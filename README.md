@@ -1,69 +1,73 @@
-# React + TypeScript + Vite
+# Grex Finances
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de finanças pessoais com Next.js (frontend) e NestJS (backend).
 
-Currently, two official plugins are available:
+## 🏗️ Estrutura do Projeto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+grex-finances/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx
+│   └── page.tsx
+├── src/                    # Frontend
+│   ├── components/         # Componentes reutilizáveis
+│   ├── hooks/              # Custom hooks
+│   ├── services/           # Serviços de API
+│   ├── context/            # Contextos React
+│   ├── types/              # Tipos TypeScript
+│   ├── utils/              # Funções utilitárias
+│   └── styles/             # Estilos CSS
+├── backend/                # NestJS Backend
+│   ├── src/
+│   │   ├── config/         # Configurações (DB, AWS)
+│   │   ├── app.module.ts
+│   │   ├── app.controller.ts
+│   │   ├── app.service.ts
+│   │   └── main.ts
+│   ├── package.json
+│   └── README.md
+├── shared/                 # Tipos compartilhados (vazio por enquanto)
+└── package.json            # Frontend
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Como Usar
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Frontend (Next.js)
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+### Backend (NestJS)
+
+```bash
+cd backend
+npm install
+npm run start:dev
+```
+
+### Docker (Opcional)
+
+```bash
+cd backend
+docker-compose up -d
+```
+
+## 📋 Próximos Passos
+
+1. **Crie seus módulos no backend** em `backend/src/`
+2. **Desenvolva componentes no frontend** em `src/components/`
+3. **Defina tipos compartilhados** em `shared/types/`
+4. **Configure banco de dados** usando TypeORM
+5. **Implemente autenticação** com JWT
+
+## 🛠️ Tecnologias
+
+- **Frontend**: Next.js 15, TypeScript, CSS
+- **Backend**: NestJS, TypeORM, PostgreSQL, AWS Secrets Manager
+- **Docker**: Para desenvolvimento local
+
+---
+
+**Projeto pronto para desenvolvimento!** 🚀
