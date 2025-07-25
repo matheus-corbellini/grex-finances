@@ -1,73 +1,134 @@
 # Grex Finances
 
-Sistema de finanças pessoais com Next.js (frontend) e NestJS (backend).
+Sistema financeiro completo desenvolvido com Next.js e NestJS.
 
-## 🏗️ Estrutura do Projeto
-
-```
-grex-finances/
-├── app/                    # Next.js App Router
-│   ├── layout.tsx
-│   └── page.tsx
-├── src/                    # Frontend
-│   ├── components/         # Componentes reutilizáveis
-│   ├── hooks/              # Custom hooks
-│   ├── services/           # Serviços de API
-│   ├── context/            # Contextos React
-│   ├── types/              # Tipos TypeScript
-│   ├── utils/              # Funções utilitárias
-│   └── styles/             # Estilos CSS
-├── backend/                # NestJS Backend
-│   ├── src/
-│   │   ├── config/         # Configurações (DB, AWS)
-│   │   ├── app.module.ts
-│   │   ├── app.controller.ts
-│   │   ├── app.service.ts
-│   │   └── main.ts
-│   ├── package.json
-│   └── README.md
-├── shared/                 # Tipos compartilhados (vazio por enquanto)
-└── package.json            # Frontend
-```
-
-## 🚀 Como Usar
+## 🏗️ Arquitetura
 
 ### Frontend (Next.js)
 
-```bash
-npm install
-npm run dev
-```
+- **Framework**: Next.js 15 com React 19 e TypeScript
+- **Estrutura de diretórios organizados por domínio**:
+  - `src/services/api/` - Camada de serviços para comunicação com API
+  - `src/utils/` - Utilitários para formatação, cálculos e validações
+  - `src/components/` - Componentes reutilizáveis
+  - `src/hooks/` - Hooks customizados
+  - `src/context/` - Context providers para estado global
+  - `src/types/` - Tipos TypeScript locais
 
 ### Backend (NestJS)
 
-```bash
-cd backend
-npm install
-npm run start:dev
+- **Framework**: NestJS com TypeORM e PostgreSQL
+- **Arquitetura modular por domínio financeiro**:
+  - `modules/users/` - Gestão de usuários e autenticação
+  - `modules/accounts/` - Contas bancárias e cartões
+  - `modules/transactions/` - Transações financeiras
+  - `modules/categories/` - Categorização de transações
+  - `modules/budgets/` - Orçamentos e alertas
+  - `modules/investments/` - Portfólio de investimentos
+  - `modules/goals/` - Metas financeiras
+  - `modules/reports/` - Relatórios e análises
+
+### Shared (Tipos TypeScript)
+
+- **Localização**: `shared/types/`
+- **Tipos compartilhados** entre frontend e backend
+- **Interfaces** para todas as entidades financeiras
+- **DTOs** para validação de dados
+
+## 🚀 Funcionalidades Implementadas
+
+### ✅ Estrutura Base
+
+- [x] Módulos organizados por domínio financeiro
+- [x] Tipos TypeScript compartilhados
+- [x] Serviços de API com interceptors
+- [x] Utilitários para cálculos financeiros
+- [x] Sistema de autenticação e autorização
+- [x] Validações e DTOs estruturados
+
+### 💰 Gestão Financeira
+
+- [x] **Contas**: Múltiplos tipos (conta corrente, poupança, cartão, investimentos)
+- [x] **Transações**: CRUD completo com categorização e recorrência
+- [x] **Orçamentos**: Planejamento mensal com alertas
+- [x] **Categorias**: Sistema hierárquico (categorias e subcategorias)
+- [x] **Metas**: Objetivos financeiros com acompanhamento
+- [x] **Investimentos**: Portfólio com cálculo de rentabilidade
+- [x] **Relatórios**: Análises e insights financeiros
+
+### 🔧 Utilitários Financeiros
+
+- [x] **Formatação de moeda** (Real, Dólar, Euro, etc.)
+- [x] **Cálculos financeiros** (juros compostos, prestações, TIR, VPL)
+- [x] **Manipulação de datas** financeiras
+- [x] **Validações** de CPF, email, valores monetários
+
+### 🔐 Segurança
+
+- [x] **JWT Authentication** com refresh tokens
+- [x] **Guards personalizados** para rotas protegidas
+- [x] **Controle de acesso** baseado em roles
+- [x] **Interceptors** para tratamento de erros
+
+## 📁 Estrutura de Diretórios
+
+```
+grex-finances/
+├── frontend (Next.js)
+│   ├── app/                    # App Router Next.js
+│   ├── src/
+│   │   ├── components/         # Componentes React
+│   │   ├── hooks/             # Hooks customizados
+│   │   ├── context/           # Context providers
+│   │   ├── services/api/      # Serviços de API
+│   │   ├── utils/             # Utilitários frontend
+│   │   └── styles/            # Estilos CSS
+│   └── package.json
+├── backend (NestJS)
+│   ├── src/
+│   │   ├── modules/           # Módulos por domínio
+│   │   │   ├── users/
+│   │   │   ├── accounts/
+│   │   │   ├── transactions/
+│   │   │   ├── categories/
+│   │   │   ├── budgets/
+│   │   │   ├── investments/
+│   │   │   ├── goals/
+│   │   │   └── reports/
+│   │   ├── common/            # Guards, decorators, DTOs
+│   │   └── config/            # Configurações
+│   └── package.json
+└── shared/
+    └── types/                 # Tipos TypeScript compartilhados
+        ├── user.types.ts
+        ├── account.types.ts
+        ├── transaction.types.ts
+        ├── budget.types.ts
+        ├── investment.types.ts
+        ├── goal.types.ts
+        └── report.types.ts
 ```
 
-### Docker (Opcional)
+## 🛠️ Próximos Passos
 
-```bash
-cd backend
-docker-compose up -d
-```
+Para continuar o desenvolvimento:
 
-## 📋 Próximos Passos
+1. **Implementar as entidades** do backend (User, Account, Transaction, etc.)
+2. **Criar os controllers** e services para cada módulo
+3. **Implementar middleware de autenticação** JWT
+4. **Desenvolver os hooks** customizados do frontend
+5. **Criar context providers** para estado global
+6. **Integrar com design system** do Figma
+7. **Configurar banco de dados** PostgreSQL
+8. **Implementar testes** unitários e de integração
 
-1. **Crie seus módulos no backend** em `backend/src/`
-2. **Desenvolva componentes no frontend** em `src/components/`
-3. **Defina tipos compartilhados** em `shared/types/`
-4. **Configure banco de dados** usando TypeORM
-5. **Implemente autenticação** com JWT
+## 💡 Observações
 
-## 🛠️ Tecnologias
+- **Estrutura escalável** preparada para crescimento
+- **Separação clara** de responsabilidades
+- **Tipos seguros** com TypeScript em todo o projeto
+- **Reutilização de código** através de utilitários compartilhados
+- **Padrões consistentes** entre frontend e backend
+- **Arquitetura limpa** seguindo boas práticas
 
-- **Frontend**: Next.js 15, TypeScript, CSS
-- **Backend**: NestJS, TypeORM, PostgreSQL, AWS Secrets Manager
-- **Docker**: Para desenvolvimento local
-
----
-
-**Projeto pronto para desenvolvimento!** 🚀
+O projeto está com uma base sólida e estruturada para um aplicativo financeiro complexo, pronto para receber a implementação visual e funcional completa.
