@@ -1,18 +1,19 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "3306:3306"
     environment:
-      POSTGRES_DB: grex_finances
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: grex_finances
+      MYSQL_USER: grex_user
+      MYSQL_PASSWORD: grex_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     networks:
       - grex-network
 
@@ -26,39 +27,39 @@ services:
       - "3001:3001"
     environment:
       NODE_ENV: development
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: root
       DB_NAME: grex_finances
       JWT_SECRET: development-jwt-secret-change-in-production
       FRONTEND_URL: http://localhost:3000
     depends_on:
-      - postgres
+      - mysql
     networks:
       - grex-network
     volumes:
       - .:/app
       - /app/node_modules
 
-  # pgAdmin (opcional, para gerenciar o banco)
-  pgadmin:
-    image: dpage/pgadmin4:latest
+  # phpMyAdmin (opcional, para gerenciar o banco)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
     restart: unless-stopped
     ports:
       - "8080:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@grex.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - mysql
     networks:
       - grex-network
 
 volumes:
-  postgres_data:
-  pgadmin_data:
+  mysql_data:
 
 networks:
   grex-network:

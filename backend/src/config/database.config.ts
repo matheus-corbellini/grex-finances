@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { AWSSecretsService } from './aws-secrets.service';
+import { Injectable } from "@nestjs/common";
+import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from "@nestjs/typeorm";
+import { AWSSecretsService } from "./aws-secrets.service";
 
 @Injectable()
 export class DatabaseConfigService implements TypeOrmOptionsFactory {
@@ -10,16 +10,19 @@ export class DatabaseConfigService implements TypeOrmOptionsFactory {
     const dbConfig = await this.awsSecretsService.getDatabaseCredentials();
 
     return {
-      type: 'postgres',
+      type: "mysql",
       host: dbConfig.host,
       port: dbConfig.port,
       username: dbConfig.username,
       password: dbConfig.password,
       database: dbConfig.database,
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-      synchronize: process.env.NODE_ENV !== 'production', // Only in development
-      logging: process.env.NODE_ENV === 'development',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      entities: [__dirname + "/../**/*.entity{.ts,.js}"],
+      synchronize: process.env.NODE_ENV !== "production", // Only in development
+      logging: process.env.NODE_ENV === "development",
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: false }
+          : false,
     };
   }
-} 
+}

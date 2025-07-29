@@ -17,7 +17,7 @@ Sistema financeiro completo desenvolvido com Next.js e NestJS.
 
 ### Backend (NestJS)
 
-- **Framework**: NestJS com TypeORM e PostgreSQL
+- **Framework**: NestJS com TypeORM e MySQL
 - **Arquitetura modular por domínio financeiro**:
   - `modules/users/` - Gestão de usuários e autenticação
   - `modules/accounts/` - Contas bancárias e cartões
@@ -119,7 +119,7 @@ Para continuar o desenvolvimento:
 4. **Desenvolver os hooks** customizados do frontend
 5. **Criar context providers** para estado global
 6. **Integrar com design system** do Figma
-7. **Configurar banco de dados** PostgreSQL
+7. **Configurar banco de dados** MySQL
 8. **Implementar testes** unitários e de integração
 
 ## 💡 Observações

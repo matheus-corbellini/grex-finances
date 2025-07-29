@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { SecretsManager } from 'aws-sdk';
+import { Injectable, Logger } from "@nestjs/common";
+import { SecretsManager } from "aws-sdk";
 
 @Injectable()
 export class AWSSecretsService {
@@ -8,7 +8,7 @@ export class AWSSecretsService {
 
   constructor() {
     this.secretsManager = new SecretsManager({
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.AWS_REGION || "us-east-1",
     });
   }
 
@@ -36,38 +36,43 @@ export class AWSSecretsService {
     password: string;
     database: string;
   }> {
-    const secretName = process.env.DB_SECRET_NAME || 'grex-finances/db';
-    
+    const secretName = process.env.DB_SECRET_NAME || "grex-finances/db";
+
     try {
       const secret = await this.getSecret(secretName);
       return {
         host: secret.host,
-        port: secret.port || 5432,
+        port: secret.port || 3306,
         username: secret.username,
         password: secret.password,
         database: secret.database,
       };
     } catch (error) {
-      this.logger.warn('Using fallback database configuration from environment variables');
+      this.logger.warn(
+        "Using fallback database configuration from environment variables"
+      );
       return {
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT) || 5432,
-        username: process.env.DB_USERNAME || 'postgres',
-        password: process.env.DB_PASSWORD || 'postgres',
-        database: process.env.DB_NAME || 'grex_finances',
+        host: process.env.DB_HOST || "localhost",
+        port: parseInt(process.env.DB_PORT) || 3306,
+        username: process.env.DB_USERNAME || "root",
+        password: process.env.DB_PASSWORD || "password",
+        database: process.env.DB_NAME || "grex_finances",
       };
     }
   }
 
   async getJWTSecret(): Promise<string> {
-    const secretName = process.env.JWT_SECRET_NAME || 'grex-finances/jwt';
-    
+    const secretName = process.env.JWT_SECRET_NAME || "grex-finances/jwt";
+
     try {
       const secret = await this.getSecret(secretName);
       return secret.jwt_secret;
     } catch (error) {
-      this.logger.warn('Using fallback JWT secret from environment variables');
-      return process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
+      this.logger.warn("Using fallback JWT secret from environment variables");
+      return (
+        process.env.JWT_SECRET ||
+        "your-super-secret-jwt-key-change-this-in-production"
+      );
     }
   }
-} 
+}
