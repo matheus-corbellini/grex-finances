@@ -1,3 +1,6 @@
+import { Transaction } from "./transaction.types";
+import { Investment } from "./investment.types";
+
 export interface Report {
   id: string;
   userId: string;

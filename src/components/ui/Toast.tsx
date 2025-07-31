@@ -61,7 +61,7 @@ export const Toast: React.FC<ToastProps> = ({
     alignItems: "flex-start",
     justifyContent: "space-between",
     padding: theme.getSpacing("m"),
-    borderRadius: theme.getRadius("l"),
+    borderRadius: theme.getRadius("lg"),
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
     minWidth: "320px",
     maxWidth: "400px",

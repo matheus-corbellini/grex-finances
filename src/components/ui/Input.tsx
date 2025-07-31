@@ -275,7 +275,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             />
             <button
               type="button"
-              onClick={() => document.querySelector(`#${inputId}`)?.click()}
+              onClick={() =>
+                (
+                  document.querySelector(`#${inputId}`) as HTMLInputElement
+                )?.click()
+              }
               style={{
                 fontFamily: theme.getFontFamily("primary"),
                 fontSize: theme.getFontSize("base"),
