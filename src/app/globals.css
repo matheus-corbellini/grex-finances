@@ -555,3 +555,22 @@ main {
   line-height: var(--caption-line-height);
   letter-spacing: var(--caption-letter-spacing);
 }
+
+/* Progress Bar Animations */
+@keyframes progress-bar-stripes {
+  0% {
+    background-position: 1rem 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes progress-bar-indeterminate {
+  0% {
+    left: -30%;
+  }
+  100% {
+    left: 100%;
+  }
+}
