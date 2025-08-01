@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { Toast, ToastProps } from "./Toast";
 
@@ -29,13 +29,12 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
 }) => {
   const theme = useTheme();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const uniqueId = useId();
 
   // Add toast function
   const addToast = useCallback(
     (toast: Omit<ToastItem, "id">) => {
-      const id = `toast-${Date.now()}-${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
+      const id = `toast-${Date.now()}-${uniqueId}`;
       const newToast: ToastItem = { ...toast, id };
 
       setToasts((prev) => {

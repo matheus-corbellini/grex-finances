@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, forwardRef } from "react";
+import React, { useState, forwardRef, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 export interface InputProps {
@@ -59,9 +59,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const theme = useTheme();
     const [isFocused, setIsFocused] = useState(false);
     const [inputValue, setInputValue] = useState(value);
+    const uniqueId = useId();
 
     // Generate unique ID if not provided
-    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    const inputId = id || `input-${uniqueId}`;
 
     // Base input styles using design system
     const getBaseInputStyles = (): React.CSSProperties => ({

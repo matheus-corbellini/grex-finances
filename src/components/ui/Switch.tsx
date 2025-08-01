@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 export interface SwitchProps {
@@ -36,6 +36,7 @@ export const Switch: React.FC<SwitchProps> = ({
 }) => {
   const theme = useTheme();
   const [internalChecked, setInternalChecked] = useState(defaultChecked);
+  const uniqueId = useId();
 
   // Use controlled or uncontrolled state
   const isChecked =
@@ -177,7 +178,7 @@ export const Switch: React.FC<SwitchProps> = ({
   };
 
   // Generate unique ID if not provided
-  const switchId = id || `switch-${Math.random().toString(36).substr(2, 9)}`;
+  const switchId = id || `switch-${uniqueId}`;
 
   return (
     <div

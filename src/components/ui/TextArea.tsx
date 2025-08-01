@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, forwardRef } from "react";
+import React, { useState, forwardRef, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 export interface TextAreaProps {
@@ -65,10 +65,10 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     const theme = useTheme();
     const [isFocused, setIsFocused] = useState(false);
     const [textareaValue, setTextareaValue] = useState(value);
+    const uniqueId = useId();
 
     // Generate unique ID if not provided
-    const textareaId =
-      id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
+    const textareaId = id || `textarea-${uniqueId}`;
 
     // Base textarea styles using design system
     const getBaseTextareaStyles = (): React.CSSProperties => ({
