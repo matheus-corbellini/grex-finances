@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "@/modules/users/entities/user.entity";
 import { Investment } from "./investment.entity";
 
@@ -21,7 +21,7 @@ export class InvestmentTransaction {
   @JoinColumn()
   investment: Investment;
 
-  @Column({ type: "enum", enum: ["buy", "sell", "dividend", "split", "merger"] })
+  @Column({ type: "varchar" })
   type: string;
 
   @Column({ type: "decimal", precision: 15, scale: 6 })
@@ -33,15 +33,18 @@ export class InvestmentTransaction {
   @Column({ type: "decimal", precision: 15, scale: 2 })
   totalAmount: number;
 
-  @Column({ type: "decimal", precision: 15, scale: 2, nullable: true })
-  fees?: number;
-
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   date: Date;
 
   @Column({ nullable: true })
   notes?: string;
 
+  @Column({ nullable: true })
+  fees?: number;
+
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 } 

@@ -7,12 +7,12 @@ export class Category {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ nullable: true })
-  userId?: string;
+  @Column()
+  userId: string;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User)
   @JoinColumn()
-  user?: User;
+  user: User;
 
   @Column()
   name: string;
@@ -20,26 +20,20 @@ export class Category {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ type: "enum", enum: ["income", "expense", "transfer"] })
+  @Column({ type: "varchar" })
   type: string;
 
-  @Column()
-  color: string;
-
-  @Column()
-  icon: string;
-
-  @Column({ default: false })
-  isDefault: boolean;
+  @Column({ nullable: true })
+  icon?: string;
 
   @Column({ nullable: true })
-  parentId?: string;
+  color?: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @OneToMany(() => Subcategory, subcategory => subcategory.category)
-  subcategories?: Subcategory[];
-
-  @Column({ default: 0 })
-  order: number;
+  subcategories: Subcategory[];
 
   @CreateDateColumn()
   createdAt: Date;

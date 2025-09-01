@@ -22,13 +22,13 @@ export class UserProfile {
   @Column({ type: "date", nullable: true })
   dateOfBirth?: Date;
 
-  @Column({ type: "enum", enum: ["male", "female", "other"], nullable: true })
+  @Column({ type: "varchar", nullable: true })
   gender?: "male" | "female" | "other";
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: "simple-json", nullable: true })
   address?: any;
 
-  @Column({ type: "jsonb", default: {} })
+  @Column({ type: "simple-json", default: "{}" })
   preferences: any;
 
   @CreateDateColumn()

@@ -19,7 +19,7 @@ export class GoalProgress {
   @Column({ nullable: true })
   note?: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   date: Date;
 
   @Column({ nullable: true })

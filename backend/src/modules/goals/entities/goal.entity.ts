@@ -20,7 +20,7 @@ export class Goal {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ type: "enum", enum: ["savings", "debt_payoff", "investment", "purchase", "emergency_fund", "retirement", "education", "vacation", "other"] })
+  @Column({ type: "varchar" })
   type: string;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })
@@ -29,13 +29,13 @@ export class Goal {
   @Column({ type: "decimal", precision: 15, scale: 2, default: 0 })
   currentAmount: number;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   targetDate: Date;
 
-  @Column({ type: "enum", enum: ["low", "medium", "high", "critical"] })
+  @Column({ type: "varchar" })
   priority: string;
 
-  @Column({ type: "enum", enum: ["active", "paused", "completed", "cancelled"], default: "active" })
+  @Column({ type: "varchar", default: "active" })
   status: string;
 
   @Column({ nullable: true })

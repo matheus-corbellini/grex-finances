@@ -65,7 +65,7 @@ export class Investment {
   @Column({ nullable: true })
   exchange?: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   lastUpdated: Date;
 
   @CreateDateColumn()

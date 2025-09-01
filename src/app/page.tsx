@@ -1,6 +1,6 @@
 import React from "react";
-import { LoginPage } from "../components/layout/LoginPage";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <LoginPage />;
+  redirect("/login");
 }

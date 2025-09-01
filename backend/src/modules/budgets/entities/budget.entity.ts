@@ -21,13 +21,13 @@ export class Budget {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ type: "enum", enum: ["weekly", "monthly", "quarterly", "yearly", "custom"] })
+  @Column({ type: "varchar" })
   period: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   startDate: Date;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   endDate: Date;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })

@@ -30,16 +30,16 @@ export class Transaction {
   @Column({ nullable: true })
   notes?: string;
 
-  @Column({ type: "enum", enum: ["income", "expense", "transfer"] })
+  @Column({ type: "varchar" })
   type: string;
 
-  @Column({ type: "enum", enum: ["pending", "completed", "cancelled", "failed"], default: "completed" })
+  @Column({ type: "varchar", default: "completed" })
   status: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   date: Date;
 
-  @Column({ type: "jsonb", nullable: true })
+  @Column({ type: "simple-json", nullable: true })
   tags?: string[];
 
   @Column({ nullable: true })

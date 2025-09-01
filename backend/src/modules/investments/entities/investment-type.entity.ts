@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("investment_types")
 export class InvestmentType {
@@ -8,12 +8,24 @@ export class InvestmentType {
   @Column()
   name: string;
 
-  @Column({ type: "enum", enum: ["stocks", "bonds", "mutual_funds", "etf", "cryptocurrency", "real_estate", "commodities", "other"] })
+  @Column({ type: "varchar" })
   category: string;
+
+  @Column({ type: "varchar" })
+  riskLevel: string;
 
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ type: "enum", enum: ["low", "medium", "high", "very_high"] })
-  riskLevel: string;
+  @Column({ nullable: true })
+  icon?: string;
+
+  @Column({ nullable: true })
+  color?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 } 

@@ -21,32 +21,103 @@ const SheepIcon = () => (
   />
 );
 
-export const LoginPage: React.FC = () => {
+export const RegisterPage: React.FC = () => {
   const theme = useTheme();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    console.log("Login attempt:", { email, password });
-    // TODO: Implementar autenticação real
-    // Simular login bem-sucedido
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 1000);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
-  const handleForgotPassword = () => {
-    console.log("Forgot password clicked");
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "Nome é obrigatório";
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Sobrenome é obrigatório";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email é obrigatório";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Senha é obrigatória";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirme sua senha";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Senhas não coincidem";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      console.log("Register attempt:", {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      // TODO: Implementar chamada para API de registro
+      // const response = await authService.register({
+      //   firstName: formData.firstName,
+      //   lastName: formData.lastName,
+      //   email: formData.email,
+      //   password: formData.password,
+      // });
+      
+      // Simular delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Registro realizado com sucesso!");
+      // TODO: Redirecionar para login ou dashboard
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1000);
+    } catch (error) {
+      console.error("Erro no registro:", error);
+      setErrors({ general: "Erro ao realizar registro. Tente novamente." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoToLogin = () => {
+    console.log("Go to login clicked");
+    router.push("/login");
   };
 
   const handleContact = () => {
     console.log("Contact clicked");
-  };
-
-  const handleGoToRegister = () => {
-    console.log("Go to register clicked");
-    router.push("/register");
   };
 
   return (
@@ -63,7 +134,7 @@ export const LoginPage: React.FC = () => {
       {/* Top Section - Welcome Text Centered */}
       <div
         style={{
-          flex: "0.4",
+          flex: "0.3",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -98,7 +169,7 @@ export const LoginPage: React.FC = () => {
                 lineHeight: theme.getLineHeight("normal"),
               }}
             >
-              Olá, seja muito bem-vindo!
+              Bem-vindo ao Grex Finances!
             </span>
             <span
               style={{
@@ -109,13 +180,13 @@ export const LoginPage: React.FC = () => {
                 lineHeight: theme.getLineHeight("tight"),
               }}
             >
-              Insira seu usuário e senha e entre agora mesmo
+              Crie sua conta e comece a organizar suas finanças
             </span>
           </div>
         </div>
       </div>
 
-      {/* Middle Section - Login Card */}
+      {/* Middle Section - Register Card */}
       <div
         style={{
           display: "flex",
@@ -123,15 +194,15 @@ export const LoginPage: React.FC = () => {
           alignItems: "center",
           padding: theme.getSpacing("xl"),
           flex: "1",
-          position: "relative", // Added for absolute positioning of sheep icon
+          position: "relative",
         }}
       >
         {/* Sheep Icon - Above Form Card */}
         <div
           style={{
             position: "absolute",
-            top: `-${theme.getSpacing("xs")}`, // Reduced distance to be practically glued
-            right: `calc(50% - 250px + ${theme.getSpacing("xl")})`, // Align with form card right edge
+            top: `-${theme.getSpacing("xs")}`,
+            right: `calc(50% - 250px + ${theme.getSpacing("xl")})`,
             zIndex: 10,
           }}
         >
@@ -163,10 +234,26 @@ export const LoginPage: React.FC = () => {
               marginBottom: theme.getSpacing("l"),
             }}
           >
-            Faça seu login
+            Criar conta
           </h1>
 
-          {/* Login Form */}
+          {/* Error Message */}
+          {errors.general && (
+            <div
+              style={{
+                backgroundColor: theme.colors.error[100],
+                color: theme.colors.error[300],
+                padding: theme.getSpacing("m"),
+                borderRadius: theme.getRadius("s"),
+                fontSize: theme.getFontSize("sm"),
+                textAlign: "center",
+              }}
+            >
+              {errors.general}
+            </div>
+          )}
+
+          {/* Register Form */}
           <div
             style={{
               display: "flex",
@@ -174,17 +261,55 @@ export const LoginPage: React.FC = () => {
               gap: theme.getSpacing("l"),
             }}
           >
+            {/* Name Fields */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: theme.getSpacing("m"),
+              }}
+            >
+              {/* First Name Input */}
+              <Input
+                id="firstName"
+                name="firstName"
+                type="text"
+                label="Nome"
+                placeholder="Seu nome"
+                value={formData.firstName}
+                onChange={(value) => handleInputChange("firstName", value)}
+                size="lg"
+                fullWidth
+                error={errors.firstName}
+              />
+
+              {/* Last Name Input */}
+              <Input
+                id="lastName"
+                name="lastName"
+                type="text"
+                label="Sobrenome"
+                placeholder="Seu sobrenome"
+                value={formData.lastName}
+                onChange={(value) => handleInputChange("lastName", value)}
+                size="lg"
+                fullWidth
+                error={errors.lastName}
+              />
+            </div>
+
             {/* Email Input */}
             <Input
               id="email"
               name="email"
               type="email"
-              label="Usuário"
-              placeholder="Seu email"
-              value={email}
-              onChange={setEmail}
+              label="Email"
+              placeholder="seu@email.com"
+              value={formData.email}
+              onChange={(value) => handleInputChange("email", value)}
               size="lg"
               fullWidth
+              error={errors.email}
             />
 
             {/* Password Input */}
@@ -194,49 +319,88 @@ export const LoginPage: React.FC = () => {
               type="password"
               label="Senha"
               placeholder="Sua senha"
-              value={password}
-              onChange={setPassword}
+              value={formData.password}
+              onChange={(value) => handleInputChange("password", value)}
               size="lg"
               fullWidth
+              error={errors.password}
             />
 
-            {/* Login Button */}
+            {/* Confirm Password Input */}
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              label="Confirmar Senha"
+              placeholder="Confirme sua senha"
+              value={formData.confirmPassword}
+              onChange={(value) => handleInputChange("confirmPassword", value)}
+              size="lg"
+              fullWidth
+              error={errors.confirmPassword}
+            />
+
+            {/* Register Button */}
             <Button
               variant="primary"
               size="lg"
-              onClick={handleLogin}
+              onClick={handleRegister}
               fullWidth
+              disabled={isLoading}
               style={{
                 marginTop: theme.getSpacing("l"),
                 minHeight: "56px",
                 fontSize: theme.getFontSize("lg"),
               }}
             >
-              Acessar
+              {isLoading ? "Criando conta..." : "Criar conta"}
             </Button>
 
-            {/* Forgot Password Link */}
-            <button
-              type="button"
-              onClick={handleForgotPassword}
+            {/* Terms and Conditions */}
+            <p
               style={{
                 fontFamily: theme.getFontFamily("primary"),
-                fontSize: theme.getFontSize("base"),
+                fontSize: theme.getFontSize("xs"),
                 fontWeight: theme.getFontWeight("secondary"),
-                color: theme.colors.primary[600],
-                backgroundColor: "transparent",
-                border: "none",
-                cursor: "pointer",
-                textDecoration: "underline",
+                color: theme.colors.neutrals[600],
                 textAlign: "center",
-                padding: theme.getSpacing("s"),
-                marginTop: theme.getSpacing("m"),
+                margin: 0,
+                lineHeight: theme.getLineHeight("normal"),
               }}
             >
-              Esqueci minha senha
-            </button>
+              Ao criar uma conta, você concorda com nossos{" "}
+              <button
+                type="button"
+                style={{
+                  color: theme.colors.primary[600],
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontFamily: "inherit",
+                  fontSize: "inherit",
+                }}
+              >
+                Termos de Uso
+              </button>{" "}
+              e{" "}
+              <button
+                type="button"
+                style={{
+                  color: theme.colors.primary[600],
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontFamily: "inherit",
+                  fontSize: "inherit",
+                }}
+              >
+                Política de Privacidade
+              </button>
+            </p>
 
-            {/* Register Link */}
+            {/* Login Link */}
             <div
               style={{
                 textAlign: "center",
@@ -252,11 +416,11 @@ export const LoginPage: React.FC = () => {
                   color: theme.colors.neutrals[600],
                 }}
               >
-                Não tem uma conta?{" "}
+                Já tem uma conta?{" "}
               </span>
               <button
                 type="button"
-                onClick={handleGoToRegister}
+                onClick={handleGoToLogin}
                 style={{
                   fontFamily: theme.getFontFamily("primary"),
                   fontSize: theme.getFontSize("base"),
@@ -269,7 +433,7 @@ export const LoginPage: React.FC = () => {
                   padding: 0,
                 }}
               >
-                Criar conta
+                Faça login
               </button>
             </div>
           </div>
@@ -339,4 +503,4 @@ export const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

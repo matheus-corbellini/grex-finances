@@ -21,32 +21,35 @@ export class RecurringTransaction {
   @JoinColumn()
   account: Account;
 
-  @Column({ nullable: true })
-  categoryId?: string;
+  @Column()
+  description: string;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })
   amount: number;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  notes?: string;
 
-  @Column({ type: "enum", enum: ["income", "expense", "transfer"] })
+  @Column({ type: "varchar" })
   type: string;
 
-  @Column({ type: "enum", enum: ["daily", "weekly", "monthly", "quarterly", "yearly"] })
+  @Column({ type: "varchar" })
   frequency: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "datetime" })
   startDate: Date;
 
-  @Column({ type: "timestamp", nullable: true })
+  @Column({ type: "datetime", nullable: true })
   endDate?: Date;
 
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ type: "timestamp" })
-  nextExecutionDate: Date;
+  @Column({ type: "simple-json", nullable: true })
+  tags?: string[];
+
+  @Column({ nullable: true })
+  categoryId?: string;
 
   @CreateDateColumn()
   createdAt: Date;

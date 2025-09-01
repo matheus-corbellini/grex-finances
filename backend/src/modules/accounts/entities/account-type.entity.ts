@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("account_types")
 export class AccountType {
@@ -8,7 +8,7 @@ export class AccountType {
   @Column()
   name: string;
 
-  @Column({ type: "enum", enum: ["checking", "savings", "credit_card", "investment", "cash", "loan", "other"] })
+  @Column({ type: "varchar" })
   category: string;
 
   @Column({ nullable: true })
@@ -16,4 +16,13 @@ export class AccountType {
 
   @Column({ nullable: true })
   icon?: string;
+
+  @Column({ nullable: true })
+  color?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 } 
