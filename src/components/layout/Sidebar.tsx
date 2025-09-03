@@ -29,15 +29,6 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   const menuItems = [
     { name: "Visão Geral", path: "/dashboard", icon: Home },
@@ -64,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   return (
     <>
       {/* Overlay para mobile */}
-      {mounted && isOpen && (
+      {isOpen && (
         <div
           className={styles.overlay}
           onClick={onToggle}
@@ -92,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             </div>
 
             {/* User Info */}
-            {mounted && isOpen && (
+            {isOpen && (
               <div className={styles.userInfo}>
                 <div className={styles.userName}>
                   Maria Lúcia
@@ -106,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         </div>
 
         {/* Notifications and Filters */}
-        {mounted && isOpen && (
+        {isOpen && (
           <div className={styles.notificationsSection}>
             <div className={styles.notificationsContainer}>
               {/* Notifications Icon */}
@@ -145,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                     size={20}
                     className={styles.menuIcon}
                   />
-                  {mounted && isOpen && (
+                  {isOpen && (
                     <span className={styles.menuText}>
                       {item.name}
                     </span>
@@ -168,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 size={16}
                 className={styles.configIcon}
               />
-              {mounted && isOpen && (
+              {isOpen && (
                 <span className={styles.configText}>
                   {item.name}
                 </span>
@@ -185,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               size={16}
               className={styles.logoutIcon}
             />
-            {mounted && isOpen && (
+            {isOpen && (
               <span className={styles.logoutText}>
                 Sair
               </span>

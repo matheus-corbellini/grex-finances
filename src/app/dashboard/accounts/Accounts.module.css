@@ -1,0 +1,338 @@
+/* Container principal */
+.accountsContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: #f8fafc;
+  padding: 24px;
+  gap: 24px;
+}
+
+/* Barra de controles superior */
+.controlsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.viewButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.viewButton {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  color: #64748b;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewButton:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.viewButton.active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dateNavigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dateButton:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.currentDate {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* Grid de contas */
+.accountsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  flex: 1;
+}
+
+/* Card de conta */
+.accountCard {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 0.2s ease;
+}
+
+.accountCard:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Header do card */
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bankInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bankLogo {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bankDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.bankName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.accountType {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Seção de saldo */
+.balanceSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.balanceValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: #059669;
+}
+
+/* Seção de ações */
+.actionsSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actionLink {
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.actionLink:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.actionButton {
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  background-color: #2563eb;
+}
+
+/* Seção do gráfico */
+.graphSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.graphContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.graph {
+  height: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.graphLine {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.graphPath {
+  fill: url(#areaGradient);
+  stroke: #1e40af;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.graphArea {
+  fill: url(#areaGradient);
+}
+
+.graphPoints {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.graphPoint {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #1e40af;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -50%);
+}
+
+.graphLabels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.graphLabel {
+  font-size: 10px;
+  color: #64748b;
+  text-align: center;
+  flex: 1;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .accountsContainer {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .controlsBar {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .leftControls,
+  .rightControls {
+    justify-content: center;
+  }
+
+  .accountsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .accountCard {
+    padding: 20px;
+  }
+
+  .bankName {
+    font-size: 13px;
+  }
+
+  .balanceValue {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .accountsContainer {
+    padding: 12px;
+  }
+
+  .accountCard {
+    padding: 16px;
+  }
+
+  .viewButtons {
+    flex-wrap: wrap;
+  }
+
+  .viewButton {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

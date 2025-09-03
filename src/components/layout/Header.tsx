@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./Header.module.css";
 import { ChevronDown, Plus, ChevronLeft, ChevronRight, Menu } from "lucide-react";
 
@@ -10,6 +11,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const pathname = usePathname();
+  const router = useRouter();
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', {
@@ -55,18 +58,31 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             </button>
           </div>
 
-          {/* Visão Geral */}
-          <button className={`${styles.navLink} ${styles.active}`}>
-            Visão geral
+          {/* Lançamentos */}
+          <button
+            className={`${styles.navLink} ${pathname === '/dashboard/transactions' ? styles.active : ''}`}
+            onClick={() => router.push('/dashboard/transactions')}
+          >
+            Lançamentos
           </button>
 
-          {/* Título da página */}
-          <span className={styles.navText}>
-            - Relatórios
-          </span>
+          {/* Contas e Carteiras */}
+          <button
+            className={`${styles.navLink} ${pathname === '/dashboard/accounts' ? styles.active : ''}`}
+            onClick={() => router.push('/dashboard/accounts')}
+          >
+            Contas e Carteiras
+          </button>
 
           {/* Add Button */}
-          <button className={styles.addButton}>
+          <button
+            className={styles.addButton}
+            onClick={(e) => {
+              e.preventDefault();
+              // TODO: Implementar modal de adicionar transação
+              console.log('Botão Adicionar clicado');
+            }}
+          >
             <Plus size={16} />
             Adicionar
           </button>
