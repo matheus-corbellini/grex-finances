@@ -1,0 +1,227 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Removido - não é mais necessário com grid de 1 coluna */
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.input,
+.select {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: #28b3f9;
+  box-shadow: 0 0 0 3px rgba(40, 179, 249, 0.1);
+}
+
+.input.error,
+.select.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.errorMessage {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+/* Card Type Selection */
+.cardTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.cardTypeButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.cardTypeButton:hover {
+  border-color: #28b3f9;
+  background: #f8fafc;
+}
+
+.cardTypeButton.selected {
+  border-color: #28b3f9;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.cardTypeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 16px;
+}
+
+.cardTypeLabel {
+  font-weight: 500;
+}
+
+/* Button Group */
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton {
+  padding: 12px 24px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #28b3f9;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+  background: #1a9ce8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 179, 249, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .formGrid {
+    gap: 16px;
+  }
+  
+  .cardTypeGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  
+  .cardTypeButton {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .buttonGroup {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .cancelButton,
+  .submitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    gap: 20px;
+  }
+  
+  .formGrid {
+    gap: 14px;
+  }
+  
+  .cardTypeGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .cardTypeButton {
+    padding: 8px 10px;
+    font-size: 12px;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .cardTypeIcon {
+    width: 20px;
+    height: 14px;
+  }
+  
+  .input,
+  .select {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .label {
+    font-size: 13px;
+  }
+}
+
+/* Animações removidas para abertura instantânea do modal */

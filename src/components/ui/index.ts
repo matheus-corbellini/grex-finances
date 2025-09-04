@@ -8,3 +8,8 @@ export { ProgressBar } from "./ProgressBar";
 export { PaginationLink } from "./PaginationLink";
 export { Pagination } from "./Pagination";
 export { Switch } from "./Switch";
+export { CreditCard } from "./CreditCard";
+export { Modal } from "./Modal";
+export { AddCardForm } from "./AddCardForm";
+export { CardDetailsModal } from "./CardDetailsModal";
+export { EditCardForm } from "./EditCardForm";
