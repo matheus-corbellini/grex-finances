@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
 import { ReportsDropdown } from "./ReportsDropdown";
@@ -29,6 +29,16 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const router = useRouter();
   const pathname = usePathname();
+
+  // Memoize pathname comparisons to prevent unnecessary re-renders
+  const isReportsActive = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return pathname.startsWith('/dashboard/reports');
+    } catch (error) {
+      return false;
+    }
+  }, [pathname]);
 
   const menuItems = [
     { name: "Visão Geral", path: "/dashboard", icon: Home },
@@ -143,10 +153,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 </button>
               );
             })}
-            
-            {/* Reports Dropdown */}
-            <ReportsDropdown isOpen={isOpen} />
           </nav>
+
+          {/* Reports Dropdown */}
+          <ReportsDropdown isOpen={isOpen} />
         </div>
 
         {/* Configuration Menu */}

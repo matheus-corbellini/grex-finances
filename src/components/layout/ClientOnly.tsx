@@ -14,7 +14,7 @@ export const ClientOnly: React.FC<ClientOnlyProps> = ({ children, fallback = nul
         // Use a timeout to ensure this runs after the component is mounted
         const timer = setTimeout(() => {
             setHasMounted(true);
-        }, 0);
+        }, 100);
 
         return () => clearTimeout(timer);
     }, []);

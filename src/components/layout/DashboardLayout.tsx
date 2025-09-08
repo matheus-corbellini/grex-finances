@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import styles from "./DashboardLayout.module.css";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
@@ -18,15 +17,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (typeof window === 'undefined') return;
 
     // Define o estado inicial baseado no tamanho da tela
-    const handleResize = () => {
-      const shouldOpen = window.innerWidth >= 768;
-      setSidebarOpen(prev => prev !== shouldOpen ? shouldOpen : prev);
-    };
-
-    // Configurar estado inicial
-    handleResize();
+    const shouldOpen = window.innerWidth >= 768;
+    setSidebarOpen(shouldOpen);
 
     // Adicionar event listener
+    const handleResize = () => {
+      const shouldOpen = window.innerWidth >= 768;
+      setSidebarOpen(shouldOpen);
+    };
+
     window.addEventListener('resize', handleResize);
 
     return () => {

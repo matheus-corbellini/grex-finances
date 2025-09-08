@@ -79,7 +79,9 @@ export default function DashboardWidgets() {
     ];
 
     const handleActionClick = (path: string) => {
-        router.push(path);
+        if (typeof window !== 'undefined') {
+            router.push(path);
+        }
     };
 
     return (

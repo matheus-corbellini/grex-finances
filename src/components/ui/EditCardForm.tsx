@@ -111,7 +111,7 @@ export const EditCardForm: React.FC<EditCardFormProps> = ({
     };
 
     const validateForm = (): boolean => {
-        const newErrors: Partial<EditCardFormData> = {};
+        const newErrors: Record<string, string> = {};
 
         if (!formData.cardNumber || formData.cardNumber.replace(/\D/g, '').length < 16) {
             newErrors.cardNumber = "Número do cartão deve ter 16 dígitos";

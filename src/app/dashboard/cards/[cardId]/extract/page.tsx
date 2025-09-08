@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, use } from "react";
 import DashboardLayout from "../../../../../components/layout/DashboardLayout";
 import { ClientOnly } from "../../../../../components/layout/ClientOnly";
 import { useRouter } from "next/navigation";
@@ -55,14 +55,14 @@ const dummyCardData = {
 };
 
 interface ExtractPageProps {
-    params: {
+    params: Promise<{
         cardId: string;
-    };
+    }>;
 }
 
 export default function ExtractPage({ params }: ExtractPageProps) {
     const router = useRouter();
-    const { cardId } = params;
+    const { cardId } = use(params);
 
     const cardInfo = useMemo(() => {
         return dummyCardData[parseInt(cardId) as keyof typeof dummyCardData] || null;
