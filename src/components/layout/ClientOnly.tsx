@@ -11,7 +11,12 @@ export const ClientOnly: React.FC<ClientOnlyProps> = ({ children, fallback = nul
     const [hasMounted, setHasMounted] = useState(false);
 
     useEffect(() => {
-        setHasMounted(true);
+        // Use a timeout to ensure this runs after the component is mounted
+        const timer = setTimeout(() => {
+            setHasMounted(true);
+        }, 0);
+
+        return () => clearTimeout(timer);
     }, []);
 
     if (!hasMounted) {

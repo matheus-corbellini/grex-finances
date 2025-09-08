@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./DashboardLayout.module.css";
 import { Sidebar } from "./Sidebar";
@@ -13,35 +13,24 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     // Verificar se estamos no cliente
     if (typeof window === 'undefined') return;
 
     // Define o estado inicial baseado no tamanho da tela
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
+      const shouldOpen = window.innerWidth >= 768;
+      setSidebarOpen(prev => prev !== shouldOpen ? shouldOpen : prev);
     };
 
-    // Delay para garantir que a hidratação esteja completa
-    const timer = setTimeout(() => {
-      handleResize();
+    // Configurar estado inicial
+    handleResize();
 
-      // Adicionar event listener apenas se o window existir
-      if (window && typeof window.addEventListener === 'function') {
-        window.addEventListener('resize', handleResize);
-      }
-    }, 300);
+    // Adicionar event listener
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      clearTimeout(timer);
-      // Remover event listener apenas se o window existir
-      if (window && typeof window.removeEventListener === 'function') {
-        window.removeEventListener('resize', handleResize);
-      }
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 

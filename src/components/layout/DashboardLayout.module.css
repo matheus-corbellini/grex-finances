@@ -2,7 +2,7 @@
 .mainContainer {
   min-height: 100vh;
   display: flex;
-  background-color: var(--neutrals-100);
+  background-color: #f3f4f6;
   padding-left: 280px;
   transition: padding-left 0.3s ease;
   width: 100vw;
@@ -42,7 +42,7 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  background-color: var(--neutrals-100);
+  background-color: #f3f4f6;
   overflow-y: auto;
   min-width: 0;
   width: calc(100vw - 280px);

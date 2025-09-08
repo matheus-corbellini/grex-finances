@@ -3,12 +3,12 @@
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
+import { ReportsDropdown } from "./ReportsDropdown";
 import {
   Home,
   DollarSign,
   CreditCard,
   CreditCard as CreditCardIcon,
-  BarChart3,
   Users,
   Settings,
   HelpCircle,
@@ -35,7 +35,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     { name: "Lançamentos", path: "/dashboard/transactions", icon: DollarSign },
     { name: "Contas e Carteiras", path: "/dashboard/accounts", icon: CreditCard },
     { name: "Cartões de Crédito", path: "/dashboard/cards", icon: CreditCardIcon },
-    { name: "Relatórios", path: "/dashboard/reports", icon: BarChart3 },
     { name: "Contatos", path: "/dashboard/contacts", icon: Users },
   ];
 
@@ -144,6 +143,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 </button>
               );
             })}
+            
+            {/* Reports Dropdown */}
+            <ReportsDropdown isOpen={isOpen} />
           </nav>
         </div>
 
