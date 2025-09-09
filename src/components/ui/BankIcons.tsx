@@ -1,5 +1,4 @@
 import React from 'react';
-import BankIcon from 'react-br-bank-icons';
 
 interface BankIconProps {
     bankName: string;
@@ -21,19 +20,44 @@ export const BankIconComponent: React.FC<BankIconProps> = ({ bankName, size = 24
                 );
 
             case 'banco do brasil s.a':
-                return <BankIcon name="bb" size={size} className={className} />;
+                return (
+                    <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+                        <rect width="24" height="24" rx="4" fill="#FFD700" />
+                        <text x="12" y="16" textAnchor="middle" fontSize="12" fill="#000" fontWeight="bold">BB</text>
+                    </svg>
+                );
 
             case 'itaú unibanco s.a':
-                return <BankIcon name="itau" size={size} className={className} />;
+                return (
+                    <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+                        <rect width="24" height="24" rx="4" fill="#FF6900" />
+                        <text x="12" y="16" textAnchor="middle" fontSize="10" fill="#FFF" fontWeight="bold">ITAU</text>
+                    </svg>
+                );
 
             case 'santander s.a':
-                return <BankIcon name="santander" size={size} className={className} />;
+                return (
+                    <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+                        <rect width="24" height="24" rx="4" fill="#EC0000" />
+                        <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#FFF" fontWeight="bold">SANT</text>
+                    </svg>
+                );
 
             case 'bradesco s.a':
-                return <BankIcon name="bradesco" size={size} className={className} />;
+                return (
+                    <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+                        <rect width="24" height="24" rx="4" fill="#CC092F" />
+                        <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#FFF" fontWeight="bold">BRAD</text>
+                    </svg>
+                );
 
             case 'caixa econômica federal':
-                return <BankIcon name="caixa" size={size} className={className} />;
+                return (
+                    <svg width={size} height={size} viewBox="0 0 24 24" className={className}>
+                        <rect width="24" height="24" rx="4" fill="#003366" />
+                        <text x="12" y="16" textAnchor="middle" fontSize="8" fill="#FFF" fontWeight="bold">CEF</text>
+                    </svg>
+                );
 
             default:
                 return (
@@ -51,4 +75,4 @@ export const BankIconComponent: React.FC<BankIconProps> = ({ bankName, size = 24
     return getBankIcon(bankName);
 };
 
-export default BankIcon;
+export default BankIconComponent;
