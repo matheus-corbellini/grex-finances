@@ -1,246 +1,350 @@
-/* Container principal */
+/* Transactions page styles */
 
 .transactionsContainer {
-  padding: 0;
-  background-color: #f8fafc;
-  height: 100%;
+  padding: 32px;
+  background-color: #F9FAFB;
+  min-height: 100vh;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  max-width: none;
 }
 
-/* Barra de controles superior */
+/* Controls Bar */
 .controlsBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: white;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+  padding: 16px 0;
 }
 
 .leftControls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 }
 
 .viewButton {
   padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  background-color: white;
+  background-color: #F3F4F6;
+  color: #374151;
+  border: 1px solid #D1D5DB;
   border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.viewButton:hover {
-  background-color: #f1f5f9;
 }
 
 .viewButton.active {
-  background-color: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  border-color: #3B82F6;
 }
 
 .filterButton {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  background-color: white;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 8px 16px;
+  background-color: #F3F4F6;
+  color: #374151;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.filterButton:hover {
-  background-color: #f1f5f9;
 }
 
 .rightControls {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
-/* Navegação de data */
 .dateNavigation {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  background-color: #F3F4F6;
+  border-radius: 6px;
+  padding: 4px;
 }
 
 .dateButton {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #e2e8f0;
-  background-color: white;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6B7280;
   transition: all 0.2s ease;
 }
 
 .dateButton:hover {
-  background-color: #f1f5f9;
+  background-color: #E5E7EB;
 }
 
 .currentDate {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  text-transform: capitalize;
-  min-width: 120px;
-  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  padding: 0 12px;
 }
 
-/* Botões de ação */
 .actionButtons {
   display: flex;
-  align-items: center;
   gap: 8px;
 }
 
 .actionButton {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  background-color: white;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
+  padding: 8px 12px;
+  background-color: #FFFFFF;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .actionButton:hover {
-  background-color: #f1f5f9;
+  background-color: #F9FAFB;
+  color: #374151;
 }
 
-/* Seção de transações */
+/* Transactions Section */
 .transactionsSection {
-  background-color: white;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  overflow: hidden;
+  margin-bottom: 24px;
 }
 
 .transactionsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px 16px 24px;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .transactionsTitle {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
   margin: 0;
 }
 
 .searchContainer {
   position: relative;
-  display: flex;
-  align-items: center;
+  max-width: 300px;
 }
 
 .searchIcon {
   position: absolute;
   left: 12px;
-  color: #64748b;
-  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6B7280;
+  pointer-events: none;
 }
 
 .searchInput {
+  width: 100%;
   padding: 8px 12px 8px 40px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #D1D5DB;
   border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  width: 200px;
-  background-color: #f8fafc;
+  background-color: #FFFFFF;
+  transition: border-color 0.2s ease;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  background-color: white;
+  border-color: #3B82F6;
 }
 
-/* Ações para linhas selecionadas */
+
+/* Selected Actions */
 .selectedActions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
-  background-color: #eff6ff;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 0;
+  padding: var(--spacing-m);
+  background-color: var(--color-primary-100);
+  border-bottom: 1px solid var(--color-primary-200);
 }
 
 .selectedCount {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1e40af;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary-700);
 }
 
-.selectedActions .actionButtons {
+/* Table */
+.tableContainer {
+  overflow-x: auto;
+}
+
+.transactionsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeaderRow {
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.tableHeader {
+  background-color: #F8F9FA;
+  padding: 16px 20px;
+  text-align: left;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  border-right: none;
+}
+
+.tableRow {
+  border-bottom: 1px solid #F3F4F6;
+  transition: background-color 0.2s ease;
+  background-color: #FFFFFF;
+}
+
+.tableRow:hover {
+  background-color: #F9FAFB;
+}
+
+.tableRow.selected {
+  background-color: #EFF6FF;
+}
+
+.tableRow.rowSelected {
+  background-color: #EFF6FF;
+}
+
+.tableCell {
+  padding: 16px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #111827;
+  vertical-align: middle;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.circleIcon {
+  color: #9CA3AF;
+  margin-left: 8px;
+}
+
+.sortIcon {
+  color: #9CA3AF;
+  cursor: pointer;
+}
+
+.headerCell {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.selectedActions .actionButton {
-  padding: 6px 12px;
-  font-size: 12px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.typeCell {
   display: flex;
   align-items: center;
-  gap: 4px;
-  transition: background-color 0.2s ease;
 }
 
-.selectedActions .actionButton:hover {
-  background-color: #2563eb;
+.description {
+  font-weight: 400;
+  color: #111827;
 }
 
-/* Mensagem de sucesso */
-.successMessage {
-  background-color: #d1fae5;
-  color: #065f46;
-  padding: 12px 24px;
-  border-radius: 6px;
-  margin: 0 24px 16px 24px;
-  font-size: 14px;
+.categoryCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.categoryText {
+  color: #111827;
+}
+
+.value {
   font-weight: 500;
-  border: 1px solid #a7f3d0;
-  animation: slideIn 0.3s ease-out;
+  color: #111827;
 }
 
-@keyframes slideIn {
+.statusCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.statusDropdownButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.statusDropdownButton:hover {
+  background-color: #F8FAFC;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statusDropdownButton:active {
+  transform: scale(0.95);
+}
+
+.statusDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 120px;
+  margin-top: 4px;
+  padding: 4px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -248,263 +352,249 @@
   }
 }
 
-/* Container da tabela */
-.tableContainer {
-  flex: 1;
-  overflow-x: auto;
-  position: relative;
-}
-
-/* Tabela de transações */
-.transactionsTable {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.tableHeader {
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  vertical-align: middle;
-}
-
-.tableHeader:nth-child(1) { width: 8%; }
-.tableHeader:nth-child(2) { width: 35%; }
-.tableHeader:nth-child(3) { width: 20%; }
-.tableHeader:nth-child(4) { width: 20%; }
-.tableHeader:nth-child(5) { width: 17%; }
-
-.tableRow {
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.2s ease;
-  cursor: pointer;
-}
-
-.tableRow:hover:not(.rowSelected) {
-  background-color: #f0f9ff;
-}
-
-.tableRow.selected:not(.rowSelected) {
-  background-color: #f0f9ff;
-}
-
-.tableRow.rowSelected {
-  background-color: #eff6ff;
-  border-left: 3px solid #3b82f6;
-}
-
-.tableRow.rowSelected:hover {
-  background-color: #dbeafe;
-}
-
-.tableCell {
-  padding: 12px 24px;
-  font-size: 14px;
-  color: #374151;
-  vertical-align: middle;
-}
-
-/* Checkbox */
-.checkbox {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.circleIcon {
-  color: #9ca3af;
-}
-
-/* Ícones de ordenação */
-.sortIcon {
-  color: #9ca3af;
-  cursor: pointer;
-}
-
-.sortIcon:hover {
-  color: #6b7280;
-}
-
-/* Dropdown icons */
 .dropdownIcon {
-  color: #9ca3af;
+  color: #9CA3AF;
   cursor: pointer;
 }
 
-.dropdownIcon:hover {
-  color: #6b7280;
-}
-
-/* Tags de status */
-.statusTag {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-block;
-  min-width: 80px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.statusTag.warning {
-  background-color: #fed7aa;
-  color: #9a3412;
-}
-
-.statusTag.success {
-  background-color: #bbf7d0;
-  color: #166534;
-}
-
-.statusTag.error {
-  background-color: #fecaca;
-  color: #991b1b;
-}
-
-.statusTag.neutral {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-/* Dropdowns */
+/* Dropdown */
 .dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background-color: var(--color-base-white);
+  border: 1px solid var(--color-neutrals-200);
+  border-radius: var(--radius-m);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   min-width: 150px;
   max-height: 200px;
   overflow-y: auto;
-  margin-top: 4px;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 .dropdownItem {
   padding: 8px 12px;
-  font-size: 14px;
-  color: #374151;
+  font-family: var(--font-family-primary);
+  font-size: 12px;
+  color: var(--color-base-black);
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
-  min-width: 120px;
-  text-align: center;
-  white-space: nowrap;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  position: relative;
+  overflow: hidden;
 }
 
 .dropdownItem:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .dropdownItem:hover {
-  background-color: #f8fafc;
+  background-color: #F8FAFC;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .dropdownItem:active {
-  background-color: #e2e8f0;
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Seção de resumo */
+
+.dropdownIcon {
+  color: var(--color-neutrals-400);
+}
+
+/* Status Tags */
+.statusTag {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.statusTag.warning {
+  background-color: #FDF3E6;
+  color: #D97706;
+  border: 1px solid #FCD34D;
+}
+
+.statusTag.success {
+  background-color: #E6F7ED;
+  color: #059669;
+  border: 1px solid #86EFAC;
+}
+
+.statusTag.error {
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+}
+
+.statusTag.neutral {
+  background-color: #F3F4F6;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+}
+
+/* Contact specific styles */
+.contactName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-base-black);
+}
+
+.contactType {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contactType.fornecedor {
+  background-color: var(--color-warning-100);
+  color: var(--color-warning-300);
+}
+
+.contactType.cliente {
+  background-color: var(--color-success-100);
+  color: var(--color-success-300);
+}
+
+.contactType.funcionario {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-600);
+}
+
+.contactType.parceiro {
+  background-color: var(--color-secondary-100);
+  color: var(--color-secondary-800);
+}
+
+.contactStatus {
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contactStatus.ativo {
+  background-color: var(--color-success-100);
+  color: var(--color-success-300);
+}
+
+.contactStatus.inativo {
+  background-color: var(--color-neutrals-200);
+  color: var(--color-neutrals-600);
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-neutrals-500);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-xs);
+  transition: all 0.2s ease;
+}
+
+.expandButton:hover {
+  background-color: var(--color-neutrals-200);
+  color: var(--color-neutrals-700);
+}
+
+/* Summary Section */
 .summarySection {
   display: flex;
-  justify-content: space-between;
-  background-color: white;
-  padding: 20px 24px;
-  border-top: 1px solid #e2e8f0;
+  gap: 24px;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #E5E7EB;
 }
 
 .summaryItem {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  text-align: center;
 }
 
 .summaryLabel {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  color: #64748b;
-  font-weight: 500;
+  color: #6B7280;
 }
 
 .summaryValue {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #111827;
 }
 
 .summaryValue.positive {
-  color: #3b82f6;
+  color: #3B82F6;
 }
 
 .summaryValue.negative {
-  color: #ef4444;
+  color: #DC2626;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
+  .transactionsContainer {
+    padding: var(--spacing-m);
+  }
+  
   .controlsBar {
     flex-direction: column;
-    gap: 16px;
+    gap: var(--spacing-m);
     align-items: stretch;
   }
-
-  .leftControls {
-    justify-content: center;
-  }
-
+  
   .rightControls {
     justify-content: space-between;
   }
-
-  .actionButtons {
-    flex-wrap: wrap;
-  }
-
+  
   .transactionsHeader {
     flex-direction: column;
-    gap: 16px;
+    gap: var(--spacing-m);
     align-items: stretch;
   }
-
-  .searchInput {
-    width: 100%;
+  
+  .searchContainer {
+    max-width: none;
   }
-
+  
+  .selectedActions {
+    flex-direction: column;
+    gap: var(--spacing-m);
+    align-items: stretch;
+  }
+  
   .summarySection {
     flex-direction: column;
-    gap: 16px;
   }
-
-  .tableHeader,
-  .tableCell {
-    padding: 12px 16px;
+  
+  .tableContainer {
+    overflow-x: auto;
   }
-}
-
-@media (max-width: 480px) {
-  .leftControls {
-    flex-wrap: wrap;
-  }
-
-  .actionButtons {
-    justify-content: center;
-  }
-
-  .actionButton {
-    flex: 1;
-    justify-content: center;
+  
+  .transactionsTable {
+    min-width: 600px;
   }
 }

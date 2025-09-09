@@ -105,13 +105,10 @@ export const ToastDemo = () => {
         {toasts.map((toast) => (
           <div key={toast.id} style={{ marginBottom: "10px" }}>
             <Toast
-              variant={toast.variant}
-              title={toast.title}
-              description={toast.description}
-              actionText={toast.actionText}
-              onAction={() => console.log("Action clicked")}
+              isVisible={true}
+              message={toast.title}
+              type={toast.variant}
               onClose={toast.onClose}
-              autoClose={false}
             />
           </div>
         ))}
@@ -124,12 +121,10 @@ export const ToastDemo = () => {
 export const DefaultToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      title="Scheduled: Catch up"
-      description="Friday, February 10, 2023 at 5:57 PM"
-      actionText="Undo"
-      onAction={() => console.log("Undo clicked")}
+      isVisible={true}
+      message="Scheduled: Catch up"
+      type="success"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -137,13 +132,10 @@ export const DefaultToast = () => (
 export const SuccessToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      variant="success"
-      title="Scheduled: Catch up"
-      description="Friday, February 10, 2023 at 5:57 PM"
-      actionText="Confirmar"
-      onAction={() => console.log("Confirm clicked")}
+      isVisible={true}
+      message="Scheduled: Catch up"
+      type="success"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -151,13 +143,10 @@ export const SuccessToast = () => (
 export const ErrorToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      variant="error"
-      title="Uh oh! Something went wrong."
-      description="There was a problem with your request."
-      actionText="Try again"
-      onAction={() => console.log("Try again clicked")}
+      isVisible={true}
+      message="Uh oh! Something went wrong."
+      type="error"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -165,13 +154,10 @@ export const ErrorToast = () => (
 export const WarningToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      variant="warning"
-      title="Warning: Low battery"
-      description="Your device battery is running low."
-      actionText="Dismiss"
-      onAction={() => console.log("Dismiss clicked")}
+      isVisible={true}
+      message="Warning: Low battery"
+      type="warning"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -179,13 +165,10 @@ export const WarningToast = () => (
 export const InfoToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      variant="info"
-      title="Information"
-      description="This is an informational message."
-      actionText="Learn more"
-      onAction={() => console.log("Learn more clicked")}
+      isVisible={true}
+      message="Information"
+      type="info"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -193,10 +176,10 @@ export const InfoToast = () => (
 export const ToastWithoutAction = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      title="Simple notification"
-      description="This toast has no action button."
+      isVisible={true}
+      message="Simple notification"
+      type="info"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );
@@ -211,43 +194,31 @@ export const ToastWithDifferentActionVariants = () => (
     }}
   >
     <Toast
-      title="Primary Action"
-      description="This toast has a primary action button."
-      actionText="Primary"
-      actionVariant="primary"
-      onAction={() => console.log("Primary clicked")}
+      isVisible={true}
+      message="Primary Action"
+      type="success"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
 
     <Toast
-      title="Secondary Action"
-      description="This toast has a secondary action button."
-      actionText="Secondary"
-      actionVariant="secondary"
-      onAction={() => console.log("Secondary clicked")}
+      isVisible={true}
+      message="Secondary Action"
+      type="info"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
 
     <Toast
-      title="Subtle Action"
-      description="This toast has a subtle action button."
-      actionText="Subtle"
-      actionVariant="subtle"
-      onAction={() => console.log("Subtle clicked")}
+      isVisible={true}
+      message="Subtle Action"
+      type="warning"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
 
     <Toast
-      title="Outline Action"
-      description="This toast has an outline action button."
-      actionText="Outline"
-      actionVariant="outline"
-      onAction={() => console.log("Outline clicked")}
+      isVisible={true}
+      message="Outline Action"
+      type="error"
       onClose={() => console.log("Toast closed")}
-      autoClose={false}
     />
   </div>
 );

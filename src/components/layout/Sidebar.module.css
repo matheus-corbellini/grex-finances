@@ -1,8 +1,8 @@
 /* Sidebar Container */
 .sidebarContainer {
   width: 280px;
-  background-color: var(--base-white);
-  border-right: 1px solid var(--neutrals-200);
+  background-color: var(--color-base-white);
+  border-right: 1px solid var(--color-neutrals-200);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -10,9 +10,9 @@
   left: 0;
   top: 0;
   height: 100vh;
-  z-index: 999;
+  z-index: 900;
   flex-shrink: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .sidebarContainer.closed {
@@ -51,9 +51,9 @@
 
 /* Header Section */
 .headerSection {
-  padding: var(--spacing-xl);
-  border-bottom: 1px solid var(--neutrals-200);
-  min-height: 80px;
+  padding: var(--spacing-m);
+  border-bottom: 1px solid var(--color-neutrals-200);
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -71,12 +71,12 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-s);
-  background-color: var(--neutrals-100);
+  background-color: var(--color-neutrals-100);
   border: none;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
   flex-shrink: 0;
 }
 
@@ -101,15 +101,15 @@
 }
 
 .profileAvatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: var(--primary-600);
+  background-color: var(--color-primary-600);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--base-white);
-  font-size: var(--font-size-lg);
+  color: var(--color-base-white);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
   flex-shrink: 0;
 }
@@ -123,7 +123,7 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-bold);
-  color: var(--base-black);
+  color: var(--color-base-black);
   line-height: var(--line-height-tight);
   word-break: break-word;
 }
@@ -132,14 +132,14 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-secondary);
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
   line-height: var(--line-height-normal);
 }
 
 /* Notifications and Filters Section */
 .notificationsSection {
-  border-bottom: 1px solid var(--neutrals-200);
-  min-height: 120px;
+  border-bottom: 1px solid var(--color-neutrals-200);
+  min-height: 60px;
   display: flex;
   align-items: center;
 }
@@ -159,14 +159,14 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-m);
-  background-color: var(--neutrals-100);
+  background-color: var(--color-neutrals-100);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
 }
 
 .filterButtonsContainer {
@@ -180,8 +180,8 @@
 .filterButton {
   padding: var(--spacing-xs) var(--spacing-s);
   border-radius: var(--radius-s);
-  background-color: var(--primary-600);
-  color: var(--base-white);
+  background-color: var(--color-primary-600);
+  color: var(--color-base-white);
   border: none;
   cursor: pointer;
   font-size: var(--font-size-xs);
@@ -196,8 +196,8 @@
 }
 
 .filterButton.secondary {
-  background-color: var(--neutrals-100);
-  color: var(--neutrals-600);
+  background-color: var(--color-neutrals-100);
+  color: var(--color-neutrals-600);
   height: 32px;
   min-width: 60px;
 }
@@ -215,35 +215,36 @@
 /* Main Menu Section */
 .mainMenuSection {
   flex: 1;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-m);
+  overflow-y: auto;
 }
 
 .menuButton {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-m);
-  padding: var(--spacing-m) var(--spacing-m);
-  margin-bottom: var(--spacing-s);
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s) var(--spacing-m);
+  margin-bottom: var(--spacing-xs);
   border-radius: var(--radius-m);
   background-color: transparent;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
   border: none;
   cursor: pointer;
   text-align: left;
   transition: all 0.2s ease;
-  min-height: 48px;
+  min-height: 40px;
   justify-content: flex-start;
 }
 
 .menuButton.closed {
-  padding: var(--spacing-m);
+  padding: var(--spacing-s);
   justify-content: center;
 }
 
 .menuButton.active {
-  background-color: var(--primary-100);
-  color: var(--primary-600);
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-600);
 }
 
 .menuIcon {
@@ -273,30 +274,31 @@
 
 /* Configuration Menu Section */
 .configMenuSection {
-  padding: var(--spacing-xl);
-  border-top: 1px solid var(--neutrals-200);
+  padding: var(--spacing-m);
+  border-top: 1px solid var(--color-neutrals-200);
+  flex-shrink: 0;
 }
 
 .configButton {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-m);
-  padding: var(--spacing-s) var(--spacing-m);
-  margin-bottom: var(--spacing-s);
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-xs) var(--spacing-s);
+  margin-bottom: var(--spacing-xs);
   border-radius: var(--radius-s);
   background-color: transparent;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
   border: none;
   cursor: pointer;
   text-align: left;
   font-size: var(--font-size-sm);
-  min-height: 40px;
+  min-height: 32px;
   justify-content: flex-start;
 }
 
 .configButton.closed {
-  padding: var(--spacing-s);
+  padding: var(--spacing-xs);
   justify-content: center;
 }
 
@@ -325,23 +327,23 @@
 .logoutButton {
   width: 100%;
   display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-m);
-  padding: var(--spacing-s) var(--spacing-m);
-  margin-top: var(--spacing-l);
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-xs) var(--spacing-s);
+  margin-top: var(--spacing-s);
   border-radius: var(--radius-s);
-  background-color: var(--error-100);
-  color: var(--error-300);
+  background-color: var(--color-error-100);
+  color: var(--color-error-300);
   border: none;
   cursor: pointer;
   text-align: left;
   font-size: var(--font-size-sm);
-  min-height: 40px;
+  min-height: 32px;
   justify-content: flex-start;
 }
 
 .logoutButton.closed {
-  padding: var(--spacing-s);
+  padding: var(--spacing-xs);
   justify-content: center;
 }
 

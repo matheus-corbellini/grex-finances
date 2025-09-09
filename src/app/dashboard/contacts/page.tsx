@@ -1,96 +1,242 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
+import ViewContactModal from "../../../components/modals/ViewContactModal";
+import EditContactModal from "../../../components/modals/EditContactModal";
 import styles from "./Contacts.module.css";
-import { Search, Filter, Plus, ChevronRight, User, Mail, Phone, CheckCircle, ChevronUp, ChevronDown, Eye, Edit, Trash2, ChevronDown as ChevronDownIcon } from "lucide-react";
+import { Search, Plus, ChevronDown } from "lucide-react";
 
 interface Contact {
-  id: string;
+  id: number;
   name: string;
+  type: "Fornecedor" | "Cliente" | "Funcionário" | "Parceiro";
   email: string;
   phone: string;
-  type: "Fornecedor" | "Cliente" | "Funcionário" | "Parceiro";
   status: "Ativo" | "Inativo";
-  company?: string;
-  position?: string;
-  observations?: string;
-  isExpanded?: boolean;
+  statusType: "success" | "warning" | "danger";
 }
 
-const mockContacts: Contact[] = [
+const contactsData: Contact[] = [
   {
-    id: "1",
-    name: "João Silva",
-    email: "joao.silva@empresa.com",
-    phone: "(11) 99999-9999",
-    type: "Cliente",
-    status: "Ativo",
-    company: "Tech Solutions",
-    position: "CEO",
-    observations: "Cliente importante, sempre pontual nos pagamentos",
-    isExpanded: true
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria.santos@fornecedor.com",
-    phone: "(11) 88888-8888",
+    id: 1,
+    name: "Alexandre Cerbo",
     type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
     status: "Ativo",
-    company: "Supply Corp",
-    position: "Gerente",
-    observations: "Fornecedor confiável para materiais de escritório"
+    statusType: "success"
   },
   {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro.costa@empresa.com",
-    phone: "(11) 77777-7777",
-    type: "Funcionário",
+    id: 2,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
     status: "Ativo",
-    company: "Nossa Empresa",
-    position: "Desenvolvedor",
-    observations: "Funcionário dedicado e proativo"
+    statusType: "success"
   },
   {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana.oliveira@parceiro.com",
-    phone: "(11) 66666-6666",
-    type: "Parceiro",
+    id: 3,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
     status: "Ativo",
-    company: "Partner Solutions",
-    position: "Diretora",
-    observations: "Parceira estratégica para expansão de negócios"
+    statusType: "success"
+  },
+  {
+    id: 4,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 5,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 6,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 7,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 8,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 9,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 10,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 11,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 12,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 13,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 14,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 15,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 16,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 17,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 18,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 19,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 20,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 21,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 22,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
+  },
+  {
+    id: 23,
+    name: "Alexandre Cerbo",
+    type: "Fornecedor",
+    email: "alexandre@cerbo.cc",
+    phone: "+55(54)99681-797",
+    status: "Ativo",
+    statusType: "success"
   }
 ];
 
 export default function Contacts() {
-  const [contacts, setContacts] = useState<Contact[]>(mockContacts);
+  const [contacts, setContacts] = useState<Contact[]>(contactsData);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [newContact, setNewContact] = useState({
-    type: "Física",
-    cpf: "",
-    email: "",
-    phone: "",
-    isDizimista: false
-  });
-
-  const toggleExpanded = (contactId: string) => {
-    setContacts(prev =>
-      prev.map(contact =>
-        contact.id === contactId
-          ? { ...contact, isExpanded: !contact.isExpanded }
-          : { ...contact, isExpanded: false }
-      )
-    );
-  };
-
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -98,256 +244,209 @@ export default function Contacts() {
     contact.phone.includes(searchTerm)
   );
 
-  const handleSaveContact = () => {
-    // Aqui você implementaria a lógica para salvar o contato
-    console.log("Salvando contato:", newContact);
-    setShowModal(false);
-    setNewContact({
-      type: "Física",
-      cpf: "",
-      email: "",
-      phone: "",
-      isDizimista: false
-    });
+  const toggleRowSelection = (contactId: number) => {
+    setSelectedRows(prev =>
+      prev.includes(contactId)
+        ? prev.filter(id => id !== contactId)
+        : [...prev, contactId]
+    );
   };
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(filteredContacts.map(contact => contact.id));
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const isRowSelected = (contactId: number) => selectedRows.includes(contactId);
+
+  const toggleDropdown = (contactId: number) => {
+    setOpenDropdown(openDropdown === contactId ? null : contactId);
+  };
+
+  const handleViewOption = (option: string, contactId: number) => {
+    const contact = contacts.find(c => c.id === contactId);
+    if (!contact) return;
+
+    setSelectedContact(contact);
+    setOpenDropdown(null);
+
+    switch (option) {
+      case 'Visualizar':
+        setViewModalOpen(true);
+        break;
+      case 'Editar':
+        setEditModalOpen(true);
+        break;
+      case 'Excluir':
+        if (confirm(`Tem certeza que deseja excluir o contato ${contact.name}?`)) {
+          setContacts(prev => prev.filter(c => c.id !== contactId));
+        }
+        break;
+      case 'Duplicar':
+        const duplicatedContact = {
+          ...contact,
+          id: Math.max(...contacts.map(c => c.id)) + 1,
+          name: `${contact.name} (Cópia)`
+        };
+        setContacts(prev => [...prev, duplicatedContact]);
+        break;
+    }
+  };
+
+  const handleSaveContact = (updatedContact: Contact) => {
+    setContacts(prev =>
+      prev.map(contact =>
+        contact.id === updatedContact.id ? updatedContact : contact
+      )
+    );
+  };
+
+  const handleCloseModals = () => {
+    setViewModalOpen(false);
+    setEditModalOpen(false);
+    setSelectedContact(null);
+  };
+
+  // Fechar dropdown quando clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <DashboardLayout>
-      <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <h1 className={styles.title}>Contatos</h1>
-            <button
-              className={styles.addButton}
-              onClick={() => setShowModal(true)}
-            >
+      <div className={styles.contactsContainer}>
+        {/* Controls Bar */}
+        <div className={styles.controlsBar}>
+          <div className={styles.leftControls}>
+            <div className={styles.searchInput}>
+              <Search size={20} className={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Localizar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.input}
+              />
+            </div>
+          </div>
+          <div className={styles.rightControls}>
+            <span className={styles.contactsCount}>{contacts.length} Contatos</span>
+            <button className={styles.addButton}>
               <Plus size={20} />
-              Novo Contato
+              Adicionar
             </button>
           </div>
-          <span className={styles.subtitle}>{contacts.length} Contatos</span>
-        </div>
-
-        {/* Search and Filter Bar */}
-        <div className={styles.searchBar}>
-          <div className={styles.searchInput}>
-            <Search size={20} className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Localizar"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.input}
-            />
-          </div>
-          <button className={styles.filterButton}>
-            <Filter size={20} />
-            Filtrar
-          </button>
         </div>
 
         {/* Contacts Table */}
         <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
-              <tr className={styles.tableHeader}>
-                <th>Nome</th>
-                <th>
-                  <div className={styles.sortableHeader}>
-                    Tipo
-                    <div className={styles.sortIcons}>
-                      <ChevronUp size={12} />
-                      <ChevronDown size={12} />
-                    </div>
-                  </div>
-                </th>
-                <th>
-                  <div className={styles.sortableHeader}>
-                    E-mail
-                    <div className={styles.sortIcons}>
-                      <ChevronUp size={12} />
-                      <ChevronDown size={12} />
-                    </div>
-                  </div>
-                </th>
-                <th>Telefone</th>
-                <th>
-                  <div className={styles.sortableHeader}>
-                    Situação
-                    <div className={styles.sortIcons}>
-                      <ChevronUp size={12} />
-                      <ChevronDown size={12} />
-                    </div>
-                  </div>
-                </th>
-                <th></th>
+              <tr className={styles.tableHeaderRow}>
+                <th className={styles.tableHeader}>Nome</th>
+                <th className={styles.tableHeader}>Tipo</th>
+                <th className={styles.tableHeader}>E-mail</th>
+                <th className={styles.tableHeader}>Telefone</th>
+                <th className={styles.tableHeader}>Situação</th>
+                <th className={styles.tableHeader}></th>
               </tr>
             </thead>
             <tbody>
               {filteredContacts.map((contact) => (
-                <React.Fragment key={contact.id}>
-                  <tr
-                    className={`${styles.tableRow} ${contact.isExpanded ? styles.expandedRow : ''}`}
-                    onClick={() => toggleExpanded(contact.id)}
-                  >
-                    <td className={styles.nameCell}>
-                      <div className={styles.nameContainer}>
-                        <div className={styles.avatar}>
-                          {getInitials(contact.name)}
-                        </div>
-                        <div className={styles.nameInfo}>
-                          <span className={styles.name}>{contact.name}</span>
-                          <span className={`${styles.typeTag} ${styles[contact.type.toLowerCase()]}`}>
-                            {contact.type}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`${styles.typeTag} ${styles[contact.type.toLowerCase()]}`}>
-                        {contact.type}
-                      </span>
-                    </td>
-                    <td className={styles.emailCell}>{contact.email}</td>
-                    <td className={styles.phoneCell}>{contact.phone}</td>
-                    <td>
-                      <span className={`${styles.statusTag} ${styles[contact.status.toLowerCase()]}`}>
-                        {contact.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button className={styles.expandButton}>
-                        {contact.isExpanded ? <ChevronUp size={16} /> : <ChevronDownIcon size={16} />}
+                <tr
+                  key={contact.id}
+                  className={`${styles.tableRow} ${isRowSelected(contact.id) ? styles.rowSelected : ''}`}
+                >
+                  <td className={styles.tableCell}>
+                    <span className={styles.contactName}>{contact.name}</span>
+                  </td>
+                  <td className={styles.tableCell}>
+                    <span className={`${styles.typeTag} ${styles.fornecedor}`}>
+                      {contact.type}
+                    </span>
+                  </td>
+                  <td className={styles.tableCell}>
+                    <span className={styles.email}>{contact.email}</span>
+                  </td>
+                  <td className={styles.tableCell}>
+                    <span className={styles.phone}>{contact.phone}</span>
+                  </td>
+                  <td className={styles.tableCell}>
+                    <span className={`${styles.statusTag} ${styles.ativo}`}>
+                      {contact.status}
+                    </span>
+                  </td>
+                  <td className={styles.tableCell}>
+                    <div className={styles.dropdownContainer}>
+                      <button
+                        className={styles.expandButton}
+                        onClick={() => toggleDropdown(contact.id)}
+                      >
+                        <ChevronDown size={16} />
                       </button>
-                    </td>
-                  </tr>
-                  {contact.isExpanded && (
-                    <tr className={styles.expandedDetailsRow}>
-                      <td colSpan={6} className={styles.expandedCell}>
-                        <div className={styles.expandedContent}>
-                          <div className={styles.contactInfo}>
-                            <h3 className={styles.sectionTitle}>Informações de Contato</h3>
-                            <div className={styles.infoCards}>
-                              <div className={styles.infoCard}>
-                                <span className={styles.infoLabel}>E-MAIL:</span>
-                                <span className={styles.infoValue}>{contact.email}</span>
-                              </div>
-                              <div className={styles.infoCard}>
-                                <span className={styles.infoLabel}>TELEFONE:</span>
-                                <span className={styles.infoValue}>{contact.phone}</span>
-                              </div>
-                              <div className={styles.infoCard}>
-                                <span className={styles.infoLabel}>EMPRESA:</span>
-                                <span className={styles.infoValue}>{contact.company || 'N/A'}</span>
-                              </div>
-                              <div className={styles.infoCard}>
-                                <span className={styles.infoLabel}>CARGO:</span>
-                                <span className={styles.infoValue}>{contact.position || 'N/A'}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className={styles.observations}>
-                            <h3 className={styles.sectionTitle}>Observações</h3>
-                            <div className={styles.observationsContent}>
-                              {contact.observations || 'Nenhuma observação cadastrada.'}
-                            </div>
-                          </div>
-                          <div className={styles.actionButtons}>
-                            <button className={styles.actionButton}>
-                              <Eye size={16} />
-                              Ver Detalhes
-                            </button>
-                            <button className={styles.actionButton}>
-                              <Edit size={16} />
-                              Editar
-                            </button>
-                            <button className={styles.actionButton}>
-                              <Trash2 size={16} />
-                              Excluir
-                            </button>
-                          </div>
+                      {openDropdown === contact.id && (
+                        <div className={styles.dropdown}>
+                          <button
+                            className={styles.dropdownItem}
+                            onClick={() => handleViewOption('Visualizar', contact.id)}
+                          >
+                            Visualizar
+                          </button>
+                          <button
+                            className={styles.dropdownItem}
+                            onClick={() => handleViewOption('Editar', contact.id)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className={styles.dropdownItem}
+                            onClick={() => handleViewOption('Excluir', contact.id)}
+                          >
+                            Excluir
+                          </button>
+                          <button
+                            className={styles.dropdownItem}
+                            onClick={() => handleViewOption('Duplicar', contact.id)}
+                          >
+                            Duplicar
+                          </button>
                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
+                      )}
+                    </div>
+                  </td>
+                </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        {/* Modal */}
-        {showModal && (
-          <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-            <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-              <h2 className={styles.modalTitle}>Nova pessoa</h2>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Tipo da pessoa</label>
-                <select
-                  className={styles.select}
-                  value={newContact.type}
-                  onChange={(e) => setNewContact({ ...newContact, type: e.target.value })}
-                >
-                  <option value="Física">Física</option>
-                  <option value="Jurídica">Jurídica</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>CPF</label>
-                <input
-                  type="text"
-                  placeholder="00.000.000-00"
-                  className={styles.input}
-                  value={newContact.cpf}
-                  onChange={(e) => setNewContact({ ...newContact, cpf: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>E-mail</label>
-                <input
-                  type="email"
-                  placeholder="E-mail"
-                  className={styles.input}
-                  value={newContact.email}
-                  onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>Telefone</label>
-                <input
-                  type="tel"
-                  placeholder="Telefone"
-                  className={styles.input}
-                  value={newContact.phone}
-                  onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                />
-              </div>
-
-              <div className={styles.toggleGroup}>
-                <label className={styles.toggleLabel}>Dizimista</label>
-                <div
-                  className={`${styles.toggle} ${newContact.isDizimista ? styles.toggleActive : ''}`}
-                  onClick={() => setNewContact({ ...newContact, isDizimista: !newContact.isDizimista })}
-                >
-                  <div className={styles.toggleSlider}></div>
-                </div>
-              </div>
-
-              <button
-                className={styles.saveButton}
-                onClick={handleSaveContact}
-              >
-                Salvar
-              </button>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Modais */}
+      <ViewContactModal
+        isOpen={viewModalOpen}
+        onClose={handleCloseModals}
+        contact={selectedContact}
+      />
+
+      <EditContactModal
+        isOpen={editModalOpen}
+        onClose={handleCloseModals}
+        contact={selectedContact}
+        onSave={handleSaveContact}
+      />
     </DashboardLayout>
   );
 }

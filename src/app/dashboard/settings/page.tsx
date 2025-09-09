@@ -29,8 +29,15 @@ const mockUsers = [
 ];
 
 export default function Settings() {
-    const [activeSection, setActiveSection] = useState("usuarios");
+    const [activeSection, setActiveSection] = useState("preferencias");
     const [showUpgradeBanner, setShowUpgradeBanner] = useState(true);
+
+    // Preferências state
+    const [preferences, setPreferences] = useState({
+        orderType: "crescente",
+        defaultPeriod: "mensal",
+        defaultCurrency: "brl"
+    });
 
     const settingsMenu = [
         { id: "minha-igreja", label: "Minha Igreja", icon: Building },
@@ -40,8 +47,105 @@ export default function Settings() {
         { id: "categorias", label: "Categorias", icon: Tag }
     ];
 
+    const handlePreferenceChange = (key: string, value: string) => {
+        setPreferences(prev => ({
+            ...prev,
+            [key]: value
+        }));
+    };
+
+    const handleSavePreferences = () => {
+        // Aqui você pode implementar a lógica para salvar as preferências
+        console.log('Salvando preferências:', preferences);
+        // Simular salvamento
+        alert('Preferências salvas com sucesso!');
+    };
+
     const renderContent = () => {
         switch (activeSection) {
+            case "preferencias":
+                return (
+                    <div className={styles.preferencesSection}>
+                        <div className={styles.preferencesCard}>
+                            <h2 className={styles.preferencesTitle}>Preferências</h2>
+
+                            <div className={styles.preferencesForm}>
+                                {/* Ordem dos lançamentos */}
+                                <div className={styles.formField}>
+                                    <label className={styles.fieldLabel}>
+                                        Ordem dos lançamentos na tela
+                                    </label>
+                                    <div className={styles.selectContainer}>
+                                        <select
+                                            className={styles.selectField}
+                                            value={preferences.orderType}
+                                            onChange={(e) => handlePreferenceChange('orderType', e.target.value)}
+                                        >
+                                            <option value="crescente">Crescente</option>
+                                            <option value="decrescente">Decrescente</option>
+                                        </select>
+                                        <ChevronDown size={16} className={styles.selectIcon} />
+                                    </div>
+                                </div>
+
+                                {/* Período de navegação */}
+                                <div className={styles.formField}>
+                                    <label className={styles.fieldLabel}>
+                                        Período de navegação padrão
+                                    </label>
+                                    <div className={styles.selectContainer}>
+                                        <select
+                                            className={styles.selectField}
+                                            value={preferences.defaultPeriod}
+                                            onChange={(e) => handlePreferenceChange('defaultPeriod', e.target.value)}
+                                        >
+                                            <option value="mensal">Mensal</option>
+                                            <option value="semanal">Semanal</option>
+                                            <option value="anual">Anual</option>
+                                        </select>
+                                        <ChevronDown size={16} className={styles.selectIcon} />
+                                    </div>
+                                </div>
+
+                                {/* Moeda padrão */}
+                                <div className={styles.formField}>
+                                    <label className={styles.fieldLabel}>
+                                        Moeda padrão
+                                    </label>
+                                    <div className={styles.selectContainer}>
+                                        <select
+                                            className={styles.selectField}
+                                            value={preferences.defaultCurrency}
+                                            onChange={(e) => handlePreferenceChange('defaultCurrency', e.target.value)}
+                                        >
+                                            <option value="brl">(BRL) Real</option>
+                                            <option value="usd">(USD) Dólar</option>
+                                            <option value="eur">(EUR) Euro</option>
+                                        </select>
+                                        <ChevronDown size={16} className={styles.selectIcon} />
+                                    </div>
+                                </div>
+
+                                {/* Botão Salvar */}
+                                <button
+                                    className={styles.saveButton}
+                                    onClick={handleSavePreferences}
+                                >
+                                    Salvar
+                                </button>
+
+                                {/* Zona de perigo */}
+                                <div className={styles.dangerZone}>
+                                    <h3 className={styles.dangerTitle}>Excluir dados do sistema</h3>
+                                    <p className={styles.dangerText}>
+                                        Esta é uma zona de perigo! Você pode excluir os seus dados do sistema,
+                                        mas entenda que ao fazer isso você não poderá voltar atrás!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
             case "usuarios":
                 return (
                     <div className={styles.usersSection}>
@@ -122,29 +226,6 @@ export default function Settings() {
                         })}
                     </div>
 
-                    <div className={styles.sidebarFooter}>
-                        <div className={styles.footerSection}>
-                            <button className={styles.footerItem}>
-                                <SettingsIcon size={16} />
-                                <span>Configurações</span>
-                            </button>
-                            <button className={styles.footerItem}>
-                                <HelpCircle size={16} />
-                                <span>Ajuda</span>
-                            </button>
-                        </div>
-
-                        <div className={styles.footerLinks}>
-                            <a href="/dashboard/privacy">Política de Privacidade</a>
-                            <a href="#">Abrir Ticket de Suporte</a>
-                            <a href="/dashboard/terms">Termos de Uso</a>
-                        </div>
-
-                        <button className={styles.logoutButton}>
-                            <LogOut size={16} />
-                            <span>Sair</span>
-                        </button>
-                    </div>
                 </div>
 
                 {/* Main Content */}

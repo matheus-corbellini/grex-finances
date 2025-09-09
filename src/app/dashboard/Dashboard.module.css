@@ -1,46 +1,401 @@
+/* Container principal */
 .container {
-  padding: 32px;
-  background: #f8fafc;
+  background: #f1f5f9;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header com navegação de período */
+.header {
+  background: #f1f5f9;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.periodNavigation {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.periodButton {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.periodButton.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.periodButton:hover:not(.active) {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.filterButton {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filterButton:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.dateNavigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateButton {
+  background: #f3f4f6;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dateButton:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.currentDate {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 4px;
+}
+
+/* Layout principal */
+.mainContent {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Conteúdo principal */
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f1f5f9;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  grid-template-columns: 395px 1fr;
+  gap: 20px;
+  width: 100%;
+  margin: 0;
+}
+
+/* Sidebar interna com saldo geral e contas */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Área principal com cards */
+.mainArea {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebarCard {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sidebarCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sidebarTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.sidebarMenuButton {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebarMenuButton:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.sidebarBalance {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b82f6;
+  text-align: center;
+}
+
+.accountsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.accountItem:last-child {
+  border-bottom: none;
+}
+
+.accountIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.accountDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.accountName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accountType {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accountBalance {
+  font-size: 13px;
+  font-weight: 600;
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.balanceItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.balanceLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.balanceValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-align: right;
+}
+
+.balanceValueGreen {
+  font-size: 13px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.balanceResult {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 8px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progressFillGreen {
+  height: 100%;
+  background: #10b981;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressFillRed {
+  height: 100%;
+  background: #ef4444;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Primeira linha: Fluxo de Caixa */
+.firstRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Segunda linha: Contas embaixo do Fluxo de Caixa */
+.secondRow {
+  display: grid;
+  grid-template-columns: 394px 394px;
+  gap: 16px;
+  align-items: start;
+  justify-content: start;
+}
+
+/* Terceira linha: Top despesas + Cartões de crédito */
+.thirdRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: start;
 }
 
 /* Card Styles */
 .card {
   background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   position: relative;
+}
+
+/* Card Grande - Ocupa 2 colunas */
+.cardLarge {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  width: 947px;
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Pequeno - Ocupa 1 coluna */
+.cardSmall {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  width: 394px;
+  height: 248px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Pequeno - Altura menor para cartões de crédito */
+.cardSmallShort {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  width: 100%;
+  height: 223px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .cardTitle {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #374151;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.dropdownIcon {
-  color: #6b7280;
+  gap: 4px;
 }
 
 .menuButton {
@@ -48,9 +403,14 @@
   border: none;
   color: #6b7280;
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menuButton:hover {
@@ -58,79 +418,15 @@
   color: #374151;
 }
 
-/* Saldo Geral Card */
-.balanceAmount {
-  font-size: 28px;
-  font-weight: 700;
-  color: #3b82f6;
-  margin-bottom: 20px;
-}
-
-.accountsList {
-  max-height: 200px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.accountItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.accountInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.accountIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #6b7280;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.accountDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.accountName {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.accountType {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.accountBalance {
-  font-size: 14px;
-  font-weight: 600;
-  color: #3b82f6;
-}
-
 /* Chart Styles */
 .chartContainer {
-  height: 200px;
+  height: 300px;
   position: relative;
   display: flex;
   align-items: end;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 8px;
+  flex: 1;
 }
 
 .barChart {
@@ -140,20 +436,22 @@
   align-items: end;
   justify-content: space-between;
   gap: 4px;
+  position: relative;
+  z-index: 1;
 }
 
 .barContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex: 1;
 }
 
 .bar {
   width: 100%;
-  max-width: 24px;
-  height: 120px;
+  max-width: 16px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   justify-content: end;
@@ -163,13 +461,13 @@
 .barIncome {
   background: #10b981;
   border-radius: 2px 2px 0 0;
-  min-height: 8px;
+  min-height: 4px;
 }
 
 .barExpense {
   background: #ef4444;
   border-radius: 0 0 2px 2px;
-  min-height: 8px;
+  min-height: 4px;
 }
 
 .barLabel {
@@ -178,28 +476,58 @@
   text-align: center;
 }
 
+/* Linha sobreposta */
+.lineChart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.lineSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.linePath {
+  stroke-dasharray: 0;
+  animation: drawLine 2s ease-in-out;
+}
+
+@keyframes drawLine {
+  from {
+    stroke-dasharray: 0 1000;
+  }
+  to {
+    stroke-dasharray: 1000 0;
+  }
+}
+
 /* Bills Cards */
 .billsContent {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   text-align: center;
-  height: 100%;
+  flex: 1;
   justify-content: center;
+  padding: 12px 0;
 }
 
 .billsSummary {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .billsCircle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   background: #f59e0b;
   display: flex;
   align-items: center;
@@ -208,9 +536,9 @@
 }
 
 .billsCircleGreen {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   background: #10b981;
   display: flex;
   align-items: center;
@@ -219,14 +547,14 @@
 }
 
 .billsNumber {
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 700;
   color: white;
 }
 
 .billsAmount {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: #374151;
 }
 
@@ -234,12 +562,14 @@
   background: #3b82f6;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100px;
 }
 
 .resolveButton:hover {
@@ -247,138 +577,23 @@
   transform: translateY(-1px);
 }
 
-/* Balance Card */
-.balanceContent {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.balanceItem {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.balanceLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.balanceValue {
-  font-size: 16px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.balanceValueGreen {
-  font-size: 16px;
-  font-weight: 600;
-  color: #10b981;
-}
-
-.balanceResult {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.progressBar {
-  width: 100%;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progressFillGreen {
-  height: 100%;
-  background: #10b981;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.progressFillRed {
-  height: 100%;
-  background: #ef4444;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
 /* Credit Cards */
 .creditCardsList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
 }
 
 .creditCardItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.creditCardInfo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
+  gap: 8px;
+  padding: 6px 0;
 }
 
 .creditCardIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #6b7280;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.creditCardDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.creditCardName {
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-
-.creditCardBalance {
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.creditCardBalanceSecondary {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-/* Top Expenses */
-.expensesList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.expenseItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.expenseNumber {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -387,7 +602,56 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.creditCardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.creditCardName {
   font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.creditCardBalance {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* Top Expenses */
+.expensesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+.expenseItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.expenseNumber {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -400,22 +664,22 @@
 }
 
 .expenseName {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: #374151;
 }
 
 .expenseAmount {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: #374151;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .expensePercentage {
-  font-size: 12px;
+  font-size: 10px;
   color: #f59e0b;
   font-weight: 600;
 }
@@ -460,54 +724,51 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    width: 240px;
+  }
+}
+
 @media (max-width: 768px) {
-  .container {
+  .mainContent {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .content {
     padding: 16px;
   }
   
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .header {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
   }
   
-  .card {
-    padding: 20px;
+  .periodNavigation {
+    width: 100%;
+    justify-content: center;
   }
   
-  .balanceAmount {
-    font-size: 24px;
-  }
-  
-  .billsAmount {
-    font-size: 20px;
-  }
-  
-  .billsNumber {
-    font-size: 20px;
-  }
-  
-  .billsCircle,
-  .billsCircleGreen {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .chartContainer {
-    height: 150px;
+  .dateNavigation {
+    width: 100%;
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 12px;
-  }
-  
   .card {
     padding: 16px;
-  }
-  
-  .balanceAmount {
-    font-size: 20px;
   }
   
   .billsAmount {
@@ -515,12 +776,16 @@
   }
   
   .billsNumber {
-    font-size: 18px;
+    font-size: 24px;
   }
   
   .billsCircle,
   .billsCircleGreen {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .chartContainer {
+    height: 150px;
   }
 }

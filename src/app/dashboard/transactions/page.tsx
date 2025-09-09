@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Circle
 } from "lucide-react";
+import { Toast } from "../../../components/ui/Toast";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -26,6 +27,7 @@ export default function Transactions() {
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
   const [showBulkStatusDropdown, setShowBulkStatusDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [statusDropdowns, setStatusDropdowns] = useState<{ [key: number]: boolean }>({});
 
   // Fechar dropdowns ao clicar fora
   useEffect(() => {
@@ -35,12 +37,16 @@ export default function Transactions() {
       // Não fechar se clicou em dropdown ou elementos relacionados
       if (target.closest('[data-dropdown]') ||
         target.closest('.dropdown') ||
-        target.closest('.dropdownItem')) {
+        target.closest('.dropdownItem') ||
+        target.closest('.statusDropdown') ||
+        target.closest('.statusDropdownContainer') ||
+        target.closest('.statusDropdownButton')) {
         return;
       }
 
       setOpenDropdowns({});
       setShowBulkStatusDropdown(false);
+      setStatusDropdowns({});
     };
 
     document.addEventListener('click', handleClickOutside);
@@ -74,6 +80,13 @@ export default function Transactions() {
     setOpenDropdowns(prev => ({
       ...prev,
       [dropdownId]: !prev[dropdownId]
+    }));
+  };
+
+  const toggleStatusDropdown = (transactionId: number) => {
+    setStatusDropdowns(prev => ({
+      ...prev,
+      [transactionId]: !prev[transactionId]
     }));
   };
 
@@ -112,6 +125,14 @@ export default function Transactions() {
       ...prev,
       [`${field}-${transactionId}`]: false
     }));
+
+    // Fechar dropdown de status se for alteração de status
+    if (field === 'status') {
+      setStatusDropdowns(prev => ({
+        ...prev,
+        [transactionId]: false
+      }));
+    }
   };
 
   // Funções de seleção
@@ -139,14 +160,8 @@ export default function Transactions() {
   };
 
   const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
-    // Não selecionar se clicou em dropdown
-    if ((event.target as HTMLElement).closest('.dropdown') ||
-      (event.target as HTMLElement).closest('[data-dropdown]')) {
-      return;
-    }
-
-    setSelectedRow(transactionId);
-    toggleRowSelection(transactionId);
+    // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
+    return;
   };
 
   // Função para alterar status de múltiplas transações
@@ -527,46 +542,51 @@ export default function Transactions() {
     }
   };
 
-  // Estado das transações (agora mutável)
+  // Estado dos lançamentos (dados da imagem)
   const [transactions, setTransactions] = useState([
     {
       id: 1,
-      description: "Compra no supermercado",
-      category: "Alimentação",
-      value: "R$150,00",
-      status: "Pendente",
+      type: "",
+      description: "Lorem ipsum sit amet doll",
+      category: "Outros",
+      value: "R$24.534.212,00",
+      status: "Status",
       statusType: "warning"
     },
     {
       id: 2,
-      description: "Uber para o trabalho",
-      category: "Transporte",
-      value: "R$25,50",
-      status: "Pago",
+      type: "",
+      description: "Lorem ipsum sit amet doll",
+      category: "Outros",
+      value: "R$24.534.212,00",
+      status: "Status",
       statusType: "success"
     },
     {
       id: 3,
-      description: "Consulta médica",
-      category: "Saúde",
-      value: "R$200,00",
-      status: "Pago",
+      type: "",
+      description: "Lorem ipsum sit amet doll",
+      category: "Outros",
+      value: "R$24.534.212,00",
+      status: "Status",
       statusType: "success"
     },
     {
       id: 4,
-      description: "Livros de estudo",
-      category: "Educação",
-      value: "R$89,90",
-      status: "Pendente",
+      type: "",
+      description: "Lorem ipsum sit amet doll",
+      category: "Outros",
+      value: "R$24.534.212,00",
+      status: "Status",
       statusType: "warning"
     },
     {
       id: 5,
-      description: "Cinema com amigos",
-      category: "Lazer",
-      value: "R$45,00",
-      status: "Pendente",
+      type: "",
+      description: "Lorem ipsum sit amet doll",
+      category: "Outros",
+      value: "R$24.534.212,00",
+      status: "Status",
       statusType: "warning"
     }
   ]);
@@ -651,12 +671,6 @@ export default function Transactions() {
 
 
 
-          {/* Mensagem de sucesso */}
-          {showSuccessMessage && (
-            <div className={styles.successMessage}>
-              ✅ Status atualizado com sucesso!
-            </div>
-          )}
 
           {/* Ações para linhas selecionadas */}
           {selectedRows.length > 0 && (
@@ -713,18 +727,18 @@ export default function Transactions() {
           <div className={styles.tableContainer}>
             <table className={styles.transactionsTable}>
               <thead>
-                <tr>
+                <tr className={styles.tableHeaderRow}>
                   <th className={styles.tableHeader}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={styles.headerCell}>
                       <input
                         type="checkbox"
-                        className={styles.checkbox}
                         checked={selectAll}
                         onChange={toggleSelectAll}
+                        className={styles.checkbox}
                       />
-                      <Circle size={16} className={styles.circleIcon} />
-                      Tipo
-                    </span>
+                      <span>Tipo</span>
+                      <ArrowUpDown size={14} className={styles.sortIcon} />
+                    </div>
                   </th>
                   <th className={styles.tableHeader}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -760,80 +774,65 @@ export default function Transactions() {
                     onClick={(e) => handleRowClick(transaction.id, e)}
                   >
                     <td className={styles.tableCell}>
-                      <input
-                        type="checkbox"
-                        className={styles.checkbox}
-                        checked={isRowSelected(transaction.id)}
-                        onChange={() => toggleRowSelection(transaction.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </td>
-                    <td className={styles.tableCell}>
-                      {transaction.description}
-                    </td>
-                    <td className={styles.tableCell}>
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <span
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleDropdown(`category-${transaction.id}`);
+                      <div className={styles.typeCell}>
+                        <input
+                          type="checkbox"
+                          checked={isRowSelected(transaction.id)}
+                          onChange={() => {
+                            toggleRowSelection(transaction.id);
+                            setSelectedRow(transaction.id);
                           }}
-                          data-dropdown="true"
-                        >
-                          {transaction.category}
-                          <ChevronDown size={14} className={styles.dropdownIcon} />
-                        </span>
-
-                        {openDropdowns[`category-${transaction.id}`] && (
-                          <div className={styles.dropdown} data-dropdown="true">
-                            {categoryOptions.map((option) => (
-                              <div
-                                key={option}
-                                className={styles.dropdownItem}
-                                onClick={() => updateTransaction(transaction.id, 'category', option)}
-                              >
-                                {option}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                          className={styles.checkbox}
+                        />
+                        <Circle size={16} className={styles.circleIcon} />
                       </div>
                     </td>
                     <td className={styles.tableCell}>
-                      {transaction.value}
+                      <span className={styles.description}>{transaction.description}</span>
                     </td>
                     <td className={styles.tableCell}>
-                      <div style={{ position: 'relative', display: 'inline-block' }}>
-                        <span
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleDropdown(`status-${transaction.id}`);
-                          }}
-                          data-dropdown="true"
-                        >
-                          <span className={`${styles.statusTag} ${styles[transaction.statusType]}`}>
-                            {transaction.status}
-                          </span>
-                          <ChevronDown size={14} className={styles.dropdownIcon} />
+                      <div className={styles.categoryCell}>
+                        <span className={styles.categoryText}>{transaction.category}</span>
+                        <ChevronDown size={14} className={styles.dropdownIcon} />
+                      </div>
+                    </td>
+                    <td className={styles.tableCell}>
+                      <span className={styles.value}>{transaction.value}</span>
+                    </td>
+                    <td className={styles.tableCell}>
+                      <div className={styles.statusCell}>
+                        <span className={`${styles.statusTag} ${styles[transaction.statusType]}`}>
+                          {transaction.status}
                         </span>
+                        <div className={`${styles.statusDropdownContainer} statusDropdownContainer`}>
+                          <button
+                            className={`${styles.statusDropdownButton} statusDropdownButton`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleStatusDropdown(transaction.id);
+                            }}
+                          >
+                            <ChevronDown size={14} className={styles.dropdownIcon} />
+                          </button>
 
-                        {openDropdowns[`status-${transaction.id}`] && (
-                          <div className={styles.dropdown} data-dropdown="true">
-                            {statusOptions.map((option) => (
-                              <div
-                                key={option.value}
-                                className={styles.dropdownItem}
-                                onClick={() => updateTransaction(transaction.id, 'status', option.value)}
-                              >
-                                <span className={`${styles.statusTag} ${styles[option.type]}`}>
-                                  {option.label}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                          {statusDropdowns[transaction.id] && (
+                            <div className={`${styles.dropdown} ${styles.statusDropdown} statusDropdown`}>
+                              {statusOptions.map((option) => (
+                                <div
+                                  key={option.value}
+                                  className={`${styles.dropdownItem} dropdownItem`}
+                                  onClick={() => {
+                                    updateTransaction(transaction.id, 'status', option.value);
+                                  }}
+                                >
+                                  <span className={`${styles.statusTag} ${styles[option.type]}`}>
+                                    {option.label}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -859,6 +858,15 @@ export default function Transactions() {
           </div>
         </div>
       </div>
+
+      {/* Toast de notificação */}
+      <Toast
+        isVisible={showSuccessMessage}
+        message="Status atualizado com sucesso!"
+        type="success"
+        duration={3000}
+        onClose={() => setShowSuccessMessage(false)}
+      />
     </DashboardLayout>
   );
 }

@@ -2,16 +2,24 @@
 
 import React, { useState, useCallback, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { Toast, ToastProps } from "./Toast";
+import { Toast } from "./Toast";
+
+export interface ToastProps {
+  isVisible: boolean;
+  message: string;
+  type?: 'success' | 'error' | 'warning' | 'info';
+  duration?: number;
+  onClose: () => void;
+}
 
 export interface ToastContainerProps {
   position?:
-    | "top-right"
-    | "top-left"
-    | "bottom-right"
-    | "bottom-left"
-    | "top-center"
-    | "bottom-center";
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-center"
+  | "bottom-center";
   maxToasts?: number;
   className?: string;
   style?: React.CSSProperties;
@@ -122,7 +130,6 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
         <div key={toast.id} style={{ pointerEvents: "auto" }}>
           <Toast
             {...toast}
-            position={position}
             onClose={() => removeToast(toast.id)}
           />
         </div>

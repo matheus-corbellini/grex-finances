@@ -50,30 +50,6 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 
         {/* Navigation Menu */}
         <nav className={styles.navigationMenu}>
-          {/* Financeiro Dropdown */}
-          <div style={{ position: "relative" }}>
-            <button className={styles.navLink}>
-              Financeiro
-              <ChevronDown size={12} />
-            </button>
-          </div>
-
-          {/* Lançamentos */}
-          <button
-            className={`${styles.navLink} ${pathname === '/dashboard/transactions' ? styles.active : ''}`}
-            onClick={() => router.push('/dashboard/transactions')}
-          >
-            Lançamentos
-          </button>
-
-          {/* Contas e Carteiras */}
-          <button
-            className={`${styles.navLink} ${pathname === '/dashboard/accounts' ? styles.active : ''}`}
-            onClick={() => router.push('/dashboard/accounts')}
-          >
-            Contas e Carteiras
-          </button>
-
           {/* Add Button */}
           <button
             className={styles.addButton}

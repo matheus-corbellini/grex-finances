@@ -1,7 +1,7 @@
 /* Header Container */
 .header {
-  background-color: var(--base-white);
-  border-bottom: 1px solid var(--neutrals-200);
+  background-color: var(--color-base-white);
+  border-bottom: 1px solid var(--color-neutrals-200);
   padding: var(--spacing-l) var(--spacing-xl);
   display: flex;
   align-items: center;
@@ -9,7 +9,7 @@
   height: 97px;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
 }
 
 /* Left Section */
@@ -23,7 +23,7 @@
   font-family: var(--font-family-primary);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  color: var(--primary-600);
+  color: var(--color-primary-600);
   margin-right: var(--spacing-xl);
 }
 
@@ -33,47 +33,10 @@
   gap: var(--spacing-m);
 }
 
-.navText {
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-secondary);
-  color: var(--neutrals-600);
-  margin-left: var(--spacing-s);
-}
-
-.navLink {
-  font-family: var(--font-family-primary);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-secondary);
-  color: var(--neutrals-600);
-  text-decoration: none;
-  padding: var(--spacing-s) var(--spacing-m);
-  border-radius: var(--radius-m);
-  border: 1px solid var(--neutrals-200);
-  background-color: var(--neutrals-50);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  cursor: pointer;
-}
-
-.navLink:hover {
-  background-color: var(--neutrals-100);
-  color: var(--neutrals-800);
-  border-color: var(--neutrals-300);
-}
-
-.navLink.active {
-  color: var(--primary-600);
-  font-weight: var(--font-weight-bold);
-  background-color: var(--neutrals-100);
-  border-color: var(--neutrals-300);
-}
 
 .addButton {
-  background-color: var(--primary-600);
-  color: var(--base-white);
+  background-color: var(--color-primary-600);
+  color: var(--color-base-white);
   border: none;
   padding: var(--spacing-s) var(--spacing-m);
   border-radius: var(--radius-m);
@@ -89,7 +52,7 @@
 }
 
 .addButton:hover {
-  background-color: var(--primary-700);
+  background-color: var(--color-primary-700);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -111,27 +74,27 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-m);
-  background-color: var(--neutrals-50);
-  border: 1px solid var(--neutrals-200);
+  background-color: var(--color-neutrals-100);
+  border: 1px solid var(--color-neutrals-200);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
   transition: all 0.2s ease;
 }
 
 .dateButton:hover {
-  background-color: var(--neutrals-100);
-  color: var(--neutrals-800);
-  border-color: var(--neutrals-300);
+  background-color: var(--color-neutrals-200);
+  color: var(--color-neutrals-800);
+  border-color: var(--color-neutrals-300);
 }
 
 .currentDate {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-secondary);
-  color: var(--neutrals-700);
+  color: var(--color-neutrals-700);
   min-width: 140px;
   text-align: center;
   padding: var(--spacing-xs) var(--spacing-s);
@@ -148,7 +111,7 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  color: var(--neutrals-600);
+  color: var(--color-neutrals-600);
 }
 
 /* Mobile Styles */
