@@ -203,7 +203,7 @@
 /* Bar Chart */
 .barChart {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   gap: 16px;
   height: 200px;
   padding: 20px 0;
@@ -221,7 +221,7 @@
   height: 120px;
   width: 100%;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: center;
 }
 
