@@ -119,6 +119,17 @@ export default function Settings() {
         cpfCnpj: "",
         site: ""
     });
+
+    const [addressData, setAddressData] = useState({
+        cep: "",
+        logradouro: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
+        cidade: "",
+        estado: "",
+        pais: "Brasil"
+    });
     const [preferences, setPreferences] = useState({
         orderType: "crescente",
         defaultPeriod: "mensal",
@@ -412,6 +423,55 @@ export default function Settings() {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setAddressData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        let cep = e.target.value.replace(/\D/g, '');
+
+        // Formatar CEP com hífen
+        if (cep.length > 5) {
+            cep = cep.substring(0, 5) + '-' + cep.substring(5, 8);
+        }
+
+        setAddressData(prev => ({
+            ...prev,
+            cep: cep
+        }));
+
+        // Buscar endereço quando CEP tiver 8 dígitos
+        const cepNumbers = cep.replace(/\D/g, '');
+        if (cepNumbers.length === 8) {
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cepNumbers}/json/`);
+                const data = await response.json();
+
+                if (!data.erro) {
+                    setAddressData(prev => ({
+                        ...prev,
+                        logradouro: data.logradouro || "",
+                        bairro: data.bairro || "",
+                        cidade: data.localidade || "",
+                        estado: data.uf || ""
+                    }));
+                }
+            } catch (error) {
+                console.error('Erro ao buscar CEP:', error);
+            }
+        }
+    };
+
+    const handleAddressSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log("Endereço salvo:", addressData);
+        alert('Endereço salvo com sucesso!');
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -1031,10 +1091,379 @@ export default function Settings() {
                             )}
 
                             {activeTab === "endereco" && (
-                                <div style={{ padding: "20px" }}>
-                                    <h2>Endereço</h2>
-                                    <p>Conteúdo da aba Endereço será implementado aqui.</p>
-                                </div>
+                                <form onSubmit={handleAddressSubmit}>
+                                    <div style={{ display: "flex", gap: "48px" }}>
+                                        {/* Coluna esquerda - Formulário */}
+                                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
+                                            {/* CEP */}
+                                            <div>
+                                                <label style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    CEP *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="cep"
+                                                    value={addressData.cep}
+                                                    onChange={handleCepChange}
+                                                    placeholder="00000-000"
+                                                    maxLength={9}
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "10px 12px",
+                                                        border: "1px solid #d1d5db",
+                                                        borderRadius: "8px",
+                                                        fontSize: "14px",
+                                                        color: "#111827",
+                                                        backgroundColor: "white",
+                                                        outline: "none"
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Logradouro */}
+                                            <div>
+                                                <label style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    Logradouro *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="logradouro"
+                                                    value={addressData.logradouro}
+                                                    onChange={handleAddressChange}
+                                                    placeholder="Rua, Avenida, etc."
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "10px 12px",
+                                                        border: "1px solid #d1d5db",
+                                                        borderRadius: "8px",
+                                                        fontSize: "14px",
+                                                        color: "#111827",
+                                                        backgroundColor: "white",
+                                                        outline: "none"
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Número e Complemento */}
+                                            <div style={{ display: "flex", gap: "16px" }}>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                        fontSize: "14px",
+                                                        fontWeight: "500",
+                                                        color: "#374151"
+                                                    }}>
+                                                        Número *
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="numero"
+                                                        value={addressData.numero}
+                                                        onChange={handleAddressChange}
+                                                        placeholder="123"
+                                                        style={{
+                                                            width: "100%",
+                                                            padding: "10px 12px",
+                                                            border: "1px solid #d1d5db",
+                                                            borderRadius: "8px",
+                                                            fontSize: "14px",
+                                                            color: "#111827",
+                                                            backgroundColor: "white",
+                                                            outline: "none"
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 2 }}>
+                                                    <label style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                        fontSize: "14px",
+                                                        fontWeight: "500",
+                                                        color: "#374151"
+                                                    }}>
+                                                        Complemento
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="complemento"
+                                                        value={addressData.complemento}
+                                                        onChange={handleAddressChange}
+                                                        placeholder="Apartamento, sala, etc."
+                                                        style={{
+                                                            width: "100%",
+                                                            padding: "10px 12px",
+                                                            border: "1px solid #d1d5db",
+                                                            borderRadius: "8px",
+                                                            fontSize: "14px",
+                                                            color: "#111827",
+                                                            backgroundColor: "white",
+                                                            outline: "none"
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Bairro */}
+                                            <div>
+                                                <label style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    Bairro *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="bairro"
+                                                    value={addressData.bairro}
+                                                    onChange={handleAddressChange}
+                                                    placeholder="Nome do bairro"
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "10px 12px",
+                                                        border: "1px solid #d1d5db",
+                                                        borderRadius: "8px",
+                                                        fontSize: "14px",
+                                                        color: "#111827",
+                                                        backgroundColor: "white",
+                                                        outline: "none"
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Cidade e Estado */}
+                                            <div style={{ display: "flex", gap: "16px" }}>
+                                                <div style={{ flex: 2 }}>
+                                                    <label style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                        fontSize: "14px",
+                                                        fontWeight: "500",
+                                                        color: "#374151"
+                                                    }}>
+                                                        Cidade *
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="cidade"
+                                                        value={addressData.cidade}
+                                                        onChange={handleAddressChange}
+                                                        placeholder="Nome da cidade"
+                                                        style={{
+                                                            width: "100%",
+                                                            padding: "10px 12px",
+                                                            border: "1px solid #d1d5db",
+                                                            borderRadius: "8px",
+                                                            fontSize: "14px",
+                                                            color: "#111827",
+                                                            backgroundColor: "white",
+                                                            outline: "none"
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <label style={{
+                                                        display: "block",
+                                                        marginBottom: "8px",
+                                                        fontSize: "14px",
+                                                        fontWeight: "500",
+                                                        color: "#374151"
+                                                    }}>
+                                                        Estado *
+                                                    </label>
+                                                    <select
+                                                        name="estado"
+                                                        value={addressData.estado}
+                                                        onChange={handleAddressChange}
+                                                        style={{
+                                                            width: "100%",
+                                                            padding: "10px 12px",
+                                                            border: "1px solid #d1d5db",
+                                                            borderRadius: "8px",
+                                                            fontSize: "14px",
+                                                            color: "#111827",
+                                                            backgroundColor: "white",
+                                                            outline: "none"
+                                                        }}
+                                                    >
+                                                        <option value="">Selecione</option>
+                                                        <option value="AC">Acre</option>
+                                                        <option value="AL">Alagoas</option>
+                                                        <option value="AP">Amapá</option>
+                                                        <option value="AM">Amazonas</option>
+                                                        <option value="BA">Bahia</option>
+                                                        <option value="CE">Ceará</option>
+                                                        <option value="DF">Distrito Federal</option>
+                                                        <option value="ES">Espírito Santo</option>
+                                                        <option value="GO">Goiás</option>
+                                                        <option value="MA">Maranhão</option>
+                                                        <option value="MT">Mato Grosso</option>
+                                                        <option value="MS">Mato Grosso do Sul</option>
+                                                        <option value="MG">Minas Gerais</option>
+                                                        <option value="PA">Pará</option>
+                                                        <option value="PB">Paraíba</option>
+                                                        <option value="PR">Paraná</option>
+                                                        <option value="PE">Pernambuco</option>
+                                                        <option value="PI">Piauí</option>
+                                                        <option value="RJ">Rio de Janeiro</option>
+                                                        <option value="RN">Rio Grande do Norte</option>
+                                                        <option value="RS">Rio Grande do Sul</option>
+                                                        <option value="RO">Rondônia</option>
+                                                        <option value="RR">Roraima</option>
+                                                        <option value="SC">Santa Catarina</option>
+                                                        <option value="SP">São Paulo</option>
+                                                        <option value="SE">Sergipe</option>
+                                                        <option value="TO">Tocantins</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {/* País */}
+                                            <div>
+                                                <label style={{
+                                                    display: "block",
+                                                    marginBottom: "8px",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    País
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="pais"
+                                                    value={addressData.pais}
+                                                    onChange={handleAddressChange}
+                                                    placeholder="Brasil"
+                                                    style={{
+                                                        width: "100%",
+                                                        padding: "10px 12px",
+                                                        border: "1px solid #d1d5db",
+                                                        borderRadius: "8px",
+                                                        fontSize: "14px",
+                                                        color: "#111827",
+                                                        backgroundColor: "white",
+                                                        outline: "none"
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Coluna direita - Informações */}
+                                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
+                                            <div style={{
+                                                backgroundColor: "#f8fafc",
+                                                padding: "24px",
+                                                borderRadius: "8px",
+                                                border: "1px solid #e5e7eb"
+                                            }}>
+                                                <h3 style={{
+                                                    fontSize: "16px",
+                                                    fontWeight: "600",
+                                                    color: "#1f2937",
+                                                    margin: "0 0 12px 0"
+                                                }}>
+                                                    💡 Dicas
+                                                </h3>
+                                                <ul style={{
+                                                    margin: 0,
+                                                    paddingLeft: "20px",
+                                                    fontSize: "14px",
+                                                    color: "#6b7280",
+                                                    lineHeight: "1.6"
+                                                }}>
+                                                    <li>Digite o CEP para preenchimento automático</li>
+                                                    <li>Campos marcados com * são obrigatórios</li>
+                                                    <li>O endereço será usado para documentos fiscais</li>
+                                                    <li>Verifique se todos os dados estão corretos</li>
+                                                </ul>
+                                            </div>
+
+                                            <div style={{
+                                                backgroundColor: "#fef3c7",
+                                                padding: "16px",
+                                                borderRadius: "8px",
+                                                border: "1px solid #f59e0b"
+                                            }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                                    <div style={{
+                                                        width: "20px",
+                                                        height: "20px",
+                                                        backgroundColor: "#f59e0b",
+                                                        borderRadius: "50%",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        color: "white",
+                                                        fontSize: "12px",
+                                                        fontWeight: "bold"
+                                                    }}>
+                                                        !
+                                                    </div>
+                                                    <span style={{
+                                                        fontSize: "14px",
+                                                        fontWeight: "600",
+                                                        color: "#92400e"
+                                                    }}>
+                                                        Importante
+                                                    </span>
+                                                </div>
+                                                <p style={{
+                                                    margin: 0,
+                                                    fontSize: "13px",
+                                                    color: "#92400e",
+                                                    lineHeight: "1.5"
+                                                }}>
+                                                    O endereço informado será utilizado para emissão de notas fiscais e documentos contábeis.
+                                                    Certifique-se de que está correto e atualizado.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Botão de salvar */}
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "flex-end",
+                                        marginTop: "32px",
+                                        paddingTop: "24px",
+                                        borderTop: "1px solid #e5e7eb"
+                                    }}>
+                                        <button
+                                            type="submit"
+                                            style={{
+                                                backgroundColor: "#3b82f6",
+                                                color: "white",
+                                                border: "none",
+                                                padding: "12px 24px",
+                                                borderRadius: "8px",
+                                                fontSize: "14px",
+                                                fontWeight: "600",
+                                                cursor: "pointer",
+                                                transition: "background-color 0.2s"
+                                            }}
+                                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#2563eb"}
+                                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#3b82f6"}
+                                        >
+                                            Salvar Endereço
+                                        </button>
+                                    </div>
+                                </form>
                             )}
                         </div>
                     </div>
@@ -1389,9 +1818,6 @@ export default function Settings() {
                             <h1 style={{ fontSize: "24px", fontWeight: "600", color: "#1f2937", margin: "0 0 8px 0" }}>
                                 Meu plano
                             </h1>
-                            <p style={{ fontSize: "16px", color: "#6b7280", margin: "0" }}>
-                                Gerencie seu plano e métodos de pagamento
-                            </p>
                         </div>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -1418,74 +1844,77 @@ export default function Settings() {
                                     <HelpCircle size={16} />
                                 </button>
 
-                                <div style={{ marginBottom: "16px" }}>
-                                    <p style={{
-                                        fontSize: "14px",
-                                        color: "#6b7280",
-                                        margin: "0 0 8px 0"
-                                    }}>
-                                        {planData.currentPlan.description}
-                                    </p>
-                                    <h2 style={{
-                                        fontSize: "20px",
-                                        fontWeight: "600",
-                                        color: "#1f2937",
-                                        margin: "0 0 8px 0"
-                                    }}>
-                                        {planData.currentPlan.name}
-                                    </h2>
-                                    <p style={{
-                                        fontSize: "18px",
-                                        fontWeight: "600",
-                                        color: "#1f2937",
-                                        margin: "0 0 4px 0"
-                                    }}>
-                                        {planData.currentPlan.price}
-                                    </p>
-                                    <p style={{
-                                        fontSize: "14px",
-                                        color: "#6b7280",
-                                        margin: "0"
-                                    }}>
-                                        Próxima cobrança: {planData.currentPlan.nextBilling}
-                                    </p>
-                                </div>
-
-                                <div style={{ display: "flex", gap: "12px" }}>
-                                    <button
-                                        onClick={handleViewDetails}
-                                        style={{
-                                            backgroundColor: "transparent",
-                                            color: "#3b82f6",
-                                            border: "1px solid #3b82f6",
-                                            padding: "8px 16px",
-                                            borderRadius: "6px",
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                                    <div style={{ flex: 1 }}>
+                                        <p style={{
                                             fontSize: "14px",
-                                            fontWeight: "500",
-                                            cursor: "pointer"
-                                        }}
-                                    >
-                                        Ver detalhes
-                                    </button>
-                                    <button
-                                        onClick={handleUpgrade}
-                                        style={{
-                                            backgroundColor: "transparent",
-                                            color: "#3b82f6",
-                                            border: "1px solid #3b82f6",
-                                            padding: "8px 16px",
-                                            borderRadius: "6px",
+                                            color: "#6b7280",
+                                            margin: "0 0 4px 0"
+                                        }}>
+                                            {planData.currentPlan.description}
+                                        </p>
+                                        <h2 style={{
+                                            fontSize: "16px",
+                                            fontWeight: "600",
+                                            color: "#1f2937",
+                                            margin: "0 0 8px 0"
+                                        }}>
+                                            {planData.currentPlan.name}
+                                        </h2>
+                                        <div style={{ display: "flex", gap: "12px" }}>
+                                            <button
+                                                onClick={handleViewDetails}
+                                                style={{
+                                                    backgroundColor: "transparent",
+                                                    color: "#3b82f6",
+                                                    border: "none",
+                                                    padding: "4px 0",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    cursor: "pointer",
+                                                    textDecoration: "underline"
+                                                }}
+                                            >
+                                                Ver detalhes
+                                            </button>
+                                            <button
+                                                onClick={handleUpgrade}
+                                                style={{
+                                                    backgroundColor: "transparent",
+                                                    color: "#3b82f6",
+                                                    border: "none",
+                                                    padding: "4px 0",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    cursor: "pointer",
+                                                    textDecoration: "underline",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "4px"
+                                                }}
+                                            >
+                                                <ArrowUp size={14} />
+                                                Fazer upgrade
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: "right" }}>
+                                        <p style={{
+                                            fontSize: "16px",
+                                            fontWeight: "600",
+                                            color: "#1f2937",
+                                            margin: "0 0 4px 0"
+                                        }}>
+                                            {planData.currentPlan.price}
+                                        </p>
+                                        <p style={{
                                             fontSize: "14px",
-                                            fontWeight: "500",
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px"
-                                        }}
-                                    >
-                                        <ArrowUp size={14} />
-                                        Fazer upgrade
-                                    </button>
+                                            color: "#6b7280",
+                                            margin: "0"
+                                        }}>
+                                            Próxima cobrança: {planData.currentPlan.nextBilling}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1515,32 +1944,32 @@ export default function Settings() {
                                             }}>
                                                 {planData.paymentMethod.type}
                                             </p>
-                                            <div style={{ display: "flex", gap: "4px" }}>
+                                            <div style={{ display: "flex", gap: "2px" }}>
                                                 <div style={{
-                                                    width: "24px",
-                                                    height: "16px",
-                                                    backgroundColor: "#f3f4f6",
+                                                    width: "20px",
+                                                    height: "12px",
+                                                    backgroundColor: "#ff6b35",
                                                     borderRadius: "2px",
                                                     display: "flex",
                                                     alignItems: "center",
                                                     justifyContent: "center",
-                                                    fontSize: "10px",
+                                                    fontSize: "8px",
                                                     fontWeight: "600",
-                                                    color: "#6b7280"
+                                                    color: "white"
                                                 }}>
-                                                    MC
+                                                    M
                                                 </div>
                                                 <div style={{
-                                                    width: "24px",
-                                                    height: "16px",
-                                                    backgroundColor: "#f3f4f6",
+                                                    width: "20px",
+                                                    height: "12px",
+                                                    backgroundColor: "#ffd700",
                                                     borderRadius: "2px",
                                                     display: "flex",
                                                     alignItems: "center",
                                                     justifyContent: "center",
-                                                    fontSize: "10px",
+                                                    fontSize: "8px",
                                                     fontWeight: "600",
-                                                    color: "#6b7280"
+                                                    color: "white"
                                                 }}>
                                                     V
                                                 </div>
