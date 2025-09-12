@@ -86,7 +86,7 @@ export const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
       });
-      
+
       // TODO: Implementar chamada para API de registro
       // const response = await authService.register({
       //   firstName: formData.firstName,
@@ -94,14 +94,14 @@ export const RegisterPage: React.FC = () => {
       //   email: formData.email,
       //   password: formData.password,
       // });
-      
+
       // Simular delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       console.log("Registro realizado com sucesso!");
-      // TODO: Redirecionar para login ou dashboard
+      // TODO: Redirecionar para wizard de configuração
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/setup");
       }, 1000);
     } catch (error) {
       console.error("Erro no registro:", error);

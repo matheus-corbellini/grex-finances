@@ -32,12 +32,12 @@ export const LoginPage: React.FC = () => {
     // TODO: Implementar autenticação real
     // Simular login bem-sucedido
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push("/loading");
     }, 1000);
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot password clicked");
+    router.push("/forgot-password");
   };
 
   const handleContact = () => {

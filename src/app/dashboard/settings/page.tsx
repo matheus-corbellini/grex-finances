@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardLayout } from "../../../components/layout";
+import { SetupWizardModal } from "../../../components/layout/SetupWizardModal";
+import { UserModals } from "../../../components/layout/UserModals";
+import { InviteModals } from "../../../components/layout/InviteModals";
+import { CategoryModals } from "../../../components/layout/CategoryModals";
 import {
     DndContext,
     closestCenter,
@@ -21,6 +26,8 @@ import {
     useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import {
     Building,
     Users,
@@ -31,6 +38,7 @@ import {
     Mountain,
     Plus,
     HelpCircle,
+    Mail,
     ArrowUp,
     CreditCard as CardIcon,
     Search,
@@ -49,7 +57,11 @@ import {
     Play,
     Trash,
     Check,
-    ChevronDown
+    ChevronDown,
+    FileSpreadsheet,
+    Info,
+    Target,
+    AlertTriangle
 } from "lucide-react";
 
 // Componente para sub-categoria sortable
@@ -109,10 +121,121 @@ function SortableChildItem({ id, child, onDragEnd }: { id: string; child: any; o
     );
 }
 
+// Componente para categoria pai sortable (drop zone)
+function SortableParentItem({ id, category, children }: { id: string; category: any; children: React.ReactNode }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "16px 20px",
+                backgroundColor: "#f8fafc",
+                borderBottom: "1px solid #e2e8f0",
+                cursor: "grab",
+                minHeight: "60px" // Garantir altura mínima para drop zone
+            }}>
+                <div style={{ width: "20px", marginRight: "12px" }}>
+                    <input type="checkbox" style={{ margin: "0" }} />
+                </div>
+                <div style={{ width: "20px", marginRight: "12px" }}>
+                    <GripVertical size={16} color="#9ca3af" />
+                </div>
+                <div style={{ flex: 1 }}>
+                    <div style={{
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        color: "#1f2937",
+                        marginBottom: "4px"
+                    }}>
+                        • {category.name}
+                    </div>
+                    <div style={{
+                        fontSize: "12px",
+                        color: "#6b7280"
+                    }}>
+                        {category.children?.length || 0} subcategoria{(category.children?.length || 0) !== 1 ? 's' : ''}
+                    </div>
+                </div>
+                <div style={{ marginLeft: "16px" }}>
+                    <button style={{
+                        background: "none",
+                        border: "none",
+                        color: "#6b7280",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        padding: "4px 8px",
+                        borderRadius: "4px"
+                    }}>
+                        Ações
+                    </button>
+                </div>
+            </div>
+            {children}
+        </div>
+    );
+}
+
 
 export default function Settings() {
+    const router = useRouter();
     const [activeSection, setActiveSection] = useState("minha-igreja");
     const [activeTab, setActiveTab] = useState("informacoes");
+    const [showSetupModal, setShowSetupModal] = useState(false);
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
+    const [showEditUserModal, setShowEditUserModal] = useState(false);
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+    const [showInviteUserModal, setShowInviteUserModal] = useState(false);
+    const [showAcceptInviteModal, setShowAcceptInviteModal] = useState(false);
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+    const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
+    const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+    const [editingUser, setEditingUser] = useState<any>(null);
+    const [deletingUser, setDeletingUser] = useState<any>(null);
+    const [editingCategory, setEditingCategory] = useState<any>(null);
+    const [deletingCategory, setDeletingCategory] = useState<any>(null);
+    const [userForm, setUserForm] = useState({
+        name: "",
+        email: "",
+        role: "Membro",
+        phone: "",
+        department: ""
+    });
+    const [inviteForm, setInviteForm] = useState({
+        email: "",
+        name: "",
+        role: "Membro",
+        department: "",
+        message: ""
+    });
+    const [categoryForm, setCategoryForm] = useState({
+        name: "",
+        type: "expense",
+        parentId: "",
+        description: "",
+        color: "#3b82f6"
+    });
+    const [showExportDropdown, setShowExportDropdown] = useState(false);
+    const [showCategoryHelpModal, setShowCategoryHelpModal] = useState(false);
+
+    // Função para fechar dropdown
+    const handleCloseExportDropdown = () => {
+        setShowExportDropdown(false);
+    };
     const [formData, setFormData] = useState({
         nomeIgreja: "",
         telefone: "",
@@ -499,8 +622,135 @@ export default function Settings() {
     };
 
     const handleAddUser = () => {
-        console.log('Adicionando novo usuário...');
-        alert('Funcionalidade de adicionar usuário será implementada em breve!');
+        setUserForm({
+            name: "",
+            email: "",
+            role: "Membro",
+            phone: "",
+            department: ""
+        });
+        setShowAddUserModal(true);
+    };
+
+    const handleEditUser = (user: any) => {
+        setEditingUser(user);
+        setUserForm({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone || "",
+            department: user.department || ""
+        });
+        setShowEditUserModal(true);
+    };
+
+    const handleDeleteUser = (user: any) => {
+        setDeletingUser(user);
+        setShowDeleteUserModal(true);
+    };
+
+    const handleCloseAddUserModal = () => {
+        setShowAddUserModal(false);
+        setUserForm({
+            name: "",
+            email: "",
+            role: "Membro",
+            phone: "",
+            department: ""
+        });
+    };
+
+    const handleCloseEditUserModal = () => {
+        setShowEditUserModal(false);
+        setEditingUser(null);
+        setUserForm({
+            name: "",
+            email: "",
+            role: "Membro",
+            phone: "",
+            department: ""
+        });
+    };
+
+    const handleCloseDeleteUserModal = () => {
+        setShowDeleteUserModal(false);
+        setDeletingUser(null);
+    };
+
+    const handleUserFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setUserForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveUser = () => {
+        if (!userForm.name || !userForm.email) {
+            alert('Nome e e-mail são obrigatórios!');
+            return;
+        }
+
+        if (editingUser) {
+            // Editar usuário existente
+            console.log('Editando usuário:', { ...editingUser, ...userForm });
+            alert('Usuário editado com sucesso!');
+            handleCloseEditUserModal();
+        } else {
+            // Adicionar novo usuário
+            console.log('Adicionando usuário:', userForm);
+            alert('Usuário adicionado com sucesso!');
+            handleCloseAddUserModal();
+        }
+    };
+
+    const handleConfirmDeleteUser = () => {
+        if (deletingUser) {
+            console.log('Removendo usuário:', deletingUser);
+            alert('Usuário removido com sucesso!');
+            handleCloseDeleteUserModal();
+        }
+    };
+
+    const handleInviteUser = () => {
+        setInviteForm({
+            email: "",
+            name: "",
+            role: "Membro",
+            department: "",
+            message: ""
+        });
+        setShowInviteUserModal(true);
+    };
+
+    const handleCloseInviteUserModal = () => {
+        setShowInviteUserModal(false);
+        setInviteForm({
+            email: "",
+            name: "",
+            role: "Membro",
+            department: "",
+            message: ""
+        });
+    };
+
+    const handleInviteFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setInviteForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSendInvite = () => {
+        if (!inviteForm.email || !inviteForm.name) {
+            alert('E-mail e nome são obrigatórios!');
+            return;
+        }
+
+        console.log('Enviando convite:', inviteForm);
+        alert('Convite enviado com sucesso!');
+        handleCloseInviteUserModal();
     };
 
     const handleCloseBanner = () => {
@@ -533,23 +783,459 @@ export default function Settings() {
     };
 
     const handleAddCategory = () => {
-        console.log('Adicionando nova categoria...');
-        alert('Funcionalidade de adicionar categoria será implementada em breve!');
+        setCategoryForm({
+            name: "",
+            type: "expense",
+            parentId: "",
+            description: "",
+            color: "#3b82f6"
+        });
+        setShowAddCategoryModal(true);
+    };
+
+    const handleEditCategory = (category: any) => {
+        setEditingCategory(category);
+        setCategoryForm({
+            name: category.name,
+            type: category.type || "expense",
+            parentId: category.parentId || "",
+            description: category.description || "",
+            color: category.color || "#3b82f6"
+        });
+        setShowEditCategoryModal(true);
+    };
+
+    const handleDeleteCategory = (category: any) => {
+        setDeletingCategory(category);
+        setShowDeleteCategoryModal(true);
+    };
+
+    const handleCloseAddCategoryModal = () => {
+        setShowAddCategoryModal(false);
+        setCategoryForm({
+            name: "",
+            type: "expense",
+            parentId: "",
+            description: "",
+            color: "#3b82f6"
+        });
+    };
+
+    const handleCloseEditCategoryModal = () => {
+        setShowEditCategoryModal(false);
+        setEditingCategory(null);
+        setCategoryForm({
+            name: "",
+            type: "expense",
+            parentId: "",
+            description: "",
+            color: "#3b82f6"
+        });
+    };
+
+    const handleCloseDeleteCategoryModal = () => {
+        setShowDeleteCategoryModal(false);
+        setDeletingCategory(null);
+    };
+
+    const handleCategoryFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setCategoryForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSaveCategory = () => {
+        if (!categoryForm.name) {
+            alert('Nome da categoria é obrigatório!');
+            return;
+        }
+
+        if (editingCategory) {
+            // Editar categoria existente
+            console.log('Editando categoria:', { ...editingCategory, ...categoryForm });
+            alert('Categoria editada com sucesso!');
+            handleCloseEditCategoryModal();
+        } else {
+            // Adicionar nova categoria
+            console.log('Adicionando categoria:', categoryForm);
+            alert('Categoria adicionada com sucesso!');
+            handleCloseAddCategoryModal();
+        }
+    };
+
+    const handleConfirmDeleteCategory = () => {
+        if (deletingCategory) {
+            console.log('Removendo categoria:', deletingCategory);
+            alert('Categoria removida com sucesso!');
+            handleCloseDeleteCategoryModal();
+        }
+    };
+
+    const handleExportCategoriesJSON = () => {
+        try {
+            // Preparar dados para exportação
+            const exportData = {
+                metadata: {
+                    exportDate: new Date().toISOString(),
+                    version: "1.0",
+                    totalCategories: Object.values(categories).flat().length,
+                    totalSubcategories: Object.values(categories).flat().reduce((acc, cat) => acc + (cat.children?.length || 0), 0)
+                },
+                categories: {
+                    saidas: categories.saidas,
+                    entradas: categories.entradas,
+                    outros: categories.outros
+                }
+            };
+
+            // Criar arquivo JSON
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+
+            // Criar link de download
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `categorias-grex-${new Date().toISOString().split('T')[0]}.json`;
+
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // Feedback visual
+            alert('Categorias exportadas para JSON com sucesso!');
+            handleCloseExportDropdown();
+        } catch (error) {
+            console.error('Erro ao exportar categorias:', error);
+            alert('Erro ao exportar categorias. Tente novamente.');
+        }
+    };
+
+    const handleExportCategoriesPDF = () => {
+        try {
+            const doc = new jsPDF();
+            const currentDate = new Date().toLocaleDateString('pt-BR');
+            const currentTime = new Date().toLocaleTimeString('pt-BR');
+
+            // Cores personalizadas
+            const primaryColor = [59, 130, 246]; // Azul
+            const secondaryColor = [107, 114, 128]; // Cinza
+            const accentColor = [220, 38, 38]; // Vermelho
+
+            // Função para adicionar linha decorativa
+            const addDecorativeLine = (y: number, color: number[] = primaryColor) => {
+                doc.setDrawColor(color[0], color[1], color[2]);
+                doc.setLineWidth(0.5);
+                doc.line(20, y, 190, y);
+            };
+
+            // Função para adicionar retângulo colorido
+            const addColoredRect = (x: number, y: number, width: number, height: number, color: number[]) => {
+                doc.setFillColor(color[0], color[1], color[2]);
+                doc.rect(x, y, width, height, 'F');
+            };
+
+            // Cabeçalho com fundo colorido
+            addColoredRect(0, 0, 210, 40, primaryColor);
+
+            // Logo/Título principal
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.text('GREX FINANCES', 20, 20);
+
+            // Subtítulo
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Sistema de Gestão Financeira', 20, 28);
+
+            // Data e hora
+            doc.setFontSize(10);
+            doc.text(`Exportado em: ${currentDate} às ${currentTime}`, 20, 35);
+
+            // Resetar cor do texto
+            doc.setTextColor(0, 0, 0);
+
+            let yPosition = 55;
+
+            // Função para adicionar seção com cabeçalho estilizado
+            const addSection = (title: string, color: number[] = primaryColor) => {
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+
+                // Cabeçalho da seção
+                addColoredRect(15, yPosition - 8, 180, 12, color);
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text(title, 20, yPosition);
+
+                // Resetar cor
+                doc.setTextColor(0, 0, 0);
+                yPosition += 15;
+            };
+
+            // Função para adicionar categoria com estilo
+            const addCategory = (category: any, isSubcategory = false) => {
+                if (yPosition > 270) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+
+                const indent = isSubcategory ? 25 : 0;
+                const fontSize = isSubcategory ? 10 : 12;
+                const fontWeight = isSubcategory ? 'normal' : 'bold';
+
+                // Ícone colorido para categoria principal
+                if (!isSubcategory) {
+                    const iconColor = category.color === 'red' ? accentColor :
+                        category.color === 'green' ? [34, 197, 94] :
+                            category.color === 'blue' ? primaryColor : secondaryColor;
+
+                    doc.setFillColor(iconColor[0], iconColor[1], iconColor[2]);
+                    doc.circle(20 + indent, yPosition - 2, 2, 'F');
+                }
+
+                // Nome da categoria
+                doc.setFontSize(fontSize);
+                doc.setFont('helvetica', fontWeight);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`${isSubcategory ? '    • ' : '• '}${category.name}`, 25 + indent, yPosition);
+
+                // Descrição em cinza
+                if (category.description) {
+                    yPosition += 6;
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'italic');
+                    doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+                    doc.text(`      ${category.description}`, 25 + indent, yPosition);
+                    yPosition += 4;
+                }
+
+                yPosition += 8;
+            };
+
+            // Estatísticas gerais
+            const totalCategories = Object.values(categories).flat().length;
+            const totalSubcategories = Object.values(categories).flat().reduce((acc, cat) => acc + (cat.children?.length || 0), 0);
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+            doc.text(`Total: ${totalCategories} categorias principais • ${totalSubcategories} subcategorias`, 20, yPosition);
+            yPosition += 15;
+
+            // Linha decorativa
+            addDecorativeLine(yPosition);
+            yPosition += 10;
+
+            // Seção Saídas
+            addSection('SAÍDAS (Despesas)', accentColor);
+
+            categories.saidas.forEach(category => {
+                addCategory(category);
+                if (category.children) {
+                    category.children.forEach((child: any) => addCategory(child, true));
+                }
+            });
+
+            // Espaçamento entre seções
+            yPosition += 10;
+            addDecorativeLine(yPosition, [34, 197, 94]); // Verde
+            yPosition += 10;
+
+            // Seção Entradas
+            addSection('ENTRADAS (Receitas)', [34, 197, 94]);
+
+            categories.entradas.forEach(category => {
+                addCategory(category);
+                if (category.children) {
+                    category.children.forEach((child: any) => addCategory(child, true));
+                }
+            });
+
+            // Espaçamento entre seções
+            yPosition += 10;
+            addDecorativeLine(yPosition, [168, 85, 247]); // Roxo
+            yPosition += 10;
+
+            // Seção Outros
+            addSection('OUTROS', [168, 85, 247]);
+
+            categories.outros.forEach(category => {
+                addCategory(category);
+                if (category.children) {
+                    category.children.forEach((child: any) => addCategory(child, true));
+                }
+            });
+
+            // Rodapé na última página
+            const pageCount = doc.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+
+                // Linha decorativa no rodapé
+                addDecorativeLine(285, secondaryColor);
+
+                // Informações do rodapé
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+                doc.text(`Página ${i} de ${pageCount}`, 20, 290);
+                doc.text('Grex Finances - Sistema de Gestão Financeira', 120, 290);
+            }
+
+            // Salvar PDF
+            doc.save(`categorias-grex-${new Date().toISOString().split('T')[0]}.pdf`);
+
+            // Feedback visual
+            alert('Categorias exportadas para PDF com sucesso!');
+            handleCloseExportDropdown();
+        } catch (error) {
+            console.error('Erro ao exportar PDF:', error);
+            alert('Erro ao exportar PDF. Tente novamente.');
+        }
+    };
+
+    const handleExportCategoriesExcel = () => {
+        try {
+            // Preparar dados para Excel
+            const excelData: any[] = [];
+
+            // Cabeçalho
+            excelData.push(['TIPO', 'CATEGORIA PRINCIPAL', 'SUBCATEGORIA', 'DESCRIÇÃO', 'COR']);
+
+            // Função para adicionar categoria
+            const addCategoryToExcel = (category: any, type: string) => {
+                // Categoria principal
+                excelData.push([
+                    type,
+                    category.name,
+                    '',
+                    category.description || '',
+                    category.color || ''
+                ]);
+
+                // Subcategorias
+                if (category.children) {
+                    category.children.forEach((child: any) => {
+                        excelData.push([
+                            type,
+                            category.name,
+                            child.name,
+                            child.description || '',
+                            ''
+                        ]);
+                    });
+                }
+            };
+
+            // Adicionar todas as categorias
+            categories.saidas.forEach(category => addCategoryToExcel(category, 'SAÍDAS'));
+            categories.entradas.forEach(category => addCategoryToExcel(category, 'ENTRADAS'));
+            categories.outros.forEach(category => addCategoryToExcel(category, 'OUTROS'));
+
+            // Criar workbook
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Categorias');
+
+            // Salvar arquivo
+            XLSX.writeFile(wb, `categorias-grex-${new Date().toISOString().split('T')[0]}.xlsx`);
+
+            // Feedback visual
+            alert('Categorias exportadas para Excel com sucesso!');
+            handleCloseExportDropdown();
+        } catch (error) {
+            console.error('Erro ao exportar Excel:', error);
+            alert('Erro ao exportar Excel. Tente novamente.');
+        }
     };
 
     const handleImportCategories = () => {
-        console.log('Importando categorias...');
-        alert('Funcionalidade de importar categorias será implementada em breve!');
-    };
+        // Criar input de arquivo
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.style.display = 'none';
 
-    const handleExportCategories = () => {
-        console.log('Exportando categorias...');
-        alert('Funcionalidade de exportar categorias será implementada em breve!');
+        input.onchange = (event) => {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const content = e.target?.result as string;
+                    const importData = JSON.parse(content);
+
+                    // Validar estrutura do arquivo
+                    if (!importData.categories || !importData.metadata) {
+                        throw new Error('Formato de arquivo inválido');
+                    }
+
+                    // Validar estrutura das categorias
+                    const requiredTabs = ['saidas', 'entradas', 'outros'];
+                    for (const tab of requiredTabs) {
+                        if (!Array.isArray(importData.categories[tab])) {
+                            throw new Error(`Estrutura inválida para ${tab}`);
+                        }
+                    }
+
+                    // Confirmar importação
+                    const totalCategories = Object.values(importData.categories).flat().length;
+                    const totalSubcategories = Object.values(importData.categories).flat().reduce((acc: number, cat: any) => acc + (cat.children?.length || 0), 0);
+
+                    const confirmMessage = `Deseja importar as categorias?\n\n` +
+                        `• ${totalCategories} categorias principais\n` +
+                        `• ${totalSubcategories} subcategorias\n` +
+                        `• Data de exportação: ${new Date(importData.metadata.exportDate).toLocaleDateString('pt-BR')}\n\n` +
+                        `⚠️ Esta ação substituirá todas as categorias atuais!`;
+
+                    if (confirm(confirmMessage)) {
+                        // Importar categorias
+                        setCategories(importData.categories);
+
+                        // Feedback visual
+                        alert('Categorias importadas com sucesso!');
+                    }
+                } catch (error) {
+                    console.error('Erro ao importar categorias:', error);
+                    alert('Erro ao importar categorias. Verifique se o arquivo está no formato correto.');
+                }
+            };
+
+            reader.readAsText(file);
+        };
+
+        // Trigger file selection
+        document.body.appendChild(input);
+        input.click();
+        document.body.removeChild(input);
     };
 
     const handleCategoryHelp = () => {
-        console.log('Abrindo ajuda de categorias...');
-        alert('Funcionalidade de ajuda será implementada em breve!');
+        setShowCategoryHelpModal(true);
+    };
+
+    const handleCloseCategoryHelpModal = () => {
+        setShowCategoryHelpModal(false);
+    };
+
+    const handleReconfigureChurch = () => {
+        if (confirm('Deseja reconfigurar as informações da igreja? O assistente de configuração será aberto.')) {
+            setShowSetupModal(true);
+        }
+    };
+
+    const handleCloseSetupModal = () => {
+        setShowSetupModal(false);
     };
 
     const handleAddApiKey = () => {
@@ -721,19 +1407,58 @@ export default function Settings() {
                 const currentTab = activeCategoryTab as keyof typeof prevCategories;
                 const currentCategories = prevCategories[currentTab];
 
-                // Encontrar a categoria pai de origem e destino
+                // Encontrar a categoria pai de origem
                 const sourceParentIndex = currentCategories.findIndex(category =>
                     category.children?.some(child => child.id.toString() === active.id)
                 );
 
+                // Verificar se está arrastando para uma categoria pai (drop zone)
                 const targetParentIndex = currentCategories.findIndex(category =>
+                    category.id.toString() === over?.id
+                );
+
+                // Se está arrastando para uma categoria pai
+                if (sourceParentIndex !== -1 && targetParentIndex !== -1) {
+                    const sourceParent = currentCategories[sourceParentIndex];
+                    const targetParent = currentCategories[targetParentIndex];
+
+                    // Encontrar a sub-categoria sendo movida
+                    const sourceChild = sourceParent.children?.find(child => child.id.toString() === active.id);
+
+                    if (sourceChild) {
+                        const newCategories = [...currentCategories];
+
+                        // Remover da categoria de origem
+                        newCategories[sourceParentIndex] = {
+                            ...sourceParent,
+                            children: sourceParent.children?.filter(child => child.id.toString() !== active.id) || []
+                        };
+
+                        // Adicionar na categoria de destino
+                        newCategories[targetParentIndex] = {
+                            ...targetParent,
+                            children: [
+                                ...(targetParent.children || []),
+                                sourceChild
+                            ]
+                        };
+
+                        return {
+                            ...prevCategories,
+                            [currentTab]: newCategories
+                        };
+                    }
+                }
+
+                // Verificar se está arrastando para uma subcategoria (comportamento original)
+                const targetChildParentIndex = currentCategories.findIndex(category =>
                     category.children?.some(child => child.id.toString() === over?.id)
                 );
 
-                // Se está movendo para uma categoria diferente
-                if (sourceParentIndex !== -1 && targetParentIndex !== -1 && sourceParentIndex !== targetParentIndex) {
+                // Se está movendo para uma subcategoria diferente
+                if (sourceParentIndex !== -1 && targetChildParentIndex !== -1 && sourceParentIndex !== targetChildParentIndex) {
                     const sourceParent = currentCategories[sourceParentIndex];
-                    const targetParent = currentCategories[targetParentIndex];
+                    const targetParent = currentCategories[targetChildParentIndex];
 
                     // Encontrar a sub-categoria sendo movida
                     const sourceChild = sourceParent.children?.find(child => child.id.toString() === active.id);
@@ -754,7 +1479,7 @@ export default function Settings() {
                         const newTargetChildren = [...targetChildren];
                         newTargetChildren.splice(targetIndex, 0, sourceChild);
 
-                        newCategories[targetParentIndex] = {
+                        newCategories[targetChildParentIndex] = {
                             ...targetParent,
                             children: newTargetChildren
                         };
@@ -767,7 +1492,7 @@ export default function Settings() {
                 }
 
                 // Se está movendo dentro da mesma categoria
-                if (sourceParentIndex !== -1 && sourceParentIndex === targetParentIndex) {
+                if (sourceParentIndex !== -1 && sourceParentIndex === targetChildParentIndex) {
                     const parentCategory = currentCategories[sourceParentIndex];
                     const children = parentCategory.children || [];
 
@@ -803,15 +1528,50 @@ export default function Settings() {
                         backgroundColor: "#f8fafc",
                         minHeight: "100vh"
                     }}>
-                        {/* Título */}
-                        <h1 style={{
-                            fontSize: "24px",
-                            fontWeight: "600",
-                            color: "#1f2937",
-                            margin: "0 0 32px 0"
+                        {/* Título e Botão de Reconfiguração */}
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "32px"
                         }}>
-                            Minha Igreja
-                        </h1>
+                            <h1 style={{
+                                fontSize: "24px",
+                                fontWeight: "600",
+                                color: "#1f2937",
+                                margin: "0"
+                            }}>
+                                Minha Igreja
+                            </h1>
+                            <button
+                                onClick={handleReconfigureChurch}
+                                style={{
+                                    padding: "12px 24px",
+                                    background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s ease",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.transform = "translateY(-2px)";
+                                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(59, 130, 246, 0.4)";
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                }}
+                            >
+                                <SettingsIcon size={16} />
+                                Reconfigurar Igreja
+                            </button>
+                        </div>
 
                         {/* Container principal */}
                         <div style={{
@@ -1690,25 +2450,49 @@ export default function Settings() {
                             }}>
                                 {users.length} usuário{users.length !== 1 ? 's' : ''}
                             </h2>
-                            <button
-                                onClick={handleAddUser}
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    backgroundColor: "#3b82f6",
-                                    color: "white",
-                                    border: "none",
-                                    padding: "10px 16px",
-                                    borderRadius: "8px",
-                                    fontSize: "14px",
-                                    fontWeight: "500",
-                                    cursor: "pointer"
-                                }}
-                            >
-                                <Plus size={16} />
-                                Adicionar
-                            </button>
+                            <div style={{
+                                display: "flex",
+                                gap: "12px"
+                            }}>
+                                <button
+                                    onClick={handleAddUser}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        backgroundColor: "#3b82f6",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "10px 16px",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    Adicionar
+                                </button>
+                                <button
+                                    onClick={handleInviteUser}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        backgroundColor: "white",
+                                        color: "#3b82f6",
+                                        border: "1px solid #3b82f6",
+                                        padding: "10px 16px",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <Mail size={16} />
+                                    Convidar por E-mail
+                                </button>
+                            </div>
                         </div>
 
                         {/* Banner de upgrade */}
@@ -1802,9 +2586,52 @@ export default function Settings() {
                                     <div style={{
                                         fontSize: "14px",
                                         color: "#6b7280",
-                                        fontWeight: "500"
+                                        fontWeight: "500",
+                                        marginRight: "16px"
                                     }}>
                                         {user.role}
+                                    </div>
+
+                                    {/* Botões de ação */}
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
+                                    }}>
+                                        <button
+                                            onClick={() => handleEditUser(user)}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                padding: "8px",
+                                                borderRadius: "6px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "#3b82f6"
+                                            }}
+                                            title="Editar usuário"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteUser(user)}
+                                            style={{
+                                                background: "none",
+                                                border: "none",
+                                                cursor: "pointer",
+                                                padding: "8px",
+                                                borderRadius: "6px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                color: "#dc2626"
+                                            }}
+                                            title="Remover usuário"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -2144,24 +2971,117 @@ export default function Settings() {
                                     <Upload size={16} />
                                     Importar
                                 </button>
-                                <button
-                                    onClick={handleExportCategories}
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: "6px",
-                                        backgroundColor: "transparent",
-                                        color: "#6b7280",
-                                        border: "1px solid #d1d5db",
-                                        padding: "8px 12px",
-                                        borderRadius: "6px",
-                                        fontSize: "14px",
-                                        cursor: "pointer"
-                                    }}
-                                >
-                                    <Download size={16} />
-                                    Exportar
-                                </button>
+                                <div style={{ position: "relative" }}>
+                                    <button
+                                        onClick={() => setShowExportDropdown(!showExportDropdown)}
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px",
+                                            backgroundColor: "transparent",
+                                            color: "#6b7280",
+                                            border: "1px solid #d1d5db",
+                                            padding: "8px 12px",
+                                            borderRadius: "6px",
+                                            fontSize: "14px",
+                                            cursor: "pointer"
+                                        }}
+                                    >
+                                        <Download size={16} />
+                                        Exportar
+                                        <ChevronDown size={14} />
+                                    </button>
+
+                                    {showExportDropdown && (
+                                        <div style={{
+                                            position: "absolute",
+                                            top: "100%",
+                                            right: "0",
+                                            marginTop: "4px",
+                                            backgroundColor: "white",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "8px",
+                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                                            zIndex: 1000,
+                                            minWidth: "160px"
+                                        }}>
+                                            <button
+                                                onClick={handleExportCategoriesJSON}
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                    padding: "10px 12px",
+                                                    border: "none",
+                                                    backgroundColor: "transparent",
+                                                    fontSize: "14px",
+                                                    color: "#374151",
+                                                    cursor: "pointer",
+                                                    borderBottom: "1px solid #f3f4f6"
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "transparent";
+                                                }}
+                                            >
+                                                <FileText size={16} />
+                                                Exportar JSON
+                                            </button>
+                                            <button
+                                                onClick={handleExportCategoriesPDF}
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                    padding: "10px 12px",
+                                                    border: "none",
+                                                    backgroundColor: "transparent",
+                                                    fontSize: "14px",
+                                                    color: "#374151",
+                                                    cursor: "pointer",
+                                                    borderBottom: "1px solid #f3f4f6"
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "transparent";
+                                                }}
+                                            >
+                                                <FileText size={16} />
+                                                Exportar PDF
+                                            </button>
+                                            <button
+                                                onClick={handleExportCategoriesExcel}
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                    padding: "10px 12px",
+                                                    border: "none",
+                                                    backgroundColor: "transparent",
+                                                    fontSize: "14px",
+                                                    color: "#374151",
+                                                    cursor: "pointer"
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "transparent";
+                                                }}
+                                            >
+                                                <FileSpreadsheet size={16} />
+                                                Exportar Excel
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 <button
                                     onClick={handleCategoryHelp}
                                     style={{
@@ -2242,38 +3162,21 @@ export default function Settings() {
                                     onDragEnd={handleDragEnd}
                                 >
                                     <SortableContext
-                                        items={categories[activeCategoryTab as keyof typeof categories]
-                                            .flatMap(category => category.children?.map(child => child.id.toString()) || [])}
+                                        items={[
+                                            // Incluir IDs das categorias principais como drop zones
+                                            ...categories[activeCategoryTab as keyof typeof categories].map(category => category.id.toString()),
+                                            // Incluir IDs das subcategorias para drag
+                                            ...categories[activeCategoryTab as keyof typeof categories]
+                                                .flatMap(category => category.children?.map(child => child.id.toString()) || [])
+                                        ]}
                                         strategy={verticalListSortingStrategy}
                                     >
                                         {categories[activeCategoryTab as keyof typeof categories].map((category) => (
-                                            <div key={category.id}>
-                                                {/* Categoria pai */}
-                                                <div style={{
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    padding: "16px 20px",
-                                                    borderBottom: "1px solid #f1f5f9",
-                                                    backgroundColor: "white"
-                                                }}>
-                                                    <div style={{ width: "20px", marginRight: "12px" }}>
-                                                        <input type="checkbox" style={{ margin: "0" }} />
-                                                    </div>
-                                                    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "8px" }}>
-                                                        <Circle
-                                                            size={6}
-                                                            fill={category.color === "green" ? "#16a34a" : category.color === "blue" ? "#2563eb" : "#dc2626"}
-                                                            color={category.color === "green" ? "#16a34a" : category.color === "blue" ? "#2563eb" : "#dc2626"}
-                                                        />
-                                                        <span style={{ fontSize: "14px", color: "#1f2937", fontWeight: "600" }}>
-                                                            {category.name}
-                                                        </span>
-                                                    </div>
-                                                    <div style={{ fontSize: "14px", color: "#6b7280" }}>
-                                                        Ações
-                                                    </div>
-                                                </div>
-
+                                            <SortableParentItem
+                                                key={category.id}
+                                                id={category.id.toString()}
+                                                category={category}
+                                            >
                                                 {/* Categorias filhas com drag & drop */}
                                                 {category.children && category.children.map((child) => (
                                                     <SortableChildItem
@@ -2283,7 +3186,7 @@ export default function Settings() {
                                                         onDragEnd={handleDragEnd}
                                                     />
                                                 ))}
-                                            </div>
+                                            </SortableParentItem>
                                         ))}
                                     </SortableContext>
                                 </DndContext>
@@ -3777,6 +4680,376 @@ export default function Settings() {
                     {renderContent()}
                 </div>
             </div>
+
+            {/* Setup Wizard Modal */}
+            <SetupWizardModal
+                isOpen={showSetupModal}
+                onClose={handleCloseSetupModal}
+            />
+
+            {/* User Modals */}
+            <UserModals
+                showAddUserModal={showAddUserModal}
+                onCloseAddUserModal={handleCloseAddUserModal}
+                showEditUserModal={showEditUserModal}
+                onCloseEditUserModal={handleCloseEditUserModal}
+                showDeleteUserModal={showDeleteUserModal}
+                onCloseDeleteUserModal={handleCloseDeleteUserModal}
+                deletingUser={deletingUser}
+                userForm={userForm}
+                onUserFormChange={handleUserFormChange}
+                onSaveUser={handleSaveUser}
+                onConfirmDeleteUser={handleConfirmDeleteUser}
+            />
+
+            {/* Invite Modals */}
+            <InviteModals
+                showInviteUserModal={showInviteUserModal}
+                onCloseInviteUserModal={handleCloseInviteUserModal}
+                inviteForm={inviteForm}
+                onInviteFormChange={handleInviteFormChange}
+                onSendInvite={handleSendInvite}
+            />
+
+            {/* Category Modals */}
+            <CategoryModals
+                showAddCategoryModal={showAddCategoryModal}
+                onCloseAddCategoryModal={handleCloseAddCategoryModal}
+                showEditCategoryModal={showEditCategoryModal}
+                onCloseEditCategoryModal={handleCloseEditCategoryModal}
+                showDeleteCategoryModal={showDeleteCategoryModal}
+                onCloseDeleteCategoryModal={handleCloseDeleteCategoryModal}
+                deletingCategory={deletingCategory}
+                categoryForm={categoryForm}
+                onCategoryFormChange={handleCategoryFormChange}
+                onSaveCategory={handleSaveCategory}
+                onConfirmDeleteCategory={handleConfirmDeleteCategory}
+            />
+
+            {/* Modal de Ajuda para Categorias */}
+            {showCategoryHelpModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10000,
+                    padding: "20px"
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        maxWidth: "600px",
+                        width: "100%",
+                        maxHeight: "80vh",
+                        overflowY: "auto",
+                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                    }}>
+                        {/* Cabeçalho do Modal */}
+                        <div style={{
+                            padding: "24px 24px 16px 24px",
+                            borderBottom: "1px solid #e5e7eb",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between"
+                        }}>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px"
+                            }}>
+                                <div style={{
+                                    width: "40px",
+                                    height: "40px",
+                                    borderRadius: "8px",
+                                    backgroundColor: "#3b82f6",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}>
+                                    <HelpCircle size={20} color="white" />
+                                </div>
+                                <div>
+                                    <h2 style={{
+                                        fontSize: "20px",
+                                        fontWeight: "600",
+                                        color: "#1f2937",
+                                        margin: "0"
+                                    }}>
+                                        Ajuda - Categorias
+                                    </h2>
+                                    <p style={{
+                                        fontSize: "14px",
+                                        color: "#6b7280",
+                                        margin: "4px 0 0 0"
+                                    }}>
+                                        Guia completo para gerenciar suas categorias
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleCloseCategoryHelpModal}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    padding: "8px",
+                                    borderRadius: "6px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    color: "#6b7280"
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = "#f3f4f6";
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = "transparent";
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Conteúdo do Modal */}
+                        <div style={{ padding: "24px" }}>
+                            {/* Seção Como Usar */}
+                            <div style={{ marginBottom: "24px" }}>
+                                <h3 style={{
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    margin: "0 0 12px 0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}>
+                                    <Info size={18} color="#3b82f6" />
+                                    Como Usar
+                                </h3>
+                                <div style={{
+                                    backgroundColor: "#f8fafc",
+                                    padding: "16px",
+                                    borderRadius: "8px",
+                                    borderLeft: "4px solid #3b82f6"
+                                }}>
+                                    <ul style={{
+                                        margin: "0",
+                                        paddingLeft: "20px",
+                                        color: "#374151"
+                                    }}>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Clique em <strong>"+ Adicionar"</strong> para criar novas categorias
+                                        </li>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Use o <strong>drag & drop</strong> para reorganizar subcategorias
+                                        </li>
+                                        <li style={{ marginBottom: "0" }}>
+                                            Arraste subcategorias entre diferentes categorias principais
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Seção Exportar */}
+                            <div style={{ marginBottom: "24px" }}>
+                                <h3 style={{
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    margin: "0 0 12px 0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}>
+                                    <Upload size={18} color="#0ea5e9" />
+                                    Exportar
+                                </h3>
+                                <div style={{
+                                    backgroundColor: "#f0f9ff",
+                                    padding: "16px",
+                                    borderRadius: "8px",
+                                    borderLeft: "4px solid #0ea5e9"
+                                }}>
+                                    <ul style={{
+                                        margin: "0",
+                                        paddingLeft: "20px",
+                                        color: "#374151"
+                                    }}>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Clique em <strong>"Exportar"</strong> para baixar suas categorias
+                                        </li>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Escolha entre <strong>JSON</strong>, <strong>PDF</strong> ou <strong>Excel</strong>
+                                        </li>
+                                        <li style={{ marginBottom: "0" }}>
+                                            Arquivo será salvo com data atual
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Seção Importar */}
+                            <div style={{ marginBottom: "24px" }}>
+                                <h3 style={{
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    margin: "0 0 12px 0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}>
+                                    <Download size={18} color="#f59e0b" />
+                                    Importar
+                                </h3>
+                                <div style={{
+                                    backgroundColor: "#fef3c7",
+                                    padding: "16px",
+                                    borderRadius: "8px",
+                                    borderLeft: "4px solid #f59e0b"
+                                }}>
+                                    <ul style={{
+                                        margin: "0",
+                                        paddingLeft: "20px",
+                                        color: "#374151"
+                                    }}>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Clique em <strong>"Importar"</strong> e selecione arquivo JSON
+                                        </li>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Arquivo deve ter sido exportado pelo sistema
+                                        </li>
+                                        <li style={{ marginBottom: "0", color: "#dc2626", fontWeight: "500", display: "flex", alignItems: "center", gap: "6px" }}>
+                                            <AlertTriangle size={14} color="#dc2626" />
+                                            Substitui todas as categorias atuais
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Seção Dicas */}
+                            <div style={{ marginBottom: "24px" }}>
+                                <h3 style={{
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    margin: "0 0 12px 0",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px"
+                                }}>
+                                    <Target size={18} color="#22c55e" />
+                                    Dicas Importantes
+                                </h3>
+                                <div style={{
+                                    backgroundColor: "#f0fdf4",
+                                    padding: "16px",
+                                    borderRadius: "8px",
+                                    borderLeft: "4px solid #22c55e"
+                                }}>
+                                    <ul style={{
+                                        margin: "0",
+                                        paddingLeft: "20px",
+                                        color: "#374151"
+                                    }}>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Faça <strong>backup</strong> antes de importar
+                                        </li>
+                                        <li style={{ marginBottom: "8px" }}>
+                                            Use <strong>cores</strong> para organizar visualmente
+                                        </li>
+                                        <li style={{ marginBottom: "0" }}>
+                                            Categorias vazias aceitam drops de outras subcategorias
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Seção Suporte */}
+                            <div style={{
+                                backgroundColor: "#f8fafc",
+                                padding: "16px",
+                                borderRadius: "8px",
+                                border: "1px solid #e5e7eb"
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "12px"
+                                }}>
+                                    <div style={{
+                                        width: "32px",
+                                        height: "32px",
+                                        borderRadius: "6px",
+                                        backgroundColor: "#3b82f6",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>
+                                        <HelpCircle size={16} color="white" />
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            margin: "0",
+                                            fontSize: "14px",
+                                            color: "#374151",
+                                            fontWeight: "500"
+                                        }}>
+                                            Precisa de mais ajuda?
+                                        </p>
+                                        <p style={{
+                                            margin: "4px 0 0 0",
+                                            fontSize: "13px",
+                                            color: "#6b7280"
+                                        }}>
+                                            Entre em contato com o suporte através do menu "Abrir Ticket de Suporte"
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Rodapé do Modal */}
+                        <div style={{
+                            padding: "16px 24px",
+                            borderTop: "1px solid #e5e7eb",
+                            display: "flex",
+                            justifyContent: "flex-end"
+                        }}>
+                            <button
+                                onClick={handleCloseCategoryHelpModal}
+                                style={{
+                                    backgroundColor: "#3b82f6",
+                                    color: "white",
+                                    border: "none",
+                                    padding: "10px 20px",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s ease"
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = "#2563eb";
+                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = "#3b82f6";
+                                    e.currentTarget.style.transform = "translateY(0)";
+                                }}
+                            >
+                                Entendi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }
