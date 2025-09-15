@@ -61,7 +61,8 @@ import {
     FileSpreadsheet,
     Info,
     Target,
-    AlertTriangle
+    AlertTriangle,
+    Bell
 } from "lucide-react";
 
 // Componente para sub-categoria sortable
@@ -204,6 +205,13 @@ export default function Settings() {
     const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
     const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
     const [showDeleteCategoryModal, setShowDeleteCategoryModal] = useState(false);
+    const [showChangeEmailModal, setShowChangeEmailModal] = useState(false);
+    const [showUploadLogoModal, setShowUploadLogoModal] = useState(false);
+    const [showFileManagementModal, setShowFileManagementModal] = useState(false);
+    const [showImagePreviewModal, setShowImagePreviewModal] = useState(false);
+    const [showNotificationSettingsModal, setShowNotificationSettingsModal] = useState(false);
+    const [showNotificationHistoryModal, setShowNotificationHistoryModal] = useState(false);
+    const [showAlertSettingsModal, setShowAlertSettingsModal] = useState(false);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [deletingUser, setDeletingUser] = useState<any>(null);
     const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -229,6 +237,35 @@ export default function Settings() {
         description: "",
         color: "#3b82f6"
     });
+    const [emailForm, setEmailForm] = useState({
+        currentEmail: "gustavo@grex.com.br",
+        newEmail: "",
+        confirmEmail: ""
+    });
+    const [uploadForm, setUploadForm] = useState({
+        file: null as File | null,
+        preview: null as string | null,
+        description: ""
+    });
+    const [notificationSettings, setNotificationSettings] = useState({
+        email: true,
+        push: true,
+        sms: false,
+        weeklyReport: true,
+        monthlyReport: true,
+        paymentReminder: true,
+        systemUpdates: true
+    });
+    const [files, setFiles] = useState([
+        { id: 1, name: "logo-igreja.png", size: "2.3 MB", type: "image", uploadDate: "15/01/2024" },
+        { id: 2, name: "documento-contas.pdf", size: "1.8 MB", type: "document", uploadDate: "10/01/2024" },
+        { id: 3, name: "relatorio-mensal.xlsx", size: "945 KB", type: "spreadsheet", uploadDate: "05/01/2024" }
+    ]);
+    const [notifications, setNotifications] = useState([
+        { id: 1, title: "Relatório semanal gerado", message: "Seu relatório semanal está disponível", date: "20/01/2024", read: false, type: "info" },
+        { id: 2, title: "Pagamento processado", message: "Pagamento de R$ 80,00 foi processado com sucesso", date: "18/01/2024", read: true, type: "success" },
+        { id: 3, title: "Backup realizado", message: "Backup automático dos dados foi concluído", date: "15/01/2024", read: true, type: "info" }
+    ]);
     const [showExportDropdown, setShowExportDropdown] = useState(false);
     const [showCategoryHelpModal, setShowCategoryHelpModal] = useState(false);
 
@@ -240,7 +277,8 @@ export default function Settings() {
         nomeIgreja: "",
         telefone: "",
         cpfCnpj: "",
-        site: ""
+        site: "",
+        churchPhoto: ""
     });
 
     const [addressData, setAddressData] = useState({
@@ -758,28 +796,134 @@ export default function Settings() {
     };
 
     const handleViewDetails = () => {
-        console.log('Visualizando detalhes do plano...');
-        alert('Funcionalidade de ver detalhes será implementada em breve!');
+        router.push('/dashboard/billing/invoices');
     };
 
     const handleUpgrade = () => {
-        console.log('Fazendo upgrade do plano...');
-        alert('Funcionalidade de upgrade será implementada em breve!');
+        router.push('/dashboard/billing/plans');
     };
 
     const handleChangePayment = () => {
-        console.log('Alterando método de pagamento...');
-        alert('Funcionalidade de alterar pagamento será implementada em breve!');
+        router.push('/dashboard/billing/payment-methods');
     };
 
     const handlePaymentHistory = () => {
-        console.log('Visualizando histórico de pagamentos...');
-        alert('Funcionalidade de histórico será implementada em breve!');
+        router.push('/dashboard/billing/history');
     };
 
     const handleChangeEmail = () => {
-        console.log('Alterando e-mail de cobrança...');
-        alert('Funcionalidade de alterar e-mail será implementada em breve!');
+        setEmailForm({
+            currentEmail: "gustavo@grex.com.br",
+            newEmail: "",
+            confirmEmail: ""
+        });
+        setShowChangeEmailModal(true);
+    };
+
+    const handleEmailFormChange = (field: string, value: string) => {
+        setEmailForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleSaveEmail = () => {
+        if (emailForm.newEmail !== emailForm.confirmEmail) {
+            alert('Os e-mails não coincidem');
+            return;
+        }
+
+        if (!emailForm.newEmail || !emailForm.confirmEmail) {
+            alert('Preencha todos os campos');
+            return;
+        }
+
+        // Aqui você pode implementar a lógica para salvar o novo e-mail
+        console.log('Salvando novo e-mail:', emailForm.newEmail);
+        alert('E-mail alterado com sucesso!');
+        setShowChangeEmailModal(false);
+    };
+
+    const handleCloseChangeEmailModal = () => {
+        setShowChangeEmailModal(false);
+    };
+
+    // Funções para Upload e Arquivos
+    const handleUploadLogo = () => {
+        // Simula o clique no input de arquivo da área de foto
+        const fileInput = document.getElementById('church-photo-input') as HTMLInputElement;
+        if (fileInput) {
+            fileInput.click();
+        }
+    };
+
+    const handleFileManagement = () => {
+        setShowFileManagementModal(true);
+    };
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setUploadForm(prev => ({
+                    ...prev,
+                    file: file,
+                    preview: e.target?.result as string
+                }));
+                // Atualiza a foto da igreja no formulário
+                setFormData(prev => ({
+                    ...prev,
+                    churchPhoto: e.target?.result as string
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSaveLogo = () => {
+        if (uploadForm.file) {
+            console.log('Salvando logo:', uploadForm.file);
+            alert('Logo salvo com sucesso!');
+            setShowUploadLogoModal(false);
+        }
+    };
+
+    const handlePreviewImage = (file: any) => {
+        setUploadForm(prev => ({ ...prev, preview: file.preview }));
+        setShowImagePreviewModal(true);
+    };
+
+    // Funções para Notificações
+    const handleNotificationSettings = () => {
+        setShowNotificationSettingsModal(true);
+    };
+
+    const handleNotificationHistory = () => {
+        setShowNotificationHistoryModal(true);
+    };
+
+    const handleAlertSettings = () => {
+        setShowAlertSettingsModal(true);
+    };
+
+    const handleNotificationToggle = (key: string) => {
+        setNotificationSettings(prev => ({
+            ...prev,
+            [key]: !prev[key as keyof typeof prev]
+        }));
+    };
+
+    const handleMarkAsRead = (id: number) => {
+        setNotifications(prev =>
+            prev.map(notif =>
+                notif.id === id ? { ...notif, read: true } : notif
+            )
+        );
+    };
+
+    const handleDeleteFile = (id: number) => {
+        setFiles(prev => prev.filter(file => file.id !== id));
     };
 
     const handleAddCategory = () => {
@@ -1543,34 +1687,67 @@ export default function Settings() {
                             }}>
                                 Minha Igreja
                             </h1>
-                            <button
-                                onClick={handleReconfigureChurch}
-                                style={{
-                                    padding: "12px 24px",
-                                    background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    fontSize: "14px",
-                                    fontWeight: "600",
-                                    cursor: "pointer",
-                                    transition: "all 0.2s ease",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                }}
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.transform = "translateY(-2px)";
-                                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(59, 130, 246, 0.4)";
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.transform = "translateY(0)";
-                                    e.currentTarget.style.boxShadow = "none";
-                                }}
-                            >
-                                <SettingsIcon size={16} />
-                                Reconfigurar Igreja
-                            </button>
+                            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                                <button
+                                    onClick={handleReconfigureChurch}
+                                    style={{
+                                        padding: "12px 24px",
+                                        background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                        e.currentTarget.style.boxShadow = "0 8px 24px rgba(59, 130, 246, 0.4)";
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                        e.currentTarget.style.boxShadow = "none";
+                                    }}
+                                >
+                                    <SettingsIcon size={16} />
+                                    Reconfigurar Igreja
+                                </button>
+
+                                <button
+                                    onClick={handleFileManagement}
+                                    style={{
+                                        padding: "12px 24px",
+                                        backgroundColor: "#ffffff",
+                                        color: "#6b7280",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                    }}
+                                    onMouseOver={(e) => {
+                                        e.currentTarget.style.backgroundColor = "#f9fafb";
+                                        e.currentTarget.style.borderColor = "#9ca3af";
+                                        e.currentTarget.style.color = "#374151";
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget.style.backgroundColor = "#ffffff";
+                                        e.currentTarget.style.borderColor = "#d1d5db";
+                                        e.currentTarget.style.color = "#6b7280";
+                                    }}
+                                >
+                                    <FileSpreadsheet size={16} />
+                                    Gerenciar Arquivos
+                                </button>
+                            </div>
                         </div>
 
                         {/* Container principal */}
@@ -1590,7 +1767,9 @@ export default function Settings() {
                                     type="button"
                                     style={{
                                         background: "none",
-                                        border: "none",
+                                        borderTop: "none",
+                                        borderLeft: "none",
+                                        borderRight: "none",
                                         padding: "16px 24px",
                                         fontSize: "16px",
                                         fontWeight: "500",
@@ -1606,7 +1785,9 @@ export default function Settings() {
                                     type="button"
                                     style={{
                                         background: "none",
-                                        border: "none",
+                                        borderTop: "none",
+                                        borderLeft: "none",
+                                        borderRight: "none",
                                         padding: "16px 24px",
                                         fontSize: "16px",
                                         fontWeight: "500",
@@ -1782,17 +1963,44 @@ export default function Settings() {
                                             <div style={{
                                                 width: "240px",
                                                 height: "180px",
-                                                backgroundColor: "#dbeafe",
+                                                backgroundColor: formData.churchPhoto ? "transparent" : "#dbeafe",
                                                 borderRadius: "12px",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 border: "2px dashed #93c5fd",
-                                                position: "relative"
+                                                position: "relative",
+                                                overflow: "hidden"
                                             }}>
-                                                <Mountain size={64} color="#60a5fa" />
+                                                {formData.churchPhoto ? (
+                                                    <img
+                                                        src={formData.churchPhoto}
+                                                        alt="Foto da Igreja"
+                                                        style={{
+                                                            width: "100%",
+                                                            height: "100%",
+                                                            objectFit: "cover",
+                                                            borderRadius: "10px"
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <Mountain size={64} color="#60a5fa" />
+                                                )}
+                                                <input
+                                                    id="church-photo-input"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: "none" }}
+                                                    onChange={handleFileUpload}
+                                                />
                                                 <button
                                                     type="button"
+                                                    onClick={() => {
+                                                        const fileInput = document.getElementById('church-photo-input') as HTMLInputElement;
+                                                        if (fileInput) {
+                                                            fileInput.click();
+                                                        }
+                                                    }}
                                                     style={{
                                                         position: "absolute",
                                                         bottom: "12px",
@@ -2232,12 +2440,108 @@ export default function Settings() {
                 return (
                     <div style={{ padding: "32px" }}>
                         <div style={{ marginBottom: "32px" }}>
-                            <h1 style={{ fontSize: "24px", fontWeight: "600", color: "#1f2937", margin: "0 0 8px 0" }}>
-                                Preferências
-                            </h1>
-                            <p style={{ fontSize: "16px", color: "#6b7280", margin: "0" }}>
-                                Configure suas preferências de uso da plataforma
-                            </p>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                                <div>
+                                    <h1 style={{ fontSize: "24px", fontWeight: "600", color: "#1f2937", margin: "0 0 8px 0" }}>
+                                        Preferências
+                                    </h1>
+                                    <p style={{ fontSize: "16px", color: "#6b7280", margin: "0" }}>
+                                        Configure suas preferências de uso da plataforma
+                                    </p>
+                                </div>
+                                <div style={{ display: "flex", gap: "12px" }}>
+                                    <button
+                                        onClick={handleNotificationSettings}
+                                        style={{
+                                            padding: "12px 24px",
+                                            backgroundColor: "#ffffff",
+                                            color: "#3b82f6",
+                                            border: "1px solid #e5e7eb",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#f8fafc";
+                                            e.currentTarget.style.borderColor = "#3b82f6";
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#ffffff";
+                                            e.currentTarget.style.borderColor = "#e5e7eb";
+                                        }}
+                                    >
+                                        <Bell size={16} />
+                                        Configurar Notificações
+                                    </button>
+
+                                    <button
+                                        onClick={handleNotificationHistory}
+                                        style={{
+                                            padding: "12px 24px",
+                                            backgroundColor: "#ffffff",
+                                            color: "#6b7280",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#f9fafb";
+                                            e.currentTarget.style.borderColor = "#9ca3af";
+                                            e.currentTarget.style.color = "#374151";
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#ffffff";
+                                            e.currentTarget.style.borderColor = "#d1d5db";
+                                            e.currentTarget.style.color = "#6b7280";
+                                        }}
+                                    >
+                                        <FileSpreadsheet size={16} />
+                                        Histórico de Notificações
+                                    </button>
+
+                                    <button
+                                        onClick={handleAlertSettings}
+                                        style={{
+                                            padding: "12px 24px",
+                                            backgroundColor: "#ffffff",
+                                            color: "#6b7280",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#f9fafb";
+                                            e.currentTarget.style.borderColor = "#9ca3af";
+                                            e.currentTarget.style.color = "#374151";
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#ffffff";
+                                            e.currentTarget.style.borderColor = "#d1d5db";
+                                            e.currentTarget.style.color = "#6b7280";
+                                        }}
+                                    >
+                                        <AlertTriangle size={16} />
+                                        Configurar Alertas
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div style={{
@@ -2660,13 +2964,13 @@ export default function Settings() {
                                 {/* Ícone de ajuda */}
                                 <button style={{
                                     position: "absolute",
-                                    top: "16px",
-                                    right: "16px",
+                                    top: "0px",
+                                    right: "0px",
                                     background: "none",
                                     border: "none",
                                     cursor: "pointer",
                                     color: "#6b7280",
-                                    padding: "4px"
+                                    padding: "8px"
                                 }}>
                                     <HelpCircle size={16} />
                                 </button>
@@ -2692,14 +2996,35 @@ export default function Settings() {
                                             <button
                                                 onClick={handleViewDetails}
                                                 style={{
-                                                    backgroundColor: "transparent",
+                                                    backgroundColor: "#ffffff",
                                                     color: "#3b82f6",
-                                                    border: "none",
-                                                    padding: "4px 0",
+                                                    border: "1px solid #e5e7eb",
+                                                    padding: "10px 16px",
                                                     fontSize: "14px",
                                                     fontWeight: "500",
                                                     cursor: "pointer",
-                                                    textDecoration: "underline"
+                                                    textDecoration: "none",
+                                                    borderRadius: "8px",
+                                                    transition: "all 0.2s ease",
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    gap: "6px",
+                                                    boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                                    minHeight: "40px"
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f8fafc";
+                                                    e.currentTarget.style.borderColor = "#3b82f6";
+                                                    e.currentTarget.style.color = "#1d4ed8";
+                                                    e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+                                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#ffffff";
+                                                    e.currentTarget.style.borderColor = "#e5e7eb";
+                                                    e.currentTarget.style.color = "#3b82f6";
+                                                    e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                                                    e.currentTarget.style.transform = "translateY(0)";
                                                 }}
                                             >
                                                 Ver detalhes
@@ -2707,17 +3032,33 @@ export default function Settings() {
                                             <button
                                                 onClick={handleUpgrade}
                                                 style={{
-                                                    backgroundColor: "transparent",
-                                                    color: "#3b82f6",
-                                                    border: "none",
-                                                    padding: "4px 0",
+                                                    backgroundColor: "#3b82f6",
+                                                    color: "#ffffff",
+                                                    border: "1px solid #3b82f6",
+                                                    padding: "10px 16px",
                                                     fontSize: "14px",
-                                                    fontWeight: "500",
+                                                    fontWeight: "600",
                                                     cursor: "pointer",
-                                                    textDecoration: "underline",
-                                                    display: "flex",
+                                                    textDecoration: "none",
+                                                    borderRadius: "8px",
+                                                    transition: "all 0.2s ease",
+                                                    display: "inline-flex",
                                                     alignItems: "center",
-                                                    gap: "4px"
+                                                    gap: "6px",
+                                                    boxShadow: "0 1px 2px 0 rgba(59, 130, 246, 0.3)",
+                                                    minHeight: "40px"
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#1d4ed8";
+                                                    e.currentTarget.style.borderColor = "#1d4ed8";
+                                                    e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(59, 130, 246, 0.4), 0 2px 4px -1px rgba(59, 130, 246, 0.2)";
+                                                    e.currentTarget.style.transform = "translateY(-1px)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#3b82f6";
+                                                    e.currentTarget.style.borderColor = "#3b82f6";
+                                                    e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(59, 130, 246, 0.3)";
+                                                    e.currentTarget.style.transform = "translateY(0)";
                                                 }}
                                             >
                                                 <ArrowUp size={14} />
@@ -2807,14 +3148,35 @@ export default function Settings() {
                                         <button
                                             onClick={handleChangePayment}
                                             style={{
-                                                backgroundColor: "transparent",
-                                                color: "#3b82f6",
-                                                border: "none",
-                                                padding: "4px 0",
+                                                backgroundColor: "#ffffff",
+                                                color: "#6b7280",
+                                                border: "1px solid #d1d5db",
+                                                padding: "10px 16px",
                                                 fontSize: "14px",
                                                 fontWeight: "500",
                                                 cursor: "pointer",
-                                                textDecoration: "underline"
+                                                textDecoration: "none",
+                                                borderRadius: "8px",
+                                                transition: "all 0.2s ease",
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: "6px",
+                                                boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                                minHeight: "40px"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#f9fafb";
+                                                e.currentTarget.style.borderColor = "#9ca3af";
+                                                e.currentTarget.style.color = "#374151";
+                                                e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+                                                e.currentTarget.style.transform = "translateY(-1px)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#ffffff";
+                                                e.currentTarget.style.borderColor = "#d1d5db";
+                                                e.currentTarget.style.color = "#6b7280";
+                                                e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                                                e.currentTarget.style.transform = "translateY(0)";
                                             }}
                                         >
                                             Alterar
@@ -2822,14 +3184,35 @@ export default function Settings() {
                                         <button
                                             onClick={handlePaymentHistory}
                                             style={{
-                                                backgroundColor: "transparent",
+                                                backgroundColor: "#ffffff",
                                                 color: "#3b82f6",
-                                                border: "none",
-                                                padding: "4px 0",
+                                                border: "1px solid #e5e7eb",
+                                                padding: "10px 16px",
                                                 fontSize: "14px",
                                                 fontWeight: "500",
                                                 cursor: "pointer",
-                                                textDecoration: "underline"
+                                                textDecoration: "none",
+                                                borderRadius: "8px",
+                                                transition: "all 0.2s ease",
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: "6px",
+                                                boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                                minHeight: "40px"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#f8fafc";
+                                                e.currentTarget.style.borderColor = "#3b82f6";
+                                                e.currentTarget.style.color = "#1d4ed8";
+                                                e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+                                                e.currentTarget.style.transform = "translateY(-1px)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#ffffff";
+                                                e.currentTarget.style.borderColor = "#e5e7eb";
+                                                e.currentTarget.style.color = "#3b82f6";
+                                                e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                                                e.currentTarget.style.transform = "translateY(0)";
                                             }}
                                         >
                                             Histórico de pagamentos
@@ -2867,14 +3250,35 @@ export default function Settings() {
                                     <button
                                         onClick={handleChangeEmail}
                                         style={{
-                                            backgroundColor: "transparent",
-                                            color: "#3b82f6",
-                                            border: "none",
-                                            padding: "4px 0",
+                                            backgroundColor: "#ffffff",
+                                            color: "#6b7280",
+                                            border: "1px solid #d1d5db",
+                                            padding: "10px 16px",
                                             fontSize: "14px",
                                             fontWeight: "500",
                                             cursor: "pointer",
-                                            textDecoration: "underline"
+                                            textDecoration: "none",
+                                            borderRadius: "8px",
+                                            transition: "all 0.2s ease",
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "6px",
+                                            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                            minHeight: "40px"
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#f9fafb";
+                                            e.currentTarget.style.borderColor = "#9ca3af";
+                                            e.currentTarget.style.color = "#374151";
+                                            e.currentTarget.style.boxShadow = "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+                                            e.currentTarget.style.transform = "translateY(-1px)";
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#ffffff";
+                                            e.currentTarget.style.borderColor = "#d1d5db";
+                                            e.currentTarget.style.color = "#6b7280";
+                                            e.currentTarget.style.boxShadow = "0 1px 2px 0 rgba(0, 0, 0, 0.05)";
+                                            e.currentTarget.style.transform = "translateY(0)";
                                         }}
                                     >
                                         Alterar
@@ -3114,7 +3518,9 @@ export default function Settings() {
                                     onClick={() => setActiveCategoryTab(tab.id)}
                                     style={{
                                         padding: "12px 24px",
-                                        border: "none",
+                                        borderTop: "none",
+                                        borderLeft: "none",
+                                        borderRight: "none",
                                         backgroundColor: "transparent",
                                         color: activeCategoryTab === tab.id ? "#dc2626" : "#6b7280",
                                         fontSize: "14px",
@@ -3217,7 +3623,9 @@ export default function Settings() {
                                 type="button"
                                 style={{
                                     background: "none",
-                                    border: "none",
+                                    borderTop: "none",
+                                    borderLeft: "none",
+                                    borderRight: "none",
                                     padding: "16px 24px",
                                     fontSize: "16px",
                                     fontWeight: "500",
@@ -3233,7 +3641,9 @@ export default function Settings() {
                                 type="button"
                                 style={{
                                     background: "none",
-                                    border: "none",
+                                    borderTop: "none",
+                                    borderLeft: "none",
+                                    borderRight: "none",
                                     padding: "16px 24px",
                                     fontSize: "16px",
                                     fontWeight: "500",
@@ -3249,7 +3659,9 @@ export default function Settings() {
                                 type="button"
                                 style={{
                                     background: "none",
-                                    border: "none",
+                                    borderTop: "none",
+                                    borderLeft: "none",
+                                    borderRight: "none",
                                     padding: "16px 24px",
                                     fontSize: "16px",
                                     fontWeight: "500",
@@ -5045,6 +5457,1132 @@ export default function Settings() {
                                 }}
                             >
                                 Entendi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Alterar E-mail de Cobrança */}
+            {showChangeEmailModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "500px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Alterar E-mail de Cobrança
+                            </h2>
+                            <button
+                                onClick={handleCloseChangeEmailModal}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{ marginBottom: "20px" }}>
+                            <label style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#374151"
+                            }}>
+                                E-mail atual
+                            </label>
+                            <input
+                                type="email"
+                                value={emailForm.currentEmail}
+                                disabled
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    backgroundColor: "#f9fafb",
+                                    color: "#6b7280"
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: "20px" }}>
+                            <label style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#374151"
+                            }}>
+                                Novo e-mail
+                            </label>
+                            <input
+                                type="email"
+                                value={emailForm.newEmail}
+                                onChange={(e) => handleEmailFormChange('newEmail', e.target.value)}
+                                placeholder="Digite o novo e-mail"
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    fontSize: "14px"
+                                }}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: "24px" }}>
+                            <label style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#374151"
+                            }}>
+                                Confirmar novo e-mail
+                            </label>
+                            <input
+                                type="email"
+                                value={emailForm.confirmEmail}
+                                onChange={(e) => handleEmailFormChange('confirmEmail', e.target.value)}
+                                placeholder="Confirme o novo e-mail"
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    fontSize: "14px"
+                                }}
+                            />
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: "12px"
+                        }}>
+                            <button
+                                onClick={handleCloseChangeEmailModal}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveEmail}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    backgroundColor: "#3b82f6",
+                                    color: "white",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Upload Logo da Igreja */}
+            {showUploadLogoModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "500px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Upload Logo da Igreja
+                            </h2>
+                            <button
+                                onClick={() => setShowUploadLogoModal(false)}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{ marginBottom: "20px" }}>
+                            <label style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#374151"
+                            }}>
+                                Selecionar arquivo
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    fontSize: "14px"
+                                }}
+                            />
+                        </div>
+
+                        {uploadForm.preview && (
+                            <div style={{ marginBottom: "20px" }}>
+                                <label style={{
+                                    display: "block",
+                                    marginBottom: "8px",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    color: "#374151"
+                                }}>
+                                    Preview
+                                </label>
+                                <img
+                                    src={uploadForm.preview}
+                                    alt="Preview"
+                                    style={{
+                                        width: "100%",
+                                        maxHeight: "200px",
+                                        objectFit: "contain",
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "8px"
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        <div style={{ marginBottom: "24px" }}>
+                            <label style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontSize: "14px",
+                                fontWeight: "500",
+                                color: "#374151"
+                            }}>
+                                Descrição (opcional)
+                            </label>
+                            <input
+                                type="text"
+                                value={uploadForm.description}
+                                onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder="Descreva o logo..."
+                                style={{
+                                    width: "100%",
+                                    padding: "12px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    fontSize: "14px"
+                                }}
+                            />
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: "12px"
+                        }}>
+                            <button
+                                onClick={() => setShowUploadLogoModal(false)}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSaveLogo}
+                                disabled={!uploadForm.file}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    backgroundColor: uploadForm.file ? "#3b82f6" : "#9ca3af",
+                                    color: "white",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: uploadForm.file ? "pointer" : "not-allowed"
+                                }}
+                            >
+                                Salvar Logo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Gerenciamento de Arquivos */}
+            {showFileManagementModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "800px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Gerenciamento de Arquivos
+                            </h2>
+                            <button
+                                onClick={() => setShowFileManagementModal(false)}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{ marginBottom: "20px" }}>
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "16px"
+                            }}>
+                                <h3 style={{
+                                    margin: 0,
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#374151"
+                                }}>
+                                    Arquivos ({files.length})
+                                </h3>
+                                <button
+                                    onClick={handleUploadLogo}
+                                    style={{
+                                        padding: "8px 16px",
+                                        backgroundColor: "#3b82f6",
+                                        color: "white",
+                                        border: "none",
+                                        borderRadius: "6px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "6px"
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    Novo Upload
+                                </button>
+                            </div>
+
+                            <div style={{
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "8px",
+                                overflow: "hidden"
+                            }}>
+                                {files.map((file) => (
+                                    <div key={file.id} style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "16px",
+                                        borderBottom: "1px solid #e5e7eb",
+                                        backgroundColor: "white"
+                                    }}>
+                                        <div style={{
+                                            width: "40px",
+                                            height: "40px",
+                                            backgroundColor: file.type === "image" ? "#dbeafe" : "#f3f4f6",
+                                            borderRadius: "8px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            marginRight: "12px"
+                                        }}>
+                                            {file.type === "image" ? (
+                                                <Camera size={20} color="#3b82f6" />
+                                            ) : (
+                                                <FileSpreadsheet size={20} color="#6b7280" />
+                                            )}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <p style={{
+                                                margin: "0 0 4px 0",
+                                                fontSize: "14px",
+                                                fontWeight: "500",
+                                                color: "#374151"
+                                            }}>
+                                                {file.name}
+                                            </p>
+                                            <p style={{
+                                                margin: "0",
+                                                fontSize: "12px",
+                                                color: "#6b7280"
+                                            }}>
+                                                {file.size} • {file.uploadDate}
+                                            </p>
+                                        </div>
+                                        <div style={{ display: "flex", gap: "8px" }}>
+                                            <button
+                                                onClick={() => handlePreviewImage(file)}
+                                                style={{
+                                                    padding: "6px 12px",
+                                                    backgroundColor: "#f3f4f6",
+                                                    color: "#374151",
+                                                    border: "none",
+                                                    borderRadius: "6px",
+                                                    fontSize: "12px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                Visualizar
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteFile(file.id)}
+                                                style={{
+                                                    padding: "6px 12px",
+                                                    backgroundColor: "#fef2f2",
+                                                    color: "#dc2626",
+                                                    border: "none",
+                                                    borderRadius: "6px",
+                                                    fontSize: "12px",
+                                                    cursor: "pointer"
+                                                }}
+                                            >
+                                                Excluir
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end"
+                        }}>
+                            <button
+                                onClick={() => setShowFileManagementModal(false)}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Preview de Imagem */}
+            {showImagePreviewModal && uploadForm.preview && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        position: "relative",
+                        maxWidth: "90%",
+                        maxHeight: "90%"
+                    }}>
+                        <button
+                            onClick={() => setShowImagePreviewModal(false)}
+                            style={{
+                                position: "absolute",
+                                top: "-40px",
+                                right: "0",
+                                background: "rgba(255, 255, 255, 0.2)",
+                                border: "none",
+                                color: "white",
+                                fontSize: "24px",
+                                cursor: "pointer",
+                                padding: "8px",
+                                borderRadius: "4px"
+                            }}
+                        >
+                            ×
+                        </button>
+                        <img
+                            src={uploadForm.preview}
+                            alt="Preview"
+                            style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                                borderRadius: "8px"
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Configurações de Notificações */}
+            {showNotificationSettingsModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "600px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Configurações de Notificações
+                            </h2>
+                            <button
+                                onClick={() => setShowNotificationSettingsModal(false)}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            <div>
+                                <h3 style={{
+                                    margin: "0 0 16px 0",
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#374151"
+                                }}>
+                                    Canais de Notificação
+                                </h3>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    {[
+                                        { key: "email", label: "E-mail", description: "Receber notificações por e-mail" },
+                                        { key: "push", label: "Push", description: "Receber notificações push no navegador" },
+                                        { key: "sms", label: "SMS", description: "Receber notificações por SMS" }
+                                    ].map((channel) => (
+                                        <div key={channel.key} style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "16px",
+                                            border: "1px solid #e5e7eb",
+                                            borderRadius: "8px"
+                                        }}>
+                                            <div>
+                                                <p style={{
+                                                    margin: "0 0 4px 0",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    {channel.label}
+                                                </p>
+                                                <p style={{
+                                                    margin: "0",
+                                                    fontSize: "12px",
+                                                    color: "#6b7280"
+                                                }}>
+                                                    {channel.description}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleNotificationToggle(channel.key)}
+                                                style={{
+                                                    width: "44px",
+                                                    height: "24px",
+                                                    backgroundColor: notificationSettings[channel.key as keyof typeof notificationSettings] ? "#3b82f6" : "#d1d5db",
+                                                    border: "none",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                    position: "relative",
+                                                    transition: "all 0.2s ease"
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    backgroundColor: "white",
+                                                    borderRadius: "50%",
+                                                    position: "absolute",
+                                                    top: "2px",
+                                                    left: notificationSettings[channel.key as keyof typeof notificationSettings] ? "22px" : "2px",
+                                                    transition: "all 0.2s ease"
+                                                }} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 style={{
+                                    margin: "0 0 16px 0",
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#374151"
+                                }}>
+                                    Tipos de Notificação
+                                </h3>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    {[
+                                        { key: "weeklyReport", label: "Relatório Semanal", description: "Receber relatórios semanais" },
+                                        { key: "monthlyReport", label: "Relatório Mensal", description: "Receber relatórios mensais" },
+                                        { key: "paymentReminder", label: "Lembrete de Pagamento", description: "Lembretes de vencimento" },
+                                        { key: "systemUpdates", label: "Atualizações do Sistema", description: "Notificações sobre atualizações" }
+                                    ].map((type) => (
+                                        <div key={type.key} style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "16px",
+                                            border: "1px solid #e5e7eb",
+                                            borderRadius: "8px"
+                                        }}>
+                                            <div>
+                                                <p style={{
+                                                    margin: "0 0 4px 0",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    {type.label}
+                                                </p>
+                                                <p style={{
+                                                    margin: "0",
+                                                    fontSize: "12px",
+                                                    color: "#6b7280"
+                                                }}>
+                                                    {type.description}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleNotificationToggle(type.key)}
+                                                style={{
+                                                    width: "44px",
+                                                    height: "24px",
+                                                    backgroundColor: notificationSettings[type.key as keyof typeof notificationSettings] ? "#3b82f6" : "#d1d5db",
+                                                    border: "none",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                    position: "relative",
+                                                    transition: "all 0.2s ease"
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    backgroundColor: "white",
+                                                    borderRadius: "50%",
+                                                    position: "absolute",
+                                                    top: "2px",
+                                                    left: notificationSettings[type.key as keyof typeof notificationSettings] ? "22px" : "2px",
+                                                    transition: "all 0.2s ease"
+                                                }} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: "12px",
+                            marginTop: "24px"
+                        }}>
+                            <button
+                                onClick={() => setShowNotificationSettingsModal(false)}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    console.log('Salvando configurações:', notificationSettings);
+                                    alert('Configurações salvas com sucesso!');
+                                    setShowNotificationSettingsModal(false);
+                                }}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    backgroundColor: "#3b82f6",
+                                    color: "white",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Histórico de Notificações */}
+            {showNotificationHistoryModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "800px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Histórico de Notificações
+                            </h2>
+                            <button
+                                onClick={() => setShowNotificationHistoryModal(false)}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                            overflow: "hidden"
+                        }}>
+                            {notifications.map((notification) => (
+                                <div key={notification.id} style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    padding: "16px",
+                                    borderBottom: "1px solid #e5e7eb",
+                                    backgroundColor: notification.read ? "white" : "#f8fafc"
+                                }}>
+                                    <div style={{
+                                        width: "8px",
+                                        height: "8px",
+                                        backgroundColor: notification.read ? "transparent" : "#3b82f6",
+                                        borderRadius: "50%",
+                                        marginRight: "12px"
+                                    }} />
+                                    <div style={{ flex: 1 }}>
+                                        <p style={{
+                                            margin: "0 0 4px 0",
+                                            fontSize: "14px",
+                                            fontWeight: notification.read ? "400" : "600",
+                                            color: "#374151"
+                                        }}>
+                                            {notification.title}
+                                        </p>
+                                        <p style={{
+                                            margin: "0 0 4px 0",
+                                            fontSize: "12px",
+                                            color: "#6b7280"
+                                        }}>
+                                            {notification.message}
+                                        </p>
+                                        <p style={{
+                                            margin: "0",
+                                            fontSize: "11px",
+                                            color: "#9ca3af"
+                                        }}>
+                                            {notification.date}
+                                        </p>
+                                    </div>
+                                    {!notification.read && (
+                                        <button
+                                            onClick={() => handleMarkAsRead(notification.id)}
+                                            style={{
+                                                padding: "6px 12px",
+                                                backgroundColor: "#3b82f6",
+                                                color: "white",
+                                                border: "none",
+                                                borderRadius: "6px",
+                                                fontSize: "12px",
+                                                cursor: "pointer"
+                                            }}
+                                        >
+                                            Marcar como lida
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginTop: "24px"
+                        }}>
+                            <button
+                                onClick={() => setShowNotificationHistoryModal(false)}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Configuração de Alertas */}
+            {showAlertSettingsModal && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        padding: "24px",
+                        maxWidth: "600px",
+                        width: "90%",
+                        maxHeight: "90vh",
+                        overflowY: "auto"
+                    }}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "24px"
+                        }}>
+                            <h2 style={{
+                                margin: 0,
+                                fontSize: "20px",
+                                fontWeight: "600",
+                                color: "#1f2937"
+                            }}>
+                                Configuração de Alertas
+                            </h2>
+                            <button
+                                onClick={() => setShowAlertSettingsModal(false)}
+                                style={{
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: "#6b7280",
+                                    cursor: "pointer",
+                                    padding: "4px"
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            <div>
+                                <h3 style={{
+                                    margin: "0 0 16px 0",
+                                    fontSize: "16px",
+                                    fontWeight: "600",
+                                    color: "#374151"
+                                }}>
+                                    Alertas de Sistema
+                                </h3>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                    {[
+                                        { key: "lowBalance", label: "Saldo Baixo", description: "Alertar quando saldo estiver abaixo de R$ 100" },
+                                        { key: "overduePayments", label: "Pagamentos em Atraso", description: "Alertar sobre pagamentos vencidos" },
+                                        { key: "unusualActivity", label: "Atividade Incomum", description: "Alertar sobre transações suspeitas" },
+                                        { key: "backupStatus", label: "Status do Backup", description: "Alertar sobre falhas no backup" }
+                                    ].map((alert) => (
+                                        <div key={alert.key} style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            padding: "16px",
+                                            border: "1px solid #e5e7eb",
+                                            borderRadius: "8px"
+                                        }}>
+                                            <div>
+                                                <p style={{
+                                                    margin: "0 0 4px 0",
+                                                    fontSize: "14px",
+                                                    fontWeight: "500",
+                                                    color: "#374151"
+                                                }}>
+                                                    {alert.label}
+                                                </p>
+                                                <p style={{
+                                                    margin: "0",
+                                                    fontSize: "12px",
+                                                    color: "#6b7280"
+                                                }}>
+                                                    {alert.description}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => console.log('Toggle alert:', alert.key)}
+                                                style={{
+                                                    width: "44px",
+                                                    height: "24px",
+                                                    backgroundColor: "#3b82f6",
+                                                    border: "none",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                    position: "relative",
+                                                    transition: "all 0.2s ease"
+                                                }}
+                                            >
+                                                <div style={{
+                                                    width: "20px",
+                                                    height: "20px",
+                                                    backgroundColor: "white",
+                                                    borderRadius: "50%",
+                                                    position: "absolute",
+                                                    top: "2px",
+                                                    left: "22px",
+                                                    transition: "all 0.2s ease"
+                                                }} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: "12px",
+                            marginTop: "24px"
+                        }}>
+                            <button
+                                onClick={() => setShowAlertSettingsModal(false)}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "8px",
+                                    backgroundColor: "white",
+                                    color: "#374151",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={() => {
+                                    console.log('Salvando configurações de alertas');
+                                    alert('Configurações de alertas salvas com sucesso!');
+                                    setShowAlertSettingsModal(false);
+                                }}
+                                style={{
+                                    padding: "12px 24px",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    backgroundColor: "#3b82f6",
+                                    color: "white",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Salvar Configurações
                             </button>
                         </div>
                     </div>

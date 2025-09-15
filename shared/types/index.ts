@@ -6,6 +6,7 @@ export * from "./budget.types";
 export * from "./investment.types";
 export * from "./goal.types";
 export * from "./report.types";
+export * from "./billing.types";
 
 // Common types
 export interface ApiResponse<T> {
