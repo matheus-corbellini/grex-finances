@@ -1,0 +1,129 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  max-width: 800px;
+  max-height: 80vh;
+}
+
+.fullscreenModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-m);
+  background-color: var(--color-neutrals-50);
+  border-radius: var(--radius-s);
+  gap: var(--spacing-m);
+  flex-wrap: wrap;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.zoomLevel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  min-width: 40px;
+  text-align: center;
+}
+
+.imageControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.imageContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-neutrals-100);
+  border-radius: var(--radius-m);
+  padding: var(--spacing-l);
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.imageWrapper {
+  transition: transform var(--transition-base);
+  transform-origin: center center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-lg);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-neutrals-200);
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-height: 70vh;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+  
+  .zoomControls,
+  .imageControls,
+  .actionButtons {
+    justify-content: center;
+  }
+  
+  .imageContainer {
+    min-height: 300px;
+    padding: var(--spacing-m);
+  }
+  
+  .footer {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    padding: var(--spacing-s);
+  }
+  
+  .zoomControls,
+  .imageControls {
+    flex-wrap: wrap;
+  }
+  
+  .imageContainer {
+    min-height: 250px;
+    padding: var(--spacing-s);
+  }
+}

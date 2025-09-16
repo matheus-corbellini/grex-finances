@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
 import { ReportsDropdown } from "./ReportsDropdown";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import {
   Home,
   DollarSign,
@@ -157,6 +158,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
 
           {/* Reports Dropdown */}
           <ReportsDropdown isOpen={isOpen} />
+
+          {/* Notifications Dropdown */}
+          <NotificationsDropdown isOpen={isOpen} />
         </div>
 
         {/* Configuration Menu */}

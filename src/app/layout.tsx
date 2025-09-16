@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import "../styles/index.css";
 import { ThemeProvider } from "../context/ThemeContext";
+import { ToastProvider } from "../context/ToastContext";
 
 export const metadata: Metadata = {
   title: "Grex Finances",
@@ -16,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ToastProvider position="top-right" maxToasts={5}>
+            {children}
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

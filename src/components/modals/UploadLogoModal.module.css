@@ -1,0 +1,222 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  max-width: 600px;
+}
+
+.currentLogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.currentLogo h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.logoPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-l);
+  border: 2px dashed var(--color-neutrals-300);
+  border-radius: var(--radius-m);
+  background-color: var(--color-neutrals-50);
+}
+
+.logoPreview img {
+  max-width: 200px;
+  max-height: 100px;
+  object-fit: contain;
+}
+
+.noLogo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-xl);
+  border: 2px dashed var(--color-neutrals-300);
+  border-radius: var(--radius-m);
+  background-color: var(--color-neutrals-50);
+  color: var(--color-neutrals-600);
+}
+
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.uploadSection h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.uploadArea {
+  position: relative;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-xl);
+  border: 2px dashed var(--color-primary-300);
+  border-radius: var(--radius-m);
+  background-color: var(--color-primary-50);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--color-primary-700);
+}
+
+.uploadLabel:hover {
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-100);
+}
+
+.uploadLabel p {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+}
+
+.uploadLabel span {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutrals-600);
+}
+
+.selectedFile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.filePreview {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-l);
+  border: 2px solid var(--color-primary-300);
+  border-radius: var(--radius-m);
+  background-color: var(--color-primary-50);
+}
+
+.filePreview img {
+  max-width: 200px;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: var(--radius-s);
+}
+
+.removeButton {
+  position: absolute;
+  top: var(--spacing-s);
+  right: var(--spacing-s);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  background-color: var(--color-error-500);
+  color: white;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.removeButton:hover {
+  background-color: var(--color-error-600);
+  transform: scale(1.1);
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  text-align: center;
+}
+
+.fileName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.fileSize {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutrals-600);
+  margin: 0;
+}
+
+.uploadProgress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-neutrals-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-primary-500);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+.uploadProgress p {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutrals-600);
+  text-align: center;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-m);
+  justify-content: flex-end;
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-neutrals-200);
+}
+
+@media (max-width: 768px) {
+  .container {
+    gap: var(--spacing-m);
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .logoPreview img,
+  .filePreview img {
+    max-width: 150px;
+    max-height: 80px;
+  }
+}

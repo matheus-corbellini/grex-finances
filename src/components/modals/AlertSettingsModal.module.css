@@ -1,0 +1,320 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-m);
+  border-bottom: 1px solid var(--color-neutrals-200);
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.headerInfo svg {
+  color: var(--color-warning-500);
+}
+
+.headerInfo h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.headerInfo p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.rulesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-m);
+  padding: var(--spacing-3xl);
+  color: var(--color-neutrals-500);
+}
+
+.emptyState h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.emptyState p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ruleCard {
+  background-color: var(--color-neutrals-50);
+  border: 1px solid var(--color-neutrals-200);
+  border-radius: var(--radius-m);
+  padding: var(--spacing-m);
+  transition: all var(--transition-base);
+}
+
+.ruleCard:hover {
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.ruleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-s);
+}
+
+.ruleInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.ruleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-primary-100);
+  border-radius: var(--radius-s);
+  color: var(--color-primary-600);
+}
+
+.ruleDetails h4 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.ruleDetails p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ruleActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.ruleChannels {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-wrap: wrap;
+}
+
+.channelItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.channelStatus {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success-500);
+}
+
+.frequencyBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-s);
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.editForm {
+  background-color: var(--color-neutrals-50);
+  border: 1px solid var(--color-neutrals-200);
+  border-radius: var(--radius-m);
+  padding: var(--spacing-l);
+}
+
+.editForm h4 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-l) 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.formGroup label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.select {
+  padding: var(--spacing-s) var(--spacing-m);
+  border: 1px solid var(--color-neutrals-300);
+  border-radius: var(--radius-s);
+  background-color: white;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.channelsSection {
+  margin-bottom: var(--spacing-l);
+}
+
+.channelsSection label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-s);
+}
+
+.channelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.channelOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+}
+
+.channelOption:hover {
+  background-color: var(--color-neutrals-100);
+}
+
+.channelOption span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-neutrals-200);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-neutrals-200);
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-height: 70vh;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-m);
+  }
+  
+  .headerInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-s);
+  }
+  
+  .ruleHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+  
+  .ruleActions {
+    justify-content: flex-end;
+  }
+  
+  .ruleChannels {
+    justify-content: flex-start;
+  }
+  
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .channelsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .formActions,
+  .footer {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .ruleInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-s);
+  }
+  
+  .ruleIcon {
+    align-self: flex-start;
+  }
+  
+  .ruleChannels {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

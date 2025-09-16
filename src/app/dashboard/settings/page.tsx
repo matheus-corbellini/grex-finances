@@ -7,6 +7,7 @@ import { SetupWizardModal } from "../../../components/layout/SetupWizardModal";
 import { UserModals } from "../../../components/layout/UserModals";
 import { InviteModals } from "../../../components/layout/InviteModals";
 import { CategoryModals } from "../../../components/layout/CategoryModals";
+import { useToastNotifications } from "../../../hooks/useToastNotifications";
 import {
     DndContext,
     closestCenter,
@@ -62,7 +63,14 @@ import {
     Info,
     Target,
     AlertTriangle,
-    Bell
+    Bell,
+    Database,
+    HardDrive,
+    Cloud,
+    Shield,
+    Clock,
+    RefreshCw,
+    CheckCircle
 } from "lucide-react";
 
 // Componente para sub-categoria sortable
@@ -194,6 +202,7 @@ function SortableParentItem({ id, category, children }: { id: string; category: 
 
 export default function Settings() {
     const router = useRouter();
+    const toast = useToastNotifications();
     const [activeSection, setActiveSection] = useState("minha-igreja");
     const [activeTab, setActiveTab] = useState("informacoes");
     const [showSetupModal, setShowSetupModal] = useState(false);
@@ -212,6 +221,9 @@ export default function Settings() {
     const [showNotificationSettingsModal, setShowNotificationSettingsModal] = useState(false);
     const [showNotificationHistoryModal, setShowNotificationHistoryModal] = useState(false);
     const [showAlertSettingsModal, setShowAlertSettingsModal] = useState(false);
+    const [showBackupModal, setShowBackupModal] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [deletingUser, setDeletingUser] = useState<any>(null);
     const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -371,6 +383,56 @@ export default function Settings() {
         eventType: "Sequencial",
         selectedEvents: [] as string[]
     });
+
+    // Backup states
+    const [backupSettings, setBackupSettings] = useState({
+        autoBackup: true,
+        frequency: "daily",
+        retentionDays: 30,
+        includeFiles: true,
+        includeUsers: true,
+        includeTransactions: true,
+        includeReports: true,
+        cloudStorage: false,
+        emailNotification: true
+    });
+
+    const [backupJobs, setBackupJobs] = useState([
+        {
+            id: "1",
+            name: "Backup Completo - Janeiro 2024",
+            type: "scheduled",
+            status: "completed",
+            createdAt: new Date("2024-01-15T02:00:00"),
+            completedAt: new Date("2024-01-15T02:15:00"),
+            size: 15728640,
+            format: "sql",
+            includes: ["users", "transactions", "reports", "files"]
+        },
+        {
+            id: "2",
+            name: "Backup Financeiro - Semana 2",
+            type: "manual",
+            status: "completed",
+            createdAt: new Date("2024-01-14T10:30:00"),
+            completedAt: new Date("2024-01-14T10:35:00"),
+            size: 5242880,
+            format: "json",
+            includes: ["transactions", "reports"]
+        }
+    ] as Array<{
+        id: string;
+        name: string;
+        type: string;
+        status: string;
+        createdAt: Date;
+        completedAt?: Date;
+        size: number;
+        format: string;
+        includes: string[];
+    }>);
+
+    const [isCreatingBackup, setIsCreatingBackup] = useState(false);
     const [webhookEvents] = useState([
         {
             id: "PAYMENT_AUTHORIZED",
@@ -575,6 +637,7 @@ export default function Settings() {
         { id: "usuarios", label: "Usuários", icon: Users },
         { id: "meu-plano", label: "Meu plano", icon: CreditCard },
         { id: "categorias", label: "Categorias", icon: Tag },
+        { id: "backup", label: "Backup e Dados", icon: Database },
         { id: "integracoes", label: "Integrações", icon: SettingsIcon }
     ];
 
@@ -1541,6 +1604,105 @@ export default function Settings() {
             ));
         }
         setEditingWebhook(null);
+    };
+
+    // Backup functions
+    const handleCreateBackup = async () => {
+        setIsCreatingBackup(true);
+
+        const newBackup = {
+            id: Date.now().toString(),
+            name: `Backup Manual - ${new Date().toLocaleDateString('pt-BR')}`,
+            type: "manual",
+            status: "running",
+            createdAt: new Date(),
+            size: 0,
+            format: "sql",
+            includes: ["users", "transactions", "reports"],
+        };
+
+        setBackupJobs(prev => [newBackup, ...prev]);
+
+        // Show loading toast
+        const loadingToastId = toast.showBackupProgress("Criando backup dos dados...");
+
+        // Simulate backup process
+        setTimeout(() => {
+            const finalSize = Math.floor(Math.random() * 20000000) + 1000000;
+
+            setBackupJobs(prev =>
+                prev.map(backup =>
+                    backup.id === newBackup.id
+                        ? {
+                            ...backup,
+                            status: "completed",
+                            completedAt: new Date(),
+                            size: finalSize,
+                        }
+                        : backup
+                )
+            );
+
+            // Dismiss loading toast and show success
+            toast.dismissToast(loadingToastId);
+            toast.showBackupComplete(formatFileSize(finalSize));
+            setIsCreatingBackup(false);
+        }, 3000);
+    };
+
+    const handleDownloadBackup = (backup: any) => {
+        try {
+            // Simulate download
+            const link = document.createElement("a");
+            link.href = "#";
+            link.download = `${backup.name}.${backup.format}`;
+            link.click();
+            toast.showSuccess(`Download iniciado: ${backup.name}`);
+        } catch (error) {
+            toast.showApiError("baixar backup");
+        }
+    };
+
+    const handleDeleteBackup = (backupId: string) => {
+        const backup = backupJobs.find(b => b.id === backupId);
+        if (backup) {
+            toast.showDeleteConfirm(`o backup "${backup.name}"`, () => {
+                setBackupJobs(prev => prev.filter(backup => backup.id !== backupId));
+                toast.showSuccess("Backup excluído com sucesso!");
+            });
+        }
+    };
+
+    const handleBackupSettingChange = (key: string, value: any) => {
+        setBackupSettings(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleSaveBackupSettings = async () => {
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            toast.showSaveSuccess();
+        } catch (error) {
+            toast.showApiError("salvar configurações de backup");
+        }
+    };
+
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    };
+
+    const formatDate = (date: Date) => {
+        return new Intl.DateTimeFormat('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -3597,6 +3759,608 @@ export default function Settings() {
                                     </SortableContext>
                                 </DndContext>
                             </div>
+                        </div>
+                    </div>
+                );
+            case "backup":
+                return (
+                    <div style={{ padding: "32px" }}>
+                        {/* Título */}
+                        <h1 style={{
+                            fontSize: "24px",
+                            fontWeight: "600",
+                            color: "#1f2937",
+                            margin: "0 0 32px 0"
+                        }}>
+                            Backup e Dados
+                        </h1>
+
+                        {/* Estatísticas */}
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                            gap: "24px",
+                            marginBottom: "32px"
+                        }}>
+                            <div style={{
+                                padding: "24px",
+                                backgroundColor: "white",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "12px"
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px"
+                                }}>
+                                    <div style={{
+                                        width: "48px",
+                                        height: "48px",
+                                        backgroundColor: "#dbeafe",
+                                        borderRadius: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>
+                                        <Database size={24} color="#3b82f6" />
+                                    </div>
+                                    <div>
+                                        <h3 style={{
+                                            fontSize: "20px",
+                                            fontWeight: "700",
+                                            color: "#1f2937",
+                                            margin: "0 0 4px 0"
+                                        }}>
+                                            {backupJobs.length}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: "14px",
+                                            color: "#6b7280",
+                                            margin: "0"
+                                        }}>
+                                            Total de Backups
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                padding: "24px",
+                                backgroundColor: "white",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "12px"
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px"
+                                }}>
+                                    <div style={{
+                                        width: "48px",
+                                        height: "48px",
+                                        backgroundColor: "#dcfce7",
+                                        borderRadius: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>
+                                        <CheckCircle size={24} color="#16a34a" />
+                                    </div>
+                                    <div>
+                                        <h3 style={{
+                                            fontSize: "20px",
+                                            fontWeight: "700",
+                                            color: "#1f2937",
+                                            margin: "0 0 4px 0"
+                                        }}>
+                                            {backupJobs.filter(b => b.status === "completed").length}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: "14px",
+                                            color: "#6b7280",
+                                            margin: "0"
+                                        }}>
+                                            Concluídos
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                padding: "24px",
+                                backgroundColor: "white",
+                                border: "1px solid #e5e7eb",
+                                borderRadius: "12px"
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px"
+                                }}>
+                                    <div style={{
+                                        width: "48px",
+                                        height: "48px",
+                                        backgroundColor: "#fef3c7",
+                                        borderRadius: "12px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                    }}>
+                                        <HardDrive size={24} color="#d97706" />
+                                    </div>
+                                    <div>
+                                        <h3 style={{
+                                            fontSize: "20px",
+                                            fontWeight: "700",
+                                            color: "#1f2937",
+                                            margin: "0 0 4px 0"
+                                        }}>
+                                            {formatFileSize(backupJobs.reduce((acc, backup) => acc + backup.size, 0))}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: "14px",
+                                            color: "#6b7280",
+                                            margin: "0"
+                                        }}>
+                                            Espaço Total
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Configurações de Backup */}
+                        <div style={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "12px",
+                            padding: "24px",
+                            marginBottom: "24px"
+                        }}>
+                            <h3 style={{
+                                fontSize: "18px",
+                                fontWeight: "600",
+                                color: "#1f2937",
+                                margin: "0 0 24px 0"
+                            }}>
+                                Configurações de Backup
+                            </h3>
+
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                                gap: "24px",
+                                marginBottom: "24px"
+                            }}>
+                                <div>
+                                    <label style={{
+                                        display: "block",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        color: "#374151",
+                                        marginBottom: "8px"
+                                    }}>
+                                        Backup Automático
+                                    </label>
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
+                                    }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={backupSettings.autoBackup}
+                                            onChange={(e) => handleBackupSettingChange('autoBackup', e.target.checked)}
+                                            style={{
+                                                width: "16px",
+                                                height: "16px",
+                                                accentColor: "#3b82f6"
+                                            }}
+                                        />
+                                        <span style={{
+                                            fontSize: "14px",
+                                            color: "#6b7280"
+                                        }}>
+                                            Ativar backup automático
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: "block",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        color: "#374151",
+                                        marginBottom: "8px"
+                                    }}>
+                                        Frequência
+                                    </label>
+                                    <select
+                                        value={backupSettings.frequency}
+                                        onChange={(e) => handleBackupSettingChange('frequency', e.target.value)}
+                                        disabled={!backupSettings.autoBackup}
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px 12px",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "6px",
+                                            fontSize: "14px",
+                                            backgroundColor: !backupSettings.autoBackup ? "#f9fafb" : "white"
+                                        }}
+                                    >
+                                        <option value="daily">Diário</option>
+                                        <option value="weekly">Semanal</option>
+                                        <option value="monthly">Mensal</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: "block",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        color: "#374151",
+                                        marginBottom: "8px"
+                                    }}>
+                                        Retenção (dias)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={backupSettings.retentionDays}
+                                        onChange={(e) => handleBackupSettingChange('retentionDays', Number(e.target.value))}
+                                        min="1"
+                                        max="365"
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px 12px",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "6px",
+                                            fontSize: "14px"
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{
+                                        display: "block",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        color: "#374151",
+                                        marginBottom: "8px"
+                                    }}>
+                                        Armazenamento em Nuvem
+                                    </label>
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
+                                    }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={backupSettings.cloudStorage}
+                                            onChange={(e) => handleBackupSettingChange('cloudStorage', e.target.checked)}
+                                            style={{
+                                                width: "16px",
+                                                height: "16px",
+                                                accentColor: "#3b82f6"
+                                            }}
+                                        />
+                                        <span style={{
+                                            fontSize: "14px",
+                                            color: "#6b7280"
+                                        }}>
+                                            Salvar na nuvem
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "12px"
+                            }}>
+                                <button
+                                    onClick={handleSaveBackupSettings}
+                                    style={{
+                                        backgroundColor: "#3b82f6",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "12px 24px",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    Salvar Configurações
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Ações de Backup */}
+                        <div style={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "12px",
+                            padding: "24px",
+                            marginBottom: "24px"
+                        }}>
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: "24px"
+                            }}>
+                                <h3 style={{
+                                    fontSize: "18px",
+                                    fontWeight: "600",
+                                    color: "#1f2937",
+                                    margin: "0"
+                                }}>
+                                    Ações de Backup
+                                </h3>
+                                <button
+                                    onClick={handleCreateBackup}
+                                    disabled={isCreatingBackup}
+                                    style={{
+                                        backgroundColor: "#3b82f6",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "12px 24px",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: isCreatingBackup ? "not-allowed" : "pointer",
+                                        opacity: isCreatingBackup ? 0.6 : 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px"
+                                    }}
+                                >
+                                    {isCreatingBackup ? (
+                                        <>
+                                            <RefreshCw size={16} className="animate-spin" />
+                                            Criando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download size={16} />
+                                            Criar Backup
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            <p style={{
+                                fontSize: "14px",
+                                color: "#6b7280",
+                                margin: "0"
+                            }}>
+                                Crie backups manuais dos seus dados ou configure backups automáticos para proteger suas informações.
+                            </p>
+                        </div>
+
+                        {/* Histórico de Backups */}
+                        <div style={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "12px",
+                            padding: "24px"
+                        }}>
+                            <h3 style={{
+                                fontSize: "18px",
+                                fontWeight: "600",
+                                color: "#1f2937",
+                                margin: "0 0 24px 0"
+                            }}>
+                                Histórico de Backups
+                            </h3>
+
+                            {backupJobs.length === 0 ? (
+                                <div style={{
+                                    textAlign: "center",
+                                    padding: "48px 24px",
+                                    color: "#6b7280"
+                                }}>
+                                    <Database size={48} style={{ marginBottom: "16px" }} />
+                                    <h4 style={{
+                                        fontSize: "16px",
+                                        fontWeight: "500",
+                                        color: "#374151",
+                                        margin: "0 0 8px 0"
+                                    }}>
+                                        Nenhum backup encontrado
+                                    </h4>
+                                    <p style={{
+                                        fontSize: "14px",
+                                        margin: "0"
+                                    }}>
+                                        Crie seu primeiro backup para proteger os dados da igreja
+                                    </p>
+                                </div>
+                            ) : (
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "16px"
+                                }}>
+                                    {backupJobs.map(backup => (
+                                        <div key={backup.id} style={{
+                                            border: "1px solid #e5e7eb",
+                                            borderRadius: "8px",
+                                            padding: "16px",
+                                            transition: "all 0.2s"
+                                        }}>
+                                            <div style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "flex-start",
+                                                marginBottom: "12px"
+                                            }}>
+                                                <div style={{
+                                                    display: "flex",
+                                                    gap: "12px",
+                                                    flex: 1
+                                                }}>
+                                                    <div style={{
+                                                        width: "40px",
+                                                        height: "40px",
+                                                        backgroundColor: "#dbeafe",
+                                                        borderRadius: "8px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center"
+                                                    }}>
+                                                        <Database size={20} color="#3b82f6" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 style={{
+                                                            fontSize: "16px",
+                                                            fontWeight: "600",
+                                                            color: "#1f2937",
+                                                            margin: "0 0 4px 0"
+                                                        }}>
+                                                            {backup.name}
+                                                        </h4>
+                                                        <p style={{
+                                                            fontSize: "14px",
+                                                            color: "#6b7280",
+                                                            margin: "0"
+                                                        }}>
+                                                            {backup.type === "manual" ? "Manual" : "Automático"} • {backup.format.toUpperCase()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px"
+                                                }}>
+                                                    <span style={{
+                                                        padding: "4px 8px",
+                                                        borderRadius: "12px",
+                                                        fontSize: "12px",
+                                                        fontWeight: "500",
+                                                        backgroundColor: backup.status === "completed" ? "#dcfce7" : "#fef3c7",
+                                                        color: backup.status === "completed" ? "#16a34a" : "#d97706"
+                                                    }}>
+                                                        {backup.status === "completed" ? "Concluído" : backup.status === "running" ? "Executando" : backup.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div style={{
+                                                display: "flex",
+                                                gap: "24px",
+                                                marginBottom: "12px",
+                                                fontSize: "14px",
+                                                color: "#6b7280"
+                                            }}>
+                                                <div style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "4px"
+                                                }}>
+                                                    <Clock size={14} />
+                                                    <span>{formatDate(backup.createdAt)}</span>
+                                                </div>
+                                                {backup.completedAt && (
+                                                    <div style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: "4px"
+                                                    }}>
+                                                        <CheckCircle size={14} />
+                                                        <span>Concluído em {formatDate(backup.completedAt)}</span>
+                                                    </div>
+                                                )}
+                                                <div style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "4px"
+                                                }}>
+                                                    <HardDrive size={14} />
+                                                    <span>{formatFileSize(backup.size)}</span>
+                                                </div>
+                                            </div>
+
+                                            <div style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center"
+                                            }}>
+                                                <div>
+                                                    <span style={{
+                                                        fontSize: "12px",
+                                                        color: "#6b7280",
+                                                        marginRight: "8px"
+                                                    }}>
+                                                        Inclui:
+                                                    </span>
+                                                    {backup.includes.map((include, index) => (
+                                                        <span key={include} style={{
+                                                            fontSize: "12px",
+                                                            padding: "2px 6px",
+                                                            backgroundColor: "#f3f4f6",
+                                                            borderRadius: "4px",
+                                                            marginRight: "4px"
+                                                        }}>
+                                                            {include}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                <div style={{
+                                                    display: "flex",
+                                                    gap: "8px"
+                                                }}>
+                                                    {backup.status === "completed" && (
+                                                        <button
+                                                            onClick={() => handleDownloadBackup(backup)}
+                                                            style={{
+                                                                backgroundColor: "#3b82f6",
+                                                                color: "white",
+                                                                border: "none",
+                                                                padding: "6px 12px",
+                                                                borderRadius: "6px",
+                                                                fontSize: "12px",
+                                                                fontWeight: "500",
+                                                                cursor: "pointer",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                gap: "4px"
+                                                            }}
+                                                        >
+                                                            <Download size={12} />
+                                                            Download
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDeleteBackup(backup.id)}
+                                                        style={{
+                                                            backgroundColor: "#ef4444",
+                                                            color: "white",
+                                                            border: "none",
+                                                            padding: "6px 12px",
+                                                            borderRadius: "6px",
+                                                            fontSize: "12px",
+                                                            fontWeight: "500",
+                                                            cursor: "pointer",
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            gap: "4px"
+                                                        }}
+                                                    >
+                                                        <Trash2 size={12} />
+                                                        Excluir
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
