@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
 import { ReportsDropdown } from "./ReportsDropdown";
 import { NotificationsDropdown } from "./NotificationsDropdown";
+import { LogoutConfirmationModal } from "../modals/ConfirmationModal";
 import {
   Home,
   DollarSign,
@@ -30,6 +31,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Memoize pathname comparisons to prevent unnecessary re-renders
   const isReportsActive = useMemo(() => {
@@ -57,9 +59,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     { name: "Termos de Uso", path: "/dashboard/terms", icon: FileText },
   ];
 
-  const handleLogout = () => {
-    console.log("Logout clicked");
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    console.log("Logout confirmed");
+    setShowLogoutModal(false);
     router.push("/login");
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -185,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             className={`${styles.logoutButton} ${isOpen ? '' : styles.closed}`}
           >
             <LogOut
@@ -200,6 +211,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           </button>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={handleLogoutCancel}
+        onConfirm={handleLogoutConfirm}
+        title="Confirmar Logout"
+        message="Tem certeza que deseja sair do sistema? Você precisará fazer login novamente para acessar suas informações."
+        confirmText="Sair"
+        cancelText="Cancelar"
+      />
     </>
   );
 };

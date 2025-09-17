@@ -95,52 +95,6 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.statsSection {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.statCard {
-    background: white;
-    border: 1px solid var(--color-neutrals-200);
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.statIcon {
-    width: 40px;
-    height: 40px;
-    background: var(--color-neutrals-100);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-neutrals-600);
-}
-
-.statContent {
-    display: flex;
-    flex-direction: column;
-}
-
-.statNumber {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--color-neutrals-900);
-    line-height: 1;
-}
-
-.statLabel {
-    font-size: 14px;
-    color: var(--color-neutrals-600);
-    margin-top: 4px;
-}
-
 .filtersSection {
     background: white;
     border: 1px solid var(--color-neutrals-200);
@@ -249,7 +203,53 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.notificationsSection {
+.statsSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.statCard {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.statIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-neutrals-100);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-neutrals-600);
+}
+
+.statContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.statNumber {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-neutrals-900);
+    line-height: 1;
+}
+
+.statLabel {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    margin-top: 4px;
+}
+
+.logsSection {
     background: white;
     border: 1px solid var(--color-neutrals-200);
     border-radius: 12px;
@@ -260,12 +260,12 @@
     overflow-x: auto;
 }
 
-.notificationsTable {
+.logsTable {
     width: 100%;
     border-collapse: collapse;
 }
 
-.notificationsTable th {
+.logsTable th {
     background: var(--color-neutrals-50);
     padding: 16px 12px;
     text-align: left;
@@ -276,36 +276,15 @@
     white-space: nowrap;
 }
 
-.notificationsTable td {
+.logsTable td {
     padding: 16px 12px;
     border-bottom: 1px solid var(--color-neutrals-100);
     font-size: 14px;
     vertical-align: middle;
 }
 
-.notificationRow:hover {
+.logRow:hover {
     background: var(--color-neutrals-50);
-}
-
-.typeCell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.categoryCell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.titleText {
-    font-weight: 500;
-    color: var(--color-neutrals-900);
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .statusBadge {
@@ -343,37 +322,45 @@
     border: 1px solid var(--color-neutrals-200);
 }
 
-.priorityBadge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+.webhookName {
     font-weight: 500;
-    text-transform: capitalize;
+    color: var(--color-neutrals-900);
 }
 
-.priorityBadge.urgent {
-    background: var(--color-error-100);
-    color: var(--color-error-700);
-    border: 1px solid var(--color-error-200);
-}
-
-.priorityBadge.high {
-    background: var(--color-warning-100);
-    color: var(--color-warning-700);
-    border: 1px solid var(--color-warning-200);
-}
-
-.priorityBadge.medium {
-    background: var(--color-primary-100);
-    color: var(--color-primary-700);
-    border: 1px solid var(--color-primary-200);
-}
-
-.priorityBadge.low {
+.eventName {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: var(--color-neutrals-600);
     background: var(--color-neutrals-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.urlCell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 200px;
+}
+
+.urlText {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: var(--color-neutrals-600);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statusCode {
+    font-weight: 500;
     color: var(--color-neutrals-700);
-    border: 1px solid var(--color-neutrals-200);
+}
+
+.responseTime {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: var(--color-neutrals-600);
 }
 
 .timestamp {
@@ -381,95 +368,29 @@
     color: var(--color-neutrals-600);
 }
 
-.recipient {
-    font-size: 12px;
-    color: var(--color-neutrals-600);
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.readBadge {
-    padding: 2px 8px;
-    background: var(--color-success-100);
-    color: var(--color-success-700);
-    border-radius: 4px;
-    font-size: 12px;
+.retryCount {
     font-weight: 500;
+    color: var(--color-neutrals-700);
 }
 
-.unreadBadge {
-    padding: 2px 8px;
-    background: var(--color-warning-100);
-    color: var(--color-warning-700);
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.actionButtons {
-    display: flex;
-    gap: 4px;
-}
-
-.viewButton,
-.markReadButton,
-.markUnreadButton,
-.deleteButton {
+.viewButton {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 32px;
     height: 32px;
+    background: var(--color-neutrals-100);
+    color: var(--color-neutrals-600);
+    border: 1px solid var(--color-neutrals-300);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.viewButton {
-    background: var(--color-primary-100);
-    color: var(--color-primary-600);
-    border-color: var(--color-primary-200);
 }
 
 .viewButton:hover {
-    background: var(--color-primary-200);
+    background: var(--color-primary-100);
+    color: var(--color-primary-600);
     border-color: var(--color-primary-300);
-}
-
-.markReadButton {
-    background: var(--color-success-100);
-    color: var(--color-success-600);
-    border-color: var(--color-success-200);
-}
-
-.markReadButton:hover {
-    background: var(--color-success-200);
-    border-color: var(--color-success-300);
-}
-
-.markUnreadButton {
-    background: var(--color-warning-100);
-    color: var(--color-warning-600);
-    border-color: var(--color-warning-200);
-}
-
-.markUnreadButton:hover {
-    background: var(--color-warning-200);
-    border-color: var(--color-warning-300);
-}
-
-.deleteButton {
-    background: var(--color-error-100);
-    color: var(--color-error-600);
-    border-color: var(--color-error-200);
-}
-
-.deleteButton:hover {
-    background: var(--color-error-200);
-    border-color: var(--color-error-300);
 }
 
 .emptyState {
@@ -547,8 +468,6 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 18px;
-    font-weight: 600;
 }
 
 .closeButton:hover {
@@ -572,7 +491,7 @@
 }
 
 .detailTitle {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--color-neutrals-900);
     margin: 0 0 16px 0;
@@ -603,25 +522,59 @@
     color: var(--color-neutrals-900);
 }
 
-.contentCard {
+.detailValue a {
+    color: var(--color-primary-600);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.detailValue a:hover {
+    text-decoration: underline;
+}
+
+.payloadContainer {
+    position: relative;
     background: var(--color-neutrals-50);
     border: 1px solid var(--color-neutrals-200);
     border-radius: 8px;
+    overflow: hidden;
+}
+
+.copyButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    color: var(--color-neutrals-700);
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.copyButton:hover {
+    background: var(--color-neutrals-50);
+    border-color: var(--color-neutrals-400);
+}
+
+.payloadCode {
     padding: 20px;
-}
-
-.contentTitle {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-neutrals-900);
-    margin: 0 0 12px 0;
-}
-
-.contentMessage {
-    font-size: 14px;
-    color: var(--color-neutrals-600);
-    line-height: 1.6;
     margin: 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-neutrals-700);
+    background: transparent;
+    overflow-x: auto;
 }
 
 .errorMessage {
@@ -629,26 +582,10 @@
     border: 1px solid var(--color-error-200);
     border-radius: 8px;
     padding: 16px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 14px;
     color: var(--color-error-700);
     line-height: 1.5;
-}
-
-.metadataContainer {
-    background: var(--color-neutrals-900);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.metadataCode {
-    padding: 20px;
-    margin: 0;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--color-neutrals-100);
-    background: transparent;
-    overflow-x: auto;
 }
 
 /* Responsive */
@@ -687,9 +624,5 @@
         margin: 0;
         border-radius: 0;
         max-height: 100vh;
-    }
-    
-    .actionButtons {
-        flex-direction: column;
     }
 }

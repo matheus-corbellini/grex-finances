@@ -1,0 +1,480 @@
+.container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 32px;
+}
+
+.headerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.titleSection {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.iconWrapper {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-neutrals-900);
+    margin: 0 0 4px 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: var(--color-neutrals-600);
+    margin: 0;
+}
+
+.statusBadge {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 200px;
+}
+
+.statusInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.statusText {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-neutrals-700);
+}
+
+.progressBar {
+    width: 100%;
+    height: 6px;
+    background: var(--color-neutrals-200);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-success-500) 0%, var(--color-success-600) 100%);
+    transition: width 0.3s ease;
+}
+
+.securityLevel {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.securityInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.securityTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0;
+}
+
+.securityBadges {
+    display: flex;
+    gap: 8px;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.badge.excellent {
+    background: var(--color-success-100);
+    color: var(--color-success-700);
+    border: 1px solid var(--color-success-200);
+}
+
+.badge.good {
+    background: var(--color-primary-100);
+    color: var(--color-primary-700);
+    border: 1px solid var(--color-primary-200);
+}
+
+.badge.warning {
+    background: var(--color-warning-100);
+    color: var(--color-warning-700);
+    border: 1px solid var(--color-warning-200);
+}
+
+.methodsSection {
+    margin-bottom: 32px;
+}
+
+.sectionTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 20px 0;
+}
+
+.methodsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.methodCard {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.2s ease;
+}
+
+.methodCard:hover {
+    border-color: var(--color-primary-300);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.methodHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.methodIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-neutrals-100);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-neutrals-600);
+    flex-shrink: 0;
+}
+
+.methodInfo {
+    flex: 1;
+}
+
+.methodTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 4px 0;
+}
+
+.methodDescription {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.methodStatus {
+    flex-shrink: 0;
+}
+
+.verifiedBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: var(--color-success-100);
+    color: var(--color-success-700);
+    border: 1px solid var(--color-success-200);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.unverifiedBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: var(--color-warning-100);
+    color: var(--color-warning-700);
+    border: 1px solid var(--color-warning-200);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.methodValue {
+    margin-bottom: 20px;
+}
+
+.valueText {
+    font-size: 14px;
+    color: var(--color-neutrals-700);
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.methodActions {
+    display: flex;
+    gap: 12px;
+}
+
+.verifiedButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--color-success-100);
+    color: var(--color-success-700);
+    border: 1px solid var(--color-success-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.actionButtons {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+}
+
+.verifyButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.verifyButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.verifyButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.resendButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: white;
+    color: var(--color-neutrals-700);
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.resendButton:hover {
+    background: var(--color-neutrals-50);
+    border-color: var(--color-neutrals-400);
+}
+
+.passwordSection {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.passwordForm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-neutrals-700);
+}
+
+.inputWrapper {
+    position: relative;
+}
+
+.input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.toggleButton {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-neutrals-500);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.toggleButton:hover {
+    color: var(--color-neutrals-700);
+}
+
+.changePasswordButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    justify-self: start;
+    margin-top: 8px;
+}
+
+.changePasswordButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tipsSection {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.tipsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.tipCard {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: var(--color-neutrals-50);
+    border-radius: 12px;
+    border: 1px solid var(--color-neutrals-200);
+}
+
+.tipIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary-100);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary-600);
+    flex-shrink: 0;
+}
+
+.tipContent {
+    flex: 1;
+}
+
+.tipTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 8px 0;
+}
+
+.tipDescription {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+    
+    .headerContent {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .methodsGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    .passwordForm {
+        grid-template-columns: 1fr;
+    }
+    
+    .tipsGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actionButtons {
+        flex-direction: column;
+    }
+}

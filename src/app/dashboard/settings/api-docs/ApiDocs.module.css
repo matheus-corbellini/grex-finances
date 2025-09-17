@@ -1,0 +1,759 @@
+.container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 24px;
+}
+
+.headerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.titleSection {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.iconWrapper {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-neutrals-900);
+    margin: 0 0 4px 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: var(--color-neutrals-600);
+    margin: 0;
+}
+
+.headerActions {
+    display: flex;
+    gap: 12px;
+}
+
+.downloadButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.downloadButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.apiInfoSection {
+    margin-bottom: 24px;
+}
+
+.apiInfoCard {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.apiInfoHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.apiInfoTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0;
+}
+
+.apiStatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--color-success-100);
+    color: var(--color-success-700);
+    border: 1px solid var(--color-success-200);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.statusIndicator {
+    width: 8px;
+    height: 8px;
+    background: var(--color-success-500);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.apiInfoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.apiInfoItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.apiInfoItem svg {
+    color: var(--color-primary-600);
+}
+
+.apiInfoLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-neutrals-600);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.apiInfoValue {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin-top: 2px;
+}
+
+.apiKeySection {
+    margin-bottom: 24px;
+}
+
+.apiKeyCard {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.apiKeyTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 8px 0;
+}
+
+.apiKeyDescription {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    margin: 0 0 20px 0;
+}
+
+.apiKeyInput {
+    display: flex;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.apiKeyField {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.apiKeyField:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.copyKeyButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: var(--color-neutrals-100);
+    color: var(--color-neutrals-600);
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.copyKeyButton:hover:not(:disabled) {
+    background: var(--color-primary-100);
+    color: var(--color-primary-600);
+    border-color: var(--color-primary-300);
+}
+
+.copyKeyButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.filtersSection {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.filtersHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.searchBox {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.searchBox svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-neutrals-500);
+    z-index: 1;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px 12px 10px 40px;
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filterControls {
+    display: flex;
+    gap: 12px;
+}
+
+.filterSelect {
+    padding: 10px 12px;
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.endpointsSection {
+    background: white;
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.endpointsTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 20px 0;
+}
+
+.endpointsList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.endpointCard {
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.endpointCard:hover {
+    border-color: var(--color-primary-300);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.endpointHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.endpointMethod {
+    flex-shrink: 0;
+}
+
+.methodBadge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.endpointInfo {
+    flex: 1;
+}
+
+.endpointPath {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 8px 0;
+}
+
+.endpointSummary {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.endpointMeta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.endpointCategory {
+    padding: 2px 8px;
+    background: var(--color-neutrals-100);
+    color: var(--color-neutrals-700);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.authRequired {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--color-warning-100);
+    color: var(--color-warning-700);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.viewDetailsButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--color-primary-100);
+    color: var(--color-primary-700);
+    border: 1px solid var(--color-primary-200);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.viewDetailsButton:hover {
+    background: var(--color-primary-200);
+    border-color: var(--color-primary-300);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-neutrals-500);
+}
+
+.emptyState svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.emptyState h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-neutrals-700);
+    margin: 0 0 8px 0;
+}
+
+.emptyState p {
+    font-size: 14px;
+    margin: 0;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modalContent {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--color-neutrals-200);
+}
+
+.modalTitleSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modalMethodBadge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modalTitle {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0;
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-neutrals-100);
+    color: var(--color-neutrals-600);
+    border: 1px solid var(--color-neutrals-300);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.closeButton:hover {
+    background: var(--color-error-100);
+    color: var(--color-error-600);
+    border-color: var(--color-error-300);
+}
+
+.modalBody {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.endpointDescription,
+.parametersSection,
+.requestBodySection,
+.responsesSection,
+.examplesSection {
+    margin-bottom: 32px;
+}
+
+.endpointDescription:last-child,
+.parametersSection:last-child,
+.requestBodySection:last-child,
+.responsesSection:last-child,
+.examplesSection:last-child {
+    margin-bottom: 0;
+}
+
+.endpointDescription h3,
+.parametersSection h3,
+.requestBodySection h3,
+.responsesSection h3,
+.examplesSection h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 16px 0;
+}
+
+.endpointDescription p {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.parametersTable {
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.parametersHeader {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--color-neutrals-50);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-neutrals-700);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.parameterRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    gap: 16px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-neutrals-200);
+    font-size: 14px;
+}
+
+.paramName {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 500;
+    color: var(--color-neutrals-900);
+}
+
+.paramType {
+    color: var(--color-neutrals-600);
+}
+
+.paramRequired {
+    color: var(--color-neutrals-600);
+}
+
+.paramDescription {
+    color: var(--color-neutrals-600);
+}
+
+.codeBlock {
+    position: relative;
+    background: var(--color-neutrals-900);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.copyCodeButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.copyCodeButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.codeBlock pre {
+    padding: 20px;
+    margin: 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-neutrals-100);
+    background: transparent;
+    overflow-x: auto;
+}
+
+.responsesList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.responseItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--color-neutrals-50);
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 6px;
+}
+
+.responseStatus {
+    padding: 2px 8px;
+    background: var(--color-neutrals-200);
+    color: var(--color-neutrals-700);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.responseDescription {
+    font-size: 14px;
+    color: var(--color-neutrals-600);
+}
+
+.exampleCard {
+    border: 1px solid var(--color-neutrals-200);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.exampleCard:last-child {
+    margin-bottom: 0;
+}
+
+.exampleCard h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-neutrals-900);
+    margin: 0 0 16px 0;
+}
+
+.exampleRequest,
+.exampleResponse {
+    margin-bottom: 20px;
+}
+
+.exampleRequest:last-child,
+.exampleResponse:last-child {
+    margin-bottom: 0;
+}
+
+.exampleRequest h5,
+.exampleResponse h5 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-neutrals-700);
+    margin: 0 0 12px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+    
+    .headerContent {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .apiInfoGrid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filtersHeader {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .filterControls {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .filterControls select {
+        flex: 1;
+    }
+    
+    .endpointHeader {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .viewDetailsButton {
+        align-self: flex-start;
+    }
+    
+    .parametersHeader,
+    .parameterRow {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .modalContent {
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+}
