@@ -60,7 +60,7 @@ export const AcceptInvitePage: React.FC = () => {
 
         // Simular busca dos dados do convite
         setTimeout(() => {
-            // Em uma implementação real, você buscaria os dados do convite pela API
+            // Em uma implementação real, você buscaria os dados do convite psdfsdfela API
             console.log('Token do convite:', token);
         }, 1000);
     }, [searchParams]);
