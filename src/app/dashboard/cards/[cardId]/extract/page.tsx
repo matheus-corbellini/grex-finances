@@ -97,13 +97,13 @@ export default function ExtractPage({ params }: ExtractPageProps) {
     const getTypeIcon = (type: string) => {
         switch (type) {
             case "expense":
-                return "💳";
+                return "credit-card";
             case "income":
-                return "💰";
+                return "money";
             case "bill_payment":
-                return "📄";
+                return "document";
             default:
-                return "💳";
+                return "credit-card";
         }
     };
 

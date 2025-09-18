@@ -13,9 +13,11 @@ import {
   Search,
   ArrowUpDown,
   CheckCircle,
-  Circle
+  Circle,
+  Eye
 } from "lucide-react";
 import { Toast } from "../../../components/ui/Toast";
+import { TransactionViewModal } from "../../../components/modals";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -28,6 +30,8 @@ export default function Transactions() {
   const [showBulkStatusDropdown, setShowBulkStatusDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [statusDropdowns, setStatusDropdowns] = useState<{ [key: number]: boolean }>({});
+  const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
 
   // Fechar dropdowns ao clicar fora
   useEffect(() => {
@@ -162,6 +166,36 @@ export default function Transactions() {
   const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
     // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
     return;
+  };
+
+  const handleViewTransaction = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setShowTransactionViewModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setShowTransactionViewModal(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleEditTransaction = () => {
+    console.log("Editar transação:", selectedTransaction);
+    // Implementar lógica de edição
+  };
+
+  const handleDeleteTransaction = () => {
+    console.log("Excluir transação:", selectedTransaction);
+    // Implementar lógica de exclusão
+  };
+
+  const handleDuplicateTransaction = () => {
+    console.log("Duplicar transação:", selectedTransaction);
+    // Implementar lógica de duplicação
+  };
+
+  const handleShareTransaction = () => {
+    console.log("Compartilhar transação:", selectedTransaction);
+    // Implementar lógica de compartilhamento
   };
 
   // Função para alterar status de múltiplas transações
@@ -788,7 +822,19 @@ export default function Transactions() {
                       </div>
                     </td>
                     <td className={styles.tableCell}>
-                      <span className={styles.description}>{transaction.description}</span>
+                      <div className={styles.descriptionCell}>
+                        <span className={styles.description}>{transaction.description}</span>
+                        <button
+                          className={styles.viewButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewTransaction(transaction);
+                          }}
+                          title="Visualizar transação"
+                        >
+                          <Eye size={14} />
+                        </button>
+                      </div>
                     </td>
                     <td className={styles.tableCell}>
                       <div className={styles.categoryCell}>
@@ -860,13 +906,50 @@ export default function Transactions() {
       </div>
 
       {/* Toast de notificação */}
-      <Toast
-        isVisible={showSuccessMessage}
-        message="Status atualizado com sucesso!"
-        type="success"
-        duration={3000}
-        onClose={() => setShowSuccessMessage(false)}
-      />
+      {showSuccessMessage && (
+        <Toast
+          id="tx-status"
+          message="Status atualizado com sucesso!"
+          type="success"
+          duration={3000}
+          onClose={() => setShowSuccessMessage(false)}
+        />
+      )}
+
+      {/* Modal de visualização de transação */}
+      {selectedTransaction && (
+        <TransactionViewModal
+          isOpen={showTransactionViewModal}
+          onClose={handleCloseTransactionModal}
+          transaction={selectedTransaction}
+          account={{
+            id: "1",
+            userId: "1",
+            name: "Conta Principal",
+            type: { id: "1", name: "Conta Corrente", category: "checking" as any },
+            balance: 10000,
+            currency: "BRL",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          category={{
+            id: "1",
+            name: selectedTransaction.category,
+            type: "expense" as any,
+            color: "#3b82f6",
+            icon: "tag",
+            isDefault: false,
+            order: 1,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          onEdit={handleEditTransaction}
+          onDelete={handleDeleteTransaction}
+          onDuplicate={handleDuplicateTransaction}
+          onShare={handleShareTransaction}
+        />
+      )}
     </DashboardLayout>
   );
 }

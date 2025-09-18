@@ -396,7 +396,7 @@ export default function ImportPage() {
                             </label>
                             <Input
                                 value={settings.defaultCategory}
-                                onChange={(e) => handleSettingChange('defaultCategory', e.target.value)}
+                                onChange={(value: string) => handleSettingChange('defaultCategory', value)}
                                 placeholder="Nome da categoria padrão"
                             />
                         </div>
@@ -543,7 +543,9 @@ export default function ImportPage() {
                                         size="sm"
                                         onClick={() => handleRemoveFile(file.id)}
                                         icon={<Trash2 size={16} />}
-                                    />
+                                    >
+                                        Remover
+                                    </Button>
                                 </div>
                             </div>
                         ))}

@@ -339,10 +339,8 @@ export default function BackupPage() {
                             </label>
                             <Input
                                 type="number"
-                                value={settings.retentionDays}
-                                onChange={(e) => handleSettingChange('retentionDays', Number(e.target.value))}
-                                min="1"
-                                max="365"
+                                value={settings.retentionDays.toString()}
+                                onChange={(value: string) => handleSettingChange('retentionDays', Number(value))}
                             />
                         </div>
 

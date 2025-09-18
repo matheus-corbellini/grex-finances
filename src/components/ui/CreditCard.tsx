@@ -73,7 +73,7 @@ export const CreditCard: React.FC<CreditCardProps> = ({
                     </svg>
                 );
             default:
-                return "💳";
+                return "credit-card";
         }
     };
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { TextArea } from "./TextArea";
+import { Textarea } from "./TextArea";
 
 // Simple demonstration of TextArea component
 export const TextAreaDemo = () => {

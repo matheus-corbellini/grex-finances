@@ -93,7 +93,6 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             title={`Preview: ${fileName}`}
-            className={isFullscreen ? styles.fullscreenModal : ""}
         >
             <div className={styles.container}>
                 <div className={styles.toolbar}>
@@ -104,7 +103,9 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                             onClick={handleZoomOut}
                             icon={<ZoomOut size={16} />}
                             disabled={zoom <= 25}
-                        />
+                        >
+                            Zoom Out
+                        </Button>
                         <span className={styles.zoomLevel}>{zoom}%</span>
                         <Button
                             variant="ghost"
@@ -112,7 +113,9 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                             onClick={handleZoomIn}
                             icon={<ZoomIn size={16} />}
                             disabled={zoom >= 300}
-                        />
+                        >
+                            Zoom In
+                        </Button>
                     </div>
 
                     <div className={styles.imageControls}>
@@ -121,7 +124,9 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                             size="sm"
                             onClick={handleRotate}
                             icon={<RotateCw size={16} />}
-                        />
+                        >
+                            Rotate
+                        </Button>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -134,7 +139,9 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                             size="sm"
                             onClick={handleFullscreen}
                             icon={isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                        />
+                        >
+                            {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                        </Button>
                     </div>
 
                     {showActions && (

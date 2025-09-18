@@ -303,7 +303,7 @@ export default function ExportPage() {
                                 Período de Dados
                             </label>
                             <div className={styles.dateRange}>
-                                <Input
+                                <input
                                     type="date"
                                     value={settings.dateRange.start}
                                     onChange={(e) =>
@@ -312,9 +312,10 @@ export default function ExportPage() {
                                             start: e.target.value
                                         })
                                     }
+                                    className={styles.dateInput}
                                 />
                                 <span>até</span>
-                                <Input
+                                <input
                                     type="date"
                                     value={settings.dateRange.end}
                                     onChange={(e) =>
@@ -323,6 +324,7 @@ export default function ExportPage() {
                                             end: e.target.value
                                         })
                                     }
+                                    className={styles.dateInput}
                                 />
                             </div>
                         </div>
@@ -380,7 +382,7 @@ export default function ExportPage() {
                             <Input
                                 type="password"
                                 value={settings.password}
-                                onChange={(e) => handleSettingChange('password', e.target.value)}
+                                onChange={(value: string) => handleSettingChange('password', value)}
                                 placeholder="Digite uma senha para proteger o arquivo"
                             />
                         </div>

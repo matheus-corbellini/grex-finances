@@ -164,7 +164,7 @@ export default function FilesPage() {
                         <Input
                             placeholder="Buscar arquivos..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(value: string) => setSearchTerm(value)}
                         />
                     </div>
                 </div>
@@ -247,19 +247,25 @@ export default function FilesPage() {
                                     size="sm"
                                     onClick={() => handlePreview(file)}
                                     icon={<Eye size={16} />}
-                                />
+                                >
+                                    Visualizar
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleDownload(file)}
                                     icon={<Download size={16} />}
-                                />
+                                >
+                                    Baixar
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleDelete(file.id)}
                                     icon={<Trash2 size={16} />}
-                                />
+                                >
+                                    Excluir
+                                </Button>
                             </div>
                         </div>
                     ))

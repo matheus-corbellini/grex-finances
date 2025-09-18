@@ -199,7 +199,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} title={title}>
             <div className={styles.modalContent}>
                 {/* Header */}
                 <div className={styles.header}>
@@ -258,7 +258,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         variant={isDestructive ? "destructive" : "primary"}
                         onClick={handleConfirm}
                         disabled={!canConfirm() || isLoading}
-                        isLoading={isLoading}
+                        loading={isLoading}
                         className={styles.confirmButton}
                     >
                         {confirmText || getDefaultConfirmText()}
@@ -279,7 +279,7 @@ export const useConfirmationModal = () => {
         props: {}
     });
 
-    const showConfirmation = (props: Omit<ConfirmationModalProps, "isOpen" | "onClose">) => {
+    const showConfirmation = (props: Omit<ConfirmationModalProps, "isOpen" | "onClose"> & { onConfirm?: () => void }) => {
         setModalState({
             isOpen: true,
             props
@@ -297,6 +297,10 @@ export const useConfirmationModal = () => {
         <ConfirmationModal
             isOpen={modalState.isOpen}
             onClose={hideConfirmation}
+            onConfirm={modalState.props.onConfirm || (() => { })}
+            type={modalState.props.type || "info"}
+            title={modalState.props.title || "Confirmação"}
+            message={modalState.props.message || ""}
             {...modalState.props}
         />
     );

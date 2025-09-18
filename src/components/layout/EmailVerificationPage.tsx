@@ -390,7 +390,7 @@ export const EmailVerificationPage: React.FC = () => {
                             <li>Verifique sua caixa de entrada</li>
                             <li>Procure por emails do Grex Finances</li>
                             <li>Clique no link de verificação</li>
-                            <li>Volte aqui e clique em "Verificar"</li>
+                            <li>Volte aqui e clique em &quot;Verificar&quot;</li>
                         </ol>
                     </div>
 

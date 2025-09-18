@@ -454,7 +454,7 @@
   height: 100px;
   display: flex;
   flex-direction: column;
-  justify-content: end;
+  justify-content: flex-end;
   gap: 0;
 }
 
@@ -788,4 +788,56 @@
   .chartContainer {
     height: 150px;
   }
+}
+
+/* Estilos para botões de visualizar */
+.viewButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #F3F4F6;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  margin-left: auto;
+}
+
+.viewButton:hover {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  border-color: #3B82F6;
+}
+
+.expenseItem:hover .viewButton,
+.creditCardItem:hover .viewButton {
+  opacity: 1;
+}
+
+.expenseItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.expenseItem:last-child {
+  border-bottom: none;
+}
+
+.creditCardItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.creditCardItem:last-child {
+  border-bottom: none;
 }

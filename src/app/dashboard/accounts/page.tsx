@@ -2,8 +2,11 @@
 
 import React, { useState } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
-import { ChevronLeft, ChevronRight, Plus, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, TrendingUp, TrendingDown, Eye } from "lucide-react";
 import { BankIconComponent } from "../../../components/ui/BankIcons";
+import { AccountDetailsModal } from "../../../components/modals";
+import { Icon } from "../../../components/ui/Icon";
+import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
 import styles from "./Accounts.module.css";
 
 interface Account {
@@ -20,12 +23,14 @@ interface Account {
 
 export default function Accounts() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 6, 1)); // Julho 2024
+  const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const accounts: Account[] = [
     {
       id: 1,
       bankName: "Banco cooperativo Sicredi S.A",
-      bankLogo: "🌺",
+      bankLogo: "bank-sicredi",
       accountType: "conta corrente",
       balance: "R$25.000,00",
       actionLink: "Ver extrato",
@@ -41,7 +46,7 @@ export default function Accounts() {
     {
       id: 2,
       bankName: "Banco do Brasil S.A",
-      bankLogo: "🏦",
+      bankLogo: "bank-bb",
       accountType: "conta corrente",
       balance: "R$31.000,00",
       actionLink: "Ver detalhes",
@@ -57,7 +62,7 @@ export default function Accounts() {
     {
       id: 3,
       bankName: "Itaú Unibanco S.A",
-      bankLogo: "🏛️",
+      bankLogo: "bank-itau",
       accountType: "conta corrente",
       balance: "R$19.000,00",
       actionLink: "Ver saldo",
@@ -73,7 +78,7 @@ export default function Accounts() {
     {
       id: 4,
       bankName: "Santander S.A",
-      bankLogo: "🔥",
+      bankLogo: "bank-santander",
       accountType: "conta corrente",
       balance: "R$23.500,00",
       actionLink: "Consultar extrato",
@@ -89,7 +94,7 @@ export default function Accounts() {
     {
       id: 5,
       bankName: "Bradesco S.A",
-      bankLogo: "🏪",
+      bankLogo: "bank-bradesco",
       accountType: "conta corrente",
       balance: "R$28.000,00",
       actionLink: "Ver consulta",
@@ -105,7 +110,7 @@ export default function Accounts() {
     {
       id: 6,
       bankName: "Caixa Econômica Federal",
-      bankLogo: "🏛️",
+      bankLogo: "bank-caixa",
       accountType: "conta corrente",
       balance: "R$36.500,00",
       actionLink: "Visualizar transações",
@@ -163,6 +168,36 @@ export default function Accounts() {
     return `${linePath} L ${lastX},${bottomY} L ${firstX},${bottomY} Z`;
   };
 
+  const handleViewAccount = (account: Account) => {
+    setSelectedAccount(account);
+    setShowAccountDetailsModal(true);
+  };
+
+  const handleCloseAccountModal = () => {
+    setShowAccountDetailsModal(false);
+    setSelectedAccount(null);
+  };
+
+  const handleEditAccount = () => {
+    console.log("Editar conta:", selectedAccount);
+    // Implementar lógica de edição
+  };
+
+  const handleDeleteAccount = () => {
+    console.log("Excluir conta:", selectedAccount);
+    // Implementar lógica de exclusão
+  };
+
+  const handleExportAccount = () => {
+    console.log("Exportar conta:", selectedAccount);
+    // Implementar lógica de exportação
+  };
+
+  const handleShareAccount = () => {
+    console.log("Compartilhar conta:", selectedAccount);
+    // Implementar lógica de compartilhamento
+  };
+
   return (
     <DashboardLayout>
       <div className={styles.accountsContainer}>
@@ -214,7 +249,7 @@ export default function Accounts() {
                 <div className={styles.cardHeader}>
                   <div className={styles.bankInfo}>
                     <div className={styles.bankLogo}>
-                      <BankIconComponent bankName={account.bankName} size={32} />
+                      <Icon name={account.bankLogo} size={32} />
                     </div>
                     <div className={styles.bankDetails}>
                       <h3 className={styles.bankName}>{account.bankName}</h3>
@@ -230,9 +265,13 @@ export default function Accounts() {
 
                 {/* Ações */}
                 <div className={styles.actionsSection}>
-                  <a href="#" className={styles.actionLink}>
-                    {account.actionLink}
-                  </a>
+                  <button
+                    className={styles.actionLink}
+                    onClick={() => handleViewAccount(account)}
+                  >
+                    <Eye size={14} className={styles.actionIcon} />
+                    Ver Detalhes
+                  </button>
                   <button className={styles.actionButton}>
                     {account.actionButton}
                   </button>
@@ -297,6 +336,74 @@ export default function Accounts() {
           })}
         </div>
       </div>
+
+      {/* Modal de detalhes da conta */}
+      {selectedAccount && (
+        <AccountDetailsModal
+          isOpen={showAccountDetailsModal}
+          onClose={handleCloseAccountModal}
+          account={{
+            id: selectedAccount.id.toString(),
+            userId: "1",
+            name: selectedAccount.bankName,
+            type: {
+              id: "1",
+              name: selectedAccount.accountType,
+              category: "checking" as any
+            },
+            balance: parseFloat(selectedAccount.balance.replace(/[^\d,-]/g, '').replace(',', '.')),
+            currency: "BRL",
+            bankName: selectedAccount.bankName,
+            accountNumber: "567890",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          accountType={{
+            id: "1",
+            name: selectedAccount.accountType,
+            category: "checking" as any,
+            description: "Conta corrente bancária",
+            icon: "bank-bb"
+          }}
+          recentTransactions={[
+            {
+              id: "1",
+              userId: "1",
+              accountId: selectedAccount.id.toString(),
+              description: "Transferência recebida",
+              amount: 1000,
+              type: TransactionType.INCOME,
+              status: TransactionStatus.COMPLETED,
+              date: new Date(),
+              isRecurring: false,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            },
+            {
+              id: "2",
+              userId: "1",
+              accountId: selectedAccount.id.toString(),
+              description: "Pagamento de conta",
+              amount: -150,
+              type: TransactionType.EXPENSE,
+              status: TransactionStatus.COMPLETED,
+              date: new Date(),
+              isRecurring: false,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          ]}
+          balanceHistory={selectedAccount.graphData.map(point => ({
+            date: new Date(),
+            balance: point.value * 1000
+          }))}
+          onEdit={handleEditAccount}
+          onDelete={handleDeleteAccount}
+          onExport={handleExportAccount}
+          onShare={handleShareAccount}
+        />
+      )}
     </DashboardLayout>
   );
 }

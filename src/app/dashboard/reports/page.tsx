@@ -13,8 +13,10 @@ import {
   Filter,
   BarChart3,
   PieChart,
-  LineChart
+  LineChart,
+  Eye
 } from "lucide-react";
+import { ReportPreviewModal } from "../../../components/modals";
 import styles from "./Reports.module.css";
 
 // Dados ilustrativos para os relatórios
@@ -53,6 +55,8 @@ const dummyData = {
 export default function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState("6m");
   const [selectedView, setSelectedView] = useState("overview");
+  const [showReportPreviewModal, setShowReportPreviewModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -71,6 +75,40 @@ export default function Reports() {
 
   const getGrowthColor = (growth: number) => {
     return growth > 0 ? styles.positive : styles.negative;
+  };
+
+  const handleViewReport = (reportType: string) => {
+    const reportData = {
+      id: 1,
+      title: `Relatório de ${reportType}`,
+      type: reportType,
+      period: selectedPeriod,
+      generatedAt: new Date(),
+      data: dummyData,
+      summary: {
+        totalExpenses: dummyData.trends.totalExpenses,
+        totalIncome: 25000,
+        netProfit: 6800,
+        growthRate: dummyData.trends.growth
+      }
+    };
+    setSelectedReport(reportData);
+    setShowReportPreviewModal(true);
+  };
+
+  const handleCloseReportModal = () => {
+    setShowReportPreviewModal(false);
+    setSelectedReport(null);
+  };
+
+  const handleExportReport = () => {
+    console.log("Exportar relatório:", selectedReport);
+    // Implementar lógica de exportação
+  };
+
+  const handleShareReport = () => {
+    console.log("Compartilhar relatório:", selectedReport);
+    // Implementar lógica de compartilhamento
   };
 
   return (
@@ -97,6 +135,13 @@ export default function Reports() {
               <button className={styles.actionButton}>
                 <Filter size={16} />
                 Filtrar
+              </button>
+              <button
+                className={styles.actionButton}
+                onClick={() => handleViewReport("Visão Geral")}
+              >
+                <Eye size={16} />
+                Visualizar
               </button>
               <button className={styles.actionButton}>
                 <Download size={16} />
@@ -289,6 +334,17 @@ export default function Reports() {
           </div>
         </div>
       </ClientOnly>
+
+      {/* Modal de preview de relatório */}
+      {selectedReport && (
+        <ReportPreviewModal
+          isOpen={showReportPreviewModal}
+          onClose={handleCloseReportModal}
+          report={selectedReport}
+          onExport={handleExportReport}
+          onShare={handleShareReport}
+        />
+      )}
     </DashboardLayout>
   );
 }

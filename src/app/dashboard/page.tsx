@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import styles from "./Dashboard.module.css";
 import {
@@ -12,8 +12,13 @@ import {
   ArrowLeft,
   ArrowRight,
   ChevronDown,
-  Filter
+  Filter,
+  Eye
 } from "lucide-react";
+import { TransactionViewModal, AccountDetailsModal } from "../../components/modals";
+import { Icon } from "../../components/ui/Icon";
+import { CategoryType } from "../../../shared/types/category.types";
+import { TransactionType } from "../../../shared/types/transaction.types";
 
 const accounts = [
   { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
@@ -55,6 +60,63 @@ const cashFlowData = [
 ];
 
 export default function Dashboard() {
+  const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
+  const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedAccount, setSelectedAccount] = useState<any>(null);
+
+  const handleViewTransaction = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setShowTransactionViewModal(true);
+  };
+
+  const handleViewAccount = (account: any) => {
+    setSelectedAccount(account);
+    setShowAccountDetailsModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setShowTransactionViewModal(false);
+    setSelectedTransaction(null);
+  };
+
+  const handleCloseAccountModal = () => {
+    setShowAccountDetailsModal(false);
+    setSelectedAccount(null);
+  };
+
+  const handleEditTransaction = () => {
+    console.log("Editar transação:", selectedTransaction);
+  };
+
+  const handleDeleteTransaction = () => {
+    console.log("Excluir transação:", selectedTransaction);
+  };
+
+  const handleDuplicateTransaction = () => {
+    console.log("Duplicar transação:", selectedTransaction);
+  };
+
+  const handleShareTransaction = () => {
+    console.log("Compartilhar transação:", selectedTransaction);
+  };
+
+  const handleEditAccount = () => {
+    console.log("Editar conta:", selectedAccount);
+  };
+
+  const handleDeleteAccount = () => {
+    console.log("Excluir conta:", selectedAccount);
+  };
+
+  const handleExportAccount = () => {
+    console.log("Exportar conta:", selectedAccount);
+  };
+
+  const handleShareAccount = () => {
+    console.log("Compartilhar conta:", selectedAccount);
+  };
+
   return (
     <DashboardLayout>
       <div className={styles.container}>
@@ -264,6 +326,13 @@ export default function Dashboard() {
                               <span className={styles.expensePercentage}>{expense.percentage}</span>
                             </div>
                           </div>
+                          <button
+                            className={styles.viewButton}
+                            onClick={() => handleViewTransaction(expense)}
+                            title="Visualizar transação"
+                          >
+                            <Eye size={14} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -300,6 +369,13 @@ export default function Dashboard() {
                             <div className={styles.creditCardName}>{card.name}</div>
                             <div className={styles.creditCardBalance}>{card.balance}</div>
                           </div>
+                          <button
+                            className={styles.viewButton}
+                            onClick={() => handleViewAccount(card)}
+                            title="Visualizar conta"
+                          >
+                            <Eye size={14} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -310,6 +386,98 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Modal de visualização de transação */}
+      {selectedTransaction && (
+        <TransactionViewModal
+          isOpen={showTransactionViewModal}
+          onClose={handleCloseTransactionModal}
+          transaction={selectedTransaction}
+          account={{
+            id: "1",
+            userId: "1",
+            name: "Conta Principal",
+            type: {
+              id: "1",
+              name: "Conta Corrente",
+              category: "checking" as any
+            },
+            balance: 10000,
+            currency: "BRL",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          category={{
+            id: "1",
+            name: "Despesas",
+            type: CategoryType.EXPENSE,
+            color: "#ef4444",
+            icon: "tag",
+            isDefault: false,
+            order: 1,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          onEdit={handleEditTransaction}
+          onDelete={handleDeleteTransaction}
+          onDuplicate={handleDuplicateTransaction}
+          onShare={handleShareTransaction}
+        />
+      )}
+
+      {/* Modal de detalhes da conta */}
+      {selectedAccount && (
+        <AccountDetailsModal
+          isOpen={showAccountDetailsModal}
+          onClose={handleCloseAccountModal}
+          account={{
+            id: "1",
+            userId: "1",
+            name: selectedAccount.name,
+            type: {
+              id: "1",
+              name: "Cartão de Crédito",
+              category: "credit_card" as any
+            },
+            balance: parseFloat(selectedAccount.balance.replace(/[^\d,-]/g, '').replace(',', '.')),
+            currency: "BRL",
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }}
+          accountType={{
+            id: "1",
+            name: "Cartão de Crédito",
+            category: "credit_card" as any,
+            description: "Cartão de crédito bancário",
+            icon: "credit-card"
+          }}
+          recentTransactions={[
+            {
+              id: "1",
+              userId: "1",
+              accountId: "1",
+              description: "Compra no cartão",
+              amount: -500,
+              type: TransactionType.EXPENSE,
+              status: "completed" as any,
+              date: new Date(),
+              isRecurring: false,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
+          ]}
+          balanceHistory={[
+            { date: new Date(), balance: 50000 },
+            { date: new Date(), balance: 52000 }
+          ]}
+          onEdit={handleEditAccount}
+          onDelete={handleDeleteAccount}
+          onExport={handleExportAccount}
+          onShare={handleShareAccount}
+        />
+      )}
     </DashboardLayout>
   );
 }

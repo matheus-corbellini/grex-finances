@@ -7,6 +7,9 @@ import { SetupWizardModal } from "../../../components/layout/SetupWizardModal";
 import { UserModals } from "../../../components/layout/UserModals";
 import { InviteModals } from "../../../components/layout/InviteModals";
 import { CategoryModals } from "../../../components/layout/CategoryModals";
+import { AddSubcategoryModal, AdvancedPreferencesModal } from "../../../components/modals";
+import { CategoryType } from "../../../../shared/types/category.types";
+import { Icon } from "../../../components/ui/Icon";
 import { useToastNotifications } from "../../../hooks/useToastNotifications";
 import {
     DndContext,
@@ -224,6 +227,8 @@ export default function Settings() {
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
+    const [showAddSubcategoryModal, setShowAddSubcategoryModal] = useState(false);
+    const [showAdvancedPreferencesModal, setShowAdvancedPreferencesModal] = useState(false);
     const [editingUser, setEditingUser] = useState<any>(null);
     const [deletingUser, setDeletingUser] = useState<any>(null);
     const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -1026,6 +1031,18 @@ export default function Settings() {
             description: "",
             color: "#3b82f6"
         });
+    };
+
+    const handleAddSubcategory = (subcategoryData: any) => {
+        console.log("Adicionar subcategoria:", subcategoryData);
+        toast.showSuccess("Subcategoria adicionada com sucesso!");
+        setShowAddSubcategoryModal(false);
+    };
+
+    const handleSaveAdvancedPreferences = (preferences: any) => {
+        console.log("Salvar preferências avançadas:", preferences);
+        toast.showSuccess("Preferências salvas com sucesso!");
+        setShowAdvancedPreferencesModal(false);
     };
 
     const handleCloseEditCategoryModal = () => {
@@ -2702,6 +2719,37 @@ export default function Settings() {
                                         <AlertTriangle size={16} />
                                         Configurar Alertas
                                     </button>
+
+                                    <button
+                                        onClick={() => setShowAdvancedPreferencesModal(true)}
+                                        style={{
+                                            padding: "12px 24px",
+                                            backgroundColor: "#ffffff",
+                                            color: "#8b5cf6",
+                                            border: "1px solid #d1d5db",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            cursor: "pointer",
+                                            transition: "all 0.2s ease",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "8px",
+                                        }}
+                                        onMouseOver={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#f9fafb";
+                                            e.currentTarget.style.borderColor = "#8b5cf6";
+                                            e.currentTarget.style.color = "#7c3aed";
+                                        }}
+                                        onMouseOut={(e) => {
+                                            e.currentTarget.style.backgroundColor = "#ffffff";
+                                            e.currentTarget.style.borderColor = "#d1d5db";
+                                            e.currentTarget.style.color = "#8b5cf6";
+                                        }}
+                                    >
+                                        <SettingsIcon size={16} />
+                                        Preferências Avançadas
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -3516,6 +3564,25 @@ export default function Settings() {
                                 >
                                     <Plus size={16} />
                                     Adicionar
+                                </button>
+                                <button
+                                    onClick={() => setShowAddSubcategoryModal(true)}
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "8px",
+                                        backgroundColor: "#10b981",
+                                        color: "white",
+                                        border: "none",
+                                        padding: "10px 16px",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "500",
+                                        cursor: "pointer"
+                                    }}
+                                >
+                                    <Plus size={16} />
+                                    Subcategoria
                                 </button>
                             </div>
                             <div style={{ display: "flex", gap: "12px" }}>
@@ -5902,6 +5969,55 @@ export default function Settings() {
                 onConfirmDeleteCategory={handleConfirmDeleteCategory}
             />
 
+            {/* Modal de Adicionar Subcategoria */}
+            <AddSubcategoryModal
+                isOpen={showAddSubcategoryModal}
+                onClose={() => setShowAddSubcategoryModal(false)}
+                onSubmit={handleAddSubcategory}
+                categories={[
+                    {
+                        id: "1",
+                        name: "Alimentação",
+                        type: CategoryType.EXPENSE,
+                        color: "#3b82f6",
+                        icon: "utensils",
+                        isDefault: false,
+                        order: 1,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    },
+                    {
+                        id: "2",
+                        name: "Transporte",
+                        type: CategoryType.EXPENSE,
+                        color: "#10b981",
+                        icon: "car",
+                        isDefault: false,
+                        order: 2,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    },
+                    {
+                        id: "3",
+                        name: "Salário",
+                        type: CategoryType.INCOME,
+                        color: "#f59e0b",
+                        icon: "money",
+                        isDefault: false,
+                        order: 3,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }
+                ]}
+            />
+
+            {/* Modal de Preferências Avançadas */}
+            <AdvancedPreferencesModal
+                isOpen={showAdvancedPreferencesModal}
+                onClose={() => setShowAdvancedPreferencesModal(false)}
+                onSave={handleSaveAdvancedPreferences}
+            />
+
             {/* Modal de Ajuda para Categorias */}
             {showCategoryHelpModal && (
                 <div style={{
@@ -6020,7 +6136,7 @@ export default function Settings() {
                                         color: "#374151"
                                     }}>
                                         <li style={{ marginBottom: "8px" }}>
-                                            Clique em <strong>"+ Adicionar"</strong> para criar novas categorias
+                                            Clique em <strong>&quot;+ Adicionar&quot;</strong> para criar novas categorias
                                         </li>
                                         <li style={{ marginBottom: "8px" }}>
                                             Use o <strong>drag & drop</strong> para reorganizar subcategorias
@@ -6058,7 +6174,7 @@ export default function Settings() {
                                         color: "#374151"
                                     }}>
                                         <li style={{ marginBottom: "8px" }}>
-                                            Clique em <strong>"Exportar"</strong> para baixar suas categorias
+                                            Clique em <strong>&quot;Exportar&quot;</strong> para baixar suas categorias
                                         </li>
                                         <li style={{ marginBottom: "8px" }}>
                                             Escolha entre <strong>JSON</strong>, <strong>PDF</strong> ou <strong>Excel</strong>
@@ -6096,7 +6212,7 @@ export default function Settings() {
                                         color: "#374151"
                                     }}>
                                         <li style={{ marginBottom: "8px" }}>
-                                            Clique em <strong>"Importar"</strong> e selecione arquivo JSON
+                                            Clique em <strong>&quot;Importar&quot;</strong> e selecione arquivo JSON
                                         </li>
                                         <li style={{ marginBottom: "8px" }}>
                                             Arquivo deve ter sido exportado pelo sistema
@@ -6184,7 +6300,7 @@ export default function Settings() {
                                             fontSize: "13px",
                                             color: "#6b7280"
                                         }}>
-                                            Entre em contato com o suporte através do menu "Abrir Ticket de Suporte"
+                                            Entre em contato com o suporte através do menu &quot;Abrir Ticket de Suporte&quot;
                                         </p>
                                     </div>
                                 </div>

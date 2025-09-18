@@ -1,7 +1,8 @@
 export { NavigationMenuItem } from "./NavigationMenuItem";
 export { Button } from "./Button";
 export { Input } from "./Input";
-export { TextArea } from "./TextArea";
+export { Textarea } from "./TextArea";
+export { Select } from "./Select";
 export { Toast } from "./Toast";
 export { ToastContainer } from "./ToastContainer";
 export { ProgressBar } from "./ProgressBar";
@@ -13,3 +14,4 @@ export { Modal } from "./Modal";
 export { AddCardForm } from "./AddCardForm";
 export { CardDetailsModal } from "./CardDetailsModal";
 export { EditCardForm } from "./EditCardForm";
+export { Icon } from "./Icon";

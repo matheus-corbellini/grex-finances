@@ -258,7 +258,9 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                             size="sm"
                                             onClick={() => handleDeleteRule(rule.id)}
                                             icon={<Trash2 size={16} />}
-                                        />
+                                        >
+                                            Excluir
+                                        </Button>
                                     </div>
                                 </div>
 
@@ -302,8 +304,8 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 <label>Nome do Alerta</label>
                                 <Input
                                     value={editingRule.name}
-                                    onChange={(e) =>
-                                        setEditingRule({ ...editingRule, name: e.target.value })
+                                    onChange={(value) =>
+                                        setEditingRule({ ...editingRule, name: value })
                                     }
                                     placeholder="Ex: Saldo Baixo"
                                 />
@@ -346,9 +348,9 @@ export const AlertSettingsModal: React.FC<AlertSettingsModalProps> = ({
                                 <label>Valor</label>
                                 <Input
                                     type="number"
-                                    value={editingRule.threshold}
-                                    onChange={(e) =>
-                                        setEditingRule({ ...editingRule, threshold: Number(e.target.value) })
+                                    value={editingRule.threshold.toString()}
+                                    onChange={(value) =>
+                                        setEditingRule({ ...editingRule, threshold: Number(value) })
                                     }
                                 />
                             </div>
