@@ -1,18 +1,46 @@
 import React from "react";
-import { Toast } from "./Toast";
-import { ToastContainer } from "./ToastContainer";
+import { Toast, ToastProps } from "./Toast";
 
 // Simple demonstration of Toast component
 export const ToastDemo = () => {
-  const [toasts, setToasts] = React.useState<any[]>([]);
+  const [toasts, setToasts] = React.useState<ToastProps[]>([]);
 
-  const addToast = (toastProps: any) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { ...toastProps, id }]);
+  const mapVariantToType = (variant: string | undefined): ToastProps["type"] => {
+    switch (variant) {
+      case "success":
+        return "success";
+      case "error":
+        return "error";
+      case "warning":
+        return "warning";
+      case "loading":
+        return "loading";
+      default:
+        return "info";
+    }
   };
 
-  const removeToast = (id: number) => {
+  const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
+
+  const addToast = (toastProps: any) => {
+    const id = String(Date.now());
+    const newToast: ToastProps = {
+      id,
+      title: toastProps.title,
+      message: toastProps.description ?? toastProps.message ?? "",
+      type: mapVariantToType(toastProps.variant),
+      duration: toastProps.duration,
+      action: toastProps.actionText
+        ? {
+          label: toastProps.actionText,
+          onClick: () => console.log("Action clicked"),
+        }
+        : undefined,
+      onClose: () => removeToast(id),
+    };
+    setToasts((prev) => [...prev, newToast]);
   };
 
   return (
@@ -31,11 +59,10 @@ export const ToastDemo = () => {
         <button
           onClick={() =>
             addToast({
-              variant: "default",
+              variant: "info",
               title: "Scheduled: Catch up",
               description: "Friday, February 10, 2023 at 5:57 PM",
               actionText: "Undo",
-              onClose: () => removeToast(Date.now()),
             })
           }
           style={{
@@ -55,7 +82,6 @@ export const ToastDemo = () => {
               title: "Scheduled: Catch up",
               description: "Friday, February 10, 2023 at 5:57 PM",
               actionText: "Confirmar",
-              onClose: () => removeToast(Date.now()),
             })
           }
           style={{
@@ -75,7 +101,6 @@ export const ToastDemo = () => {
               title: "Uh oh! Something went wrong.",
               description: "There was a problem with your request.",
               actionText: "Try again",
-              onClose: () => removeToast(Date.now()),
             })
           }
           style={{
@@ -105,10 +130,13 @@ export const ToastDemo = () => {
         {toasts.map((toast) => (
           <div key={toast.id} style={{ marginBottom: "10px" }}>
             <Toast
-              isVisible={true}
-              message={toast.title}
-              type={toast.variant}
+              id={toast.id}
+              title={toast.title}
+              message={toast.message}
+              type={toast.type}
+              duration={toast.duration}
               onClose={toast.onClose}
+              action={toast.action}
             />
           </div>
         ))}
@@ -121,9 +149,9 @@ export const ToastDemo = () => {
 export const DefaultToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-default"
       message="Scheduled: Catch up"
-      type="success"
+      type="info"
       onClose={() => console.log("Toast closed")}
     />
   </div>
@@ -132,7 +160,7 @@ export const DefaultToast = () => (
 export const SuccessToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-success"
       message="Scheduled: Catch up"
       type="success"
       onClose={() => console.log("Toast closed")}
@@ -143,7 +171,7 @@ export const SuccessToast = () => (
 export const ErrorToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-error"
       message="Uh oh! Something went wrong."
       type="error"
       onClose={() => console.log("Toast closed")}
@@ -154,7 +182,7 @@ export const ErrorToast = () => (
 export const WarningToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-warning"
       message="Warning: Low battery"
       type="warning"
       onClose={() => console.log("Toast closed")}
@@ -165,7 +193,7 @@ export const WarningToast = () => (
 export const InfoToast = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-info"
       message="Information"
       type="info"
       onClose={() => console.log("Toast closed")}
@@ -176,7 +204,7 @@ export const InfoToast = () => (
 export const ToastWithoutAction = () => (
   <div style={{ padding: "20px" }}>
     <Toast
-      isVisible={true}
+      id="toast-no-action"
       message="Simple notification"
       type="info"
       onClose={() => console.log("Toast closed")}
@@ -194,28 +222,28 @@ export const ToastWithDifferentActionVariants = () => (
     }}
   >
     <Toast
-      isVisible={true}
+      id="toast-action-1"
       message="Primary Action"
       type="success"
       onClose={() => console.log("Toast closed")}
     />
 
     <Toast
-      isVisible={true}
+      id="toast-action-2"
       message="Secondary Action"
       type="info"
       onClose={() => console.log("Toast closed")}
     />
 
     <Toast
-      isVisible={true}
+      id="toast-action-3"
       message="Subtle Action"
       type="warning"
       onClose={() => console.log("Toast closed")}
     />
 
     <Toast
-      isVisible={true}
+      id="toast-action-4"
       message="Outline Action"
       type="error"
       onClose={() => console.log("Toast closed")}

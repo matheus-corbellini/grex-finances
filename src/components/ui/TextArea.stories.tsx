@@ -1,9 +1,13 @@
 import React from "react";
 import { Textarea } from "./TextArea";
 
-// Simple demonstration of TextArea component
+// Simple demonstration of Textarea component
 export const TextAreaDemo = () => {
   const [message, setMessage] = React.useState("");
+  const [message2, setMessage2] = React.useState("");
+  const [focusedValue, setFocusedValue] = React.useState("");
+  const [errorValue, setErrorValue] = React.useState("");
+  const [successValue, setSuccessValue] = React.useState("");
   const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   const handleSend = () => {
@@ -15,36 +19,45 @@ export const TextAreaDemo = () => {
 
   return (
     <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-      <h2>TextArea Component Demo</h2>
+      <h2>Textarea Component Demo</h2>
 
       <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
         <div style={{ flex: 1 }}>
-          <TextArea
-            label="Your message"
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message here"
-            variant="withButton"
-            buttonText="Send message"
-            buttonOnClick={handleSend}
             rows={4}
+            maxLength={200}
           />
+          <div style={{ marginTop: "8px" }}>
+            <button onClick={handleSend}>Send message</button>
+          </div>
         </div>
         <div style={{ flex: 1 }}>
-          <TextArea
-            label="Your message"
+          <Textarea
+            value={message2}
+            onChange={(e) => setMessage2(e.target.value)}
             placeholder="Type your message here"
-            helpText="Your message will be copied to the support team."
             rows={4}
+            maxLength={120}
           />
         </div>
       </div>
 
       <div style={{ marginBottom: "20px" }}>
-        <TextArea label="Focused State" placeholder="Click to focus" rows={4} />
+        <Textarea
+          value={focusedValue}
+          onChange={(e) => setFocusedValue(e.target.value)}
+          placeholder="Click to focus"
+          rows={4}
+        />
       </div>
 
       <div style={{ marginBottom: "20px" }}>
-        <TextArea
-          label="Error State"
+        <Textarea
+          value={errorValue}
+          onChange={(e) => setErrorValue(e.target.value)}
           placeholder="Error textarea"
           error="This field is required"
           rows={4}
@@ -52,10 +65,10 @@ export const TextAreaDemo = () => {
       </div>
 
       <div style={{ marginBottom: "20px" }}>
-        <TextArea
-          label="Success State"
+        <Textarea
+          value={successValue}
+          onChange={(e) => setSuccessValue(e.target.value)}
           placeholder="Success textarea"
-          success={true}
           rows={4}
         />
       </div>

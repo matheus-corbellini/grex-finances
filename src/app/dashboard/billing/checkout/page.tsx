@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardLayout } from "../../../../components/layout";
 import billingService from "../../../../services/api/billing.service";
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import styles from "./Checkout.module.css";
 
-export default function CheckoutPage() {
+function CheckoutPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const planId = searchParams.get('planId');
@@ -500,5 +500,13 @@ export default function CheckoutPage() {
                 </div>
             </div>
         </DashboardLayout>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={<div>Carregando checkout...</div>}>
+            <CheckoutPageContent />
+        </Suspense>
     );
 }
