@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./DashboardLayout.module.css";
 import { Sidebar } from "./Sidebar";
-import { Header } from "./Header";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -40,9 +39,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <div className={styles.contentWrapper}>
-        {/* Header */}
-        <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-
         {/* Page Content */}
         <main className={styles.mainContent}>
           {children}

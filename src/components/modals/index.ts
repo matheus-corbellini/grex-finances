@@ -20,3 +20,4 @@ export { AdvancedPreferencesModal } from './AdvancedPreferencesModal';
 export { ReportPreviewModal } from './ReportPreviewModal';
 export { TransactionViewModal } from './TransactionViewModal';
 export { AccountDetailsModal } from './AccountDetailsModal';
+export { AddAccountModal } from './AddAccountModal';

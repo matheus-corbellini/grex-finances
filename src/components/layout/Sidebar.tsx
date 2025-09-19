@@ -20,7 +20,8 @@ import {
   LogOut,
   Bell,
   Filter,
-  X
+  X,
+  ChevronLeft
 } from "lucide-react";
 
 interface SidebarProps {
@@ -86,6 +87,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       <div
         className={`${styles.sidebarContainer} ${isOpen ? styles.open : styles.closed}`}
       >
+        {/* Desktop Sidebar Toggle Button */}
+        <button
+          onClick={onToggle}
+          className={styles.desktopSidebarToggle}
+          title={isOpen ? "Recolher sidebar" : "Expandir sidebar"}
+        >
+          <ChevronLeft
+            size={16}
+            style={{
+              transform: isOpen ? 'rotate(0deg)' : 'rotate(180deg)',
+              transition: 'transform 0.3s ease'
+            }}
+          />
+        </button>
+
         {/* Header with Close Button for Mobile */}
         <div className={styles.headerSection}>
           {/* Mobile Close Button */}

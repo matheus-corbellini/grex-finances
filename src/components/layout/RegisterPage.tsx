@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 
@@ -23,6 +24,7 @@ const SheepIcon = () => (
 
 export const RegisterPage: React.FC = () => {
   const theme = useTheme();
+  const { register, loginWithGoogle, loginWithFacebook } = useAuth();
   const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -79,33 +81,51 @@ export const RegisterPage: React.FC = () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setErrors({});
+
     try {
-      console.log("Register attempt:", {
+      await register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
 
-      // TODO: Implementar chamada para API de registro
-      // const response = await authService.register({
-      //   firstName: formData.firstName,
-      //   lastName: formData.lastName,
-      //   email: formData.email,
-      //   password: formData.password,
-      // });
-
-      // Simular delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       console.log("Registro realizado com sucesso!");
-      // TODO: Redirecionar para wizard de configuração
-      setTimeout(() => {
-        router.push("/setup");
-      }, 1000);
-    } catch (error) {
+      router.push("/email-verification");
+    } catch (error: any) {
       console.error("Erro no registro:", error);
-      setErrors({ general: "Erro ao realizar registro. Tente novamente." });
+      setErrors({ general: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      await loginWithGoogle();
+      router.push("/setup");
+    } catch (error: any) {
+      console.error("Erro no registro com Google:", error);
+      setErrors({ general: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookRegister = async () => {
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      await loginWithFacebook();
+      router.push("/setup");
+    } catch (error: any) {
+      console.error("Erro no registro com Facebook:", error);
+      setErrors({ general: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -340,6 +360,23 @@ export const RegisterPage: React.FC = () => {
               error={errors.confirmPassword}
             />
 
+            {/* Error Message */}
+            {errors.general && (
+              <div
+                style={{
+                  padding: theme.getSpacing("m"),
+                  backgroundColor: theme.colors.error[100],
+                  border: `1px solid ${theme.colors.error[200]}`,
+                  borderRadius: theme.getRadius("md"),
+                  color: theme.colors.error[300],
+                  fontSize: theme.getFontSize("sm"),
+                  textAlign: "center",
+                }}
+              >
+                {errors.general}
+              </div>
+            )}
+
             {/* Register Button */}
             <Button
               variant="primary"
@@ -355,6 +392,107 @@ export const RegisterPage: React.FC = () => {
             >
               {isLoading ? "Criando conta..." : "Criar conta"}
             </Button>
+
+            {/* Social Register Buttons */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: theme.getSpacing("m"),
+                marginTop: theme.getSpacing("l"),
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: theme.getSpacing("m"),
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: "1px",
+                    backgroundColor: theme.colors.neutrals[300],
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: theme.getFontSize("sm"),
+                    color: theme.colors.neutrals[500],
+                    fontWeight: theme.getFontWeight("secondary"),
+                  }}
+                >
+                  ou
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: "1px",
+                    backgroundColor: theme.colors.neutrals[300],
+                  }}
+                />
+              </div>
+
+              {/* Google Register Button */}
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={handleGoogleRegister}
+                fullWidth
+                disabled={isLoading}
+                style={{
+                  minHeight: "56px",
+                  fontSize: theme.getFontSize("lg"),
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: theme.getSpacing("m"),
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
+                </svg>
+                Continuar com Google
+              </Button>
+
+              {/* Facebook Register Button */}
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={handleFacebookRegister}
+                fullWidth
+                disabled={isLoading}
+                style={{
+                  minHeight: "56px",
+                  fontSize: theme.getFontSize("lg"),
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: theme.getSpacing("m"),
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+                Continuar com Facebook
+              </Button>
+            </div>
 
             {/* Terms and Conditions */}
             <p

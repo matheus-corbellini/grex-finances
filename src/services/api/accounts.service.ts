@@ -1,68 +1,137 @@
 import BaseApiService from "./base.service";
-import {
-  Account,
-  AccountType,
-  CreateAccountDto,
-  UpdateAccountDto,
-  AccountBalance,
-  AccountSummary,
-  PaginatedResponse,
-  RequestOptions,
-} from "../../../shared/types";
+
+export interface Account {
+  id: string;
+  name: string;
+  type: 'bank' | 'wallet' | 'credit_card' | 'savings';
+  bankName?: string;
+  accountNumber?: string;
+  agency?: string;
+  balance: number;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAccountDto {
+  name: string;
+  type: 'bank' | 'wallet' | 'credit_card' | 'savings';
+  bankName?: string;
+  accountNumber?: string;
+  agency?: string;
+  initialBalance: number;
+  description?: string;
+}
+
+export interface UpdateAccountDto {
+  name?: string;
+  bankName?: string;
+  accountNumber?: string;
+  agency?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface AccountBalanceUpdateDto {
+  balance: number;
+  reason?: string;
+}
 
 class AccountsService extends BaseApiService {
-  async getAccounts(
-    options?: RequestOptions
-  ): Promise<PaginatedResponse<Account>> {
-    return this.getPaginated<Account>("/accounts", options);
+  constructor() {
+    super();
+    this.baseURL = "/accounts";
   }
 
-  async getAccount(id: string): Promise<Account> {
-    return this.get<Account>(`/accounts/${id}`);
+  // Get all accounts
+  async getAccounts(): Promise<Account[]> {
+    return this.get<Account[]>("/");
   }
 
-  async createAccount(data: CreateAccountDto): Promise<Account> {
-    return this.post<Account>("/accounts", data);
+  // Get account by ID
+  async getAccountById(id: string): Promise<Account> {
+    return this.get<Account>(`/${id}`);
   }
 
-  async updateAccount(id: string, data: UpdateAccountDto): Promise<Account> {
-    return this.patch<Account>(`/accounts/${id}`, data);
+  // Create new account
+  async createAccount(accountData: CreateAccountDto): Promise<Account> {
+    return this.post<Account>("/", accountData);
   }
 
+  // Update account
+  async updateAccount(id: string, accountData: UpdateAccountDto): Promise<Account> {
+    return this.put<Account>(`/${id}`, accountData);
+  }
+
+  // Delete account
   async deleteAccount(id: string): Promise<void> {
-    await this.delete(`/accounts/${id}`);
+    return this.delete<void>(`/${id}`);
   }
 
-  async getAccountTypes(): Promise<AccountType[]> {
-    return this.get<AccountType[]>("/account-types");
+  // Update account balance
+  async updateBalance(id: string, balanceData: AccountBalanceUpdateDto): Promise<Account> {
+    return this.patch<Account>(`/${id}/balance`, balanceData);
   }
 
-  async getAccountBalance(id: string): Promise<AccountBalance> {
-    return this.get<AccountBalance>(`/accounts/${id}/balance`);
+  // Get account transactions
+  async getAccountTransactions(id: string, params?: {
+    page?: number;
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
+    transactions: any[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    return this.get(`/${id}/transactions`, { params });
   }
 
-  async getAccountsBalance(accountIds?: string[]): Promise<AccountBalance[]> {
-    const params = accountIds ? { accountIds: accountIds.join(",") } : {};
-    return this.get<AccountBalance[]>("/accounts/balance", { params });
+  // Sync account with bank (if supported)
+  async syncAccount(id: string): Promise<Account> {
+    return this.post<Account>(`/${id}/sync`);
   }
 
-  async getAccountSummary(): Promise<AccountSummary> {
-    return this.get<AccountSummary>("/accounts/summary");
+  // Get account balance history
+  async getBalanceHistory(id: string, params?: {
+    startDate?: string;
+    endDate?: string;
+    period?: 'daily' | 'weekly' | 'monthly';
+  }): Promise<{
+    history: Array<{
+      date: string;
+      balance: number;
+    }>;
+  }> {
+    return this.get(`/${id}/balance-history`, { params });
   }
 
-  async updateAccountBalance(
-    id: string,
-    balance: number
-  ): Promise<AccountBalance> {
-    return this.patch<AccountBalance>(`/accounts/${id}/balance`, { balance });
+  // Archive account (soft delete)
+  async archiveAccount(id: string): Promise<void> {
+    return this.patch<void>(`/${id}/archive`);
   }
 
-  async syncAccountBalance(id: string): Promise<AccountBalance> {
-    return this.post<AccountBalance>(`/accounts/${id}/sync`);
+  // Restore archived account
+  async restoreAccount(id: string): Promise<Account> {
+    return this.patch<Account>(`/${id}/restore`);
   }
 
-  async toggleAccountStatus(id: string): Promise<Account> {
-    return this.patch<Account>(`/accounts/${id}/toggle-status`);
+  // Get archived accounts
+  async getArchivedAccounts(): Promise<Account[]> {
+    return this.get<Account[]>("/archived");
+  }
+
+  // Get accounts summary
+  async getAccountsSummary(): Promise<{
+    totalAccounts: number;
+    totalBalance: number;
+    activeAccounts: number;
+    archivedAccounts: number;
+    accountsByType: Record<string, number>;
+  }> {
+    return this.get("/summary");
   }
 }
 

@@ -5,3 +5,13 @@ node_modules
 .env.test.local
 .env.production.local
 .next
+
+# Firebase Configuration Files
+firebase-config.env
+firebase-backend.env
+firebase-service-account.json
+firebase-adminsdk-*.json
+
+# Environment Files
+.env.example
+.env.template

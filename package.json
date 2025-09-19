@@ -14,6 +14,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "axios": "^1.11.0",
     "borderless": "^1.0.0",
+    "firebase": "^12.3.0",
     "jspdf": "^3.0.2",
     "lucide-react": "^0.542.0",
     "next": "^15.2.0",

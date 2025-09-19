@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { ChevronLeft, ChevronRight, Plus, TrendingUp, TrendingDown, Eye } from "lucide-react";
 import { BankIconComponent } from "../../../components/ui/BankIcons";
-import { AccountDetailsModal } from "../../../components/modals";
+import { AccountDetailsModal, AddAccountModal } from "../../../components/modals";
 import { Icon } from "../../../components/ui/Icon";
 import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
+import accountsService, { CreateAccountDto } from "../../../services/api/accounts.service";
 import styles from "./Accounts.module.css";
 
 interface Account {
@@ -24,6 +25,7 @@ interface Account {
 export default function Accounts() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 6, 1)); // Julho 2024
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   const accounts: Account[] = [
@@ -198,6 +200,24 @@ export default function Accounts() {
     // Implementar lógica de compartilhamento
   };
 
+  const handleAddAccount = async (accountData: CreateAccountDto) => {
+    try {
+      // Chamar API para criar conta
+      const newAccount = await accountsService.createAccount(accountData);
+      console.log("Conta criada:", newAccount);
+
+      // Aqui você pode atualizar a lista de contas local ou recarregar os dados
+      // Por exemplo: setAccounts(prev => [...prev, newAccount]);
+
+      // Mostrar mensagem de sucesso (você pode usar um toast aqui)
+      alert("Conta adicionada com sucesso!");
+
+    } catch (error: any) {
+      console.error("Erro ao criar conta:", error);
+      throw new Error(error.message || "Erro ao adicionar conta");
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className={styles.accountsContainer}>
@@ -215,6 +235,15 @@ export default function Accounts() {
                 Filtros
               </button>
             </div>
+
+            {/* Botão Adicionar Conta */}
+            <button
+              className={styles.addAccountButton}
+              onClick={() => setShowAddAccountModal(true)}
+            >
+              <Plus size={16} />
+              Adicionar Conta
+            </button>
           </div>
 
           <div className={styles.rightControls}>
@@ -404,6 +433,13 @@ export default function Accounts() {
           onShare={handleShareAccount}
         />
       )}
+
+      {/* Modal Adicionar Conta */}
+      <AddAccountModal
+        isOpen={showAddAccountModal}
+        onClose={() => setShowAddAccountModal(false)}
+        onSubmit={handleAddAccount}
+      />
     </DashboardLayout>
   );
 }

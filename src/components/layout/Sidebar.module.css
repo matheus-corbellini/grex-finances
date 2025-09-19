@@ -15,6 +15,39 @@
   overflow: hidden;
 }
 
+/* Desktop Sidebar Toggle Button */
+.desktopSidebarToggle {
+  position: absolute;
+  top: 24px; /* Posição mais próxima ao topo para maior visibilidade */
+  right: 0px; /* Ajustado para não ser cortado */
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* Forma circular */
+  background-color: var(--color-primary-600); /* Fundo azul forte para visibilidade */
+  border: none; /* Remover borda para um look mais limpo */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-base-white); /* Ícone branco para contraste */
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra mais proeminente */
+  z-index: 901; /* Garantir que fique no topo */
+}
+
+.desktopSidebarToggle:hover {
+  background-color: var(--color-primary-700); /* Azul mais escuro no hover */
+  transform: scale(1.05); /* Leve aumento no hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* Sombra mais intensa no hover */
+}
+
+/* Hide toggle button on mobile */
+@media (max-width: 768px) {
+  .desktopSidebarToggle {
+    display: none;
+  }
+}
+
 .sidebarContainer.closed {
   width: 60px;
 }

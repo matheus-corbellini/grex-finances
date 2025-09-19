@@ -114,6 +114,7 @@
   color: var(--color-neutrals-600);
 }
 
+
 /* Mobile Styles */
 @media (max-width: 768px) {
   .mobileMenuButton {

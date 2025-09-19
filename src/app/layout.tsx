@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "../styles/index.css";
 import { ThemeProvider } from "../context/ThemeContext";
 import { ToastProvider } from "../context/ToastContext";
+import { AuthProvider } from "../context/AuthContext";
 
 export const metadata: Metadata = {
   title: "Grex Finances",
@@ -18,9 +19,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <ThemeProvider>
-          <ToastProvider position="top-right" maxToasts={5}>
-            {children}
-          </ToastProvider>
+          <AuthProvider>
+            <ToastProvider position="top-right" maxToasts={5}>
+              {children}
+            </ToastProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -3,13 +3,14 @@
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Header.module.css";
-import { ChevronDown, Plus, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { ChevronDown, Plus, ChevronLeft, ChevronRight, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 interface HeaderProps {
   onMenuToggle: () => void;
+  sidebarOpen?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
+export const Header: React.FC<HeaderProps> = ({ onMenuToggle, sidebarOpen = true }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const pathname = usePathname();
   const router = useRouter();
@@ -42,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
         >
           <Menu size={24} />
         </button>
+
 
         {/* Logo */}
         <div className={styles.brand}>
