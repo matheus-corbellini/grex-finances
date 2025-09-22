@@ -48,6 +48,15 @@ export class Account {
   @Column({ nullable: true })
   icon?: string;
 
+  @Column({ nullable: true })
+  agency?: string;
+
+  @Column({ default: false })
+  isArchived: boolean;
+
+  @Column({ nullable: true })
+  archivedAt?: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 
