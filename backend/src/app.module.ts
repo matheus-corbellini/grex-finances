@@ -22,10 +22,9 @@ import { GoalsModule } from "@/modules/goals/goals.module";
     TypeOrmModule.forRoot({
       type: "sqlite",
       database: "grex_finances.db",
-      autoLoadEntities: false,
-      entities: [],
-      synchronize: false,
-      logging: false,
+      autoLoadEntities: true,
+      synchronize: true,
+      logging: true,
     }),
     UsersModule,
     AccountsModule,
