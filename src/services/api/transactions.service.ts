@@ -15,11 +15,14 @@ class TransactionsService extends BaseApiService {
     filter?: TransactionFilter,
     options?: RequestOptions
   ): Promise<PaginatedResponse<Transaction>> {
-    const requestOptions = {
-      ...options,
-      filter: { ...options?.filter, ...filter },
+    const params = {
+      ...options?.filter,
+      ...filter,
+      page: options?.page || 1,
+      limit: options?.limit || 10
     };
-    return this.getPaginated<Transaction>("/transactions", requestOptions);
+
+    return this.get<PaginatedResponse<Transaction>>("/transactions", { params });
   }
 
   async getTransaction(id: string): Promise<Transaction> {
@@ -34,11 +37,15 @@ class TransactionsService extends BaseApiService {
     id: string,
     data: UpdateTransactionDto
   ): Promise<Transaction> {
-    return this.patch<Transaction>(`/transactions/${id}`, data);
+    return this.put<Transaction>(`/transactions/${id}`, data);
   }
 
   async deleteTransaction(id: string): Promise<void> {
-    await this.delete(`/transactions/${id}`);
+    return this.delete<void>(`/transactions/${id}`);
+  }
+
+  async getCategories(): Promise<any[]> {
+    return this.get<any[]>("/categories");
   }
 
   async duplicateTransaction(id: string): Promise<Transaction> {

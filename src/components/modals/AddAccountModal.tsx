@@ -18,7 +18,7 @@ interface AccountFormData {
     bankName?: string;
     accountNumber?: string;
     agency?: string;
-    initialBalance: string;
+    initialBalance: number;
     description?: string;
 }
 
@@ -40,18 +40,28 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
         bankName: '',
         accountNumber: '',
         agency: '',
-        initialBalance: '',
+        initialBalance: 0,
         description: '',
     });
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        console.log(`🔄 Atualizando campo ${field}:`, value);
+
+        if (field === 'initialBalance') {
+            const numericValue = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+            setFormData(prev => ({ ...prev, [field]: numericValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
+
         // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
+
+        console.log(`✅ Campo ${field} atualizado. Novo formData:`, formData);
     };
 
     const validateForm = () => {
@@ -73,22 +83,29 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             }
         }
 
-        if (!formData.initialBalance.trim()) {
-            newErrors.initialBalance = 'Saldo inicial é obrigatório';
-        } else {
-            const balance = parseFloat(formData.initialBalance.replace(/[^\d,-]/g, '').replace(',', '.'));
-            if (isNaN(balance)) {
-                newErrors.initialBalance = 'Saldo inicial deve ser um número válido';
-            }
+        if (formData.initialBalance < 0) {
+            newErrors.initialBalance = 'Saldo inicial deve ser maior ou igual a zero';
+        } else if (isNaN(formData.initialBalance)) {
+            newErrors.initialBalance = 'Saldo inicial deve ser um número válido';
         }
+
+        console.log("🔍 Erros encontrados na validação:", newErrors);
+        console.log("🔍 Quantidade de erros:", Object.keys(newErrors).length);
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
-        if (!validateForm()) return;
+        console.log("🔍 Iniciando validação do formulário...");
+        console.log("📋 Dados do formulário:", formData);
 
+        if (!validateForm()) {
+            console.log("❌ Validação falhou, erros:", errors);
+            return;
+        }
+
+        console.log("✅ Validação passou, enviando dados...");
         setIsLoading(true);
         try {
             await onSubmit(formData);
@@ -99,11 +116,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 bankName: '',
                 accountNumber: '',
                 agency: '',
-                initialBalance: '',
+                initialBalance: 0,
                 description: '',
             });
             onClose();
         } catch (error: any) {
+            console.error("❌ Erro no modal:", error);
             setErrors({ general: error.message || 'Erro ao adicionar conta' });
         } finally {
             setIsLoading(false);
@@ -117,7 +135,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             bankName: '',
             accountNumber: '',
             agency: '',
-            initialBalance: '',
+            initialBalance: 0,
             description: '',
         });
         setErrors({});
@@ -179,7 +197,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                         label="Nome da Conta"
                         placeholder="Ex: Conta Corrente Principal"
                         value={formData.name}
-                        onChange={handleInputChange}
+                        onChange={(value) => handleInputChange('name', value)}
                         error={errors.name}
                         required
                     />
@@ -192,8 +210,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                                 name="bankName"
                                 label="Nome do Banco"
                                 placeholder="Ex: Banco do Brasil"
-                                value={formData.bankName}
-                                onChange={handleInputChange}
+                                value={formData.bankName || ''}
+                                onChange={(value) => handleInputChange('bankName', value)}
                                 error={errors.bankName}
                                 required
                             />
@@ -203,8 +221,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                                     name="agency"
                                     label="Agência"
                                     placeholder="Ex: 1234"
-                                    value={formData.agency}
-                                    onChange={handleInputChange}
+                                    value={formData.agency || ''}
+                                    onChange={(value) => handleInputChange('agency', value)}
                                     error={errors.agency}
                                     required
                                 />
@@ -213,8 +231,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                                     name="accountNumber"
                                     label="Número da Conta"
                                     placeholder="Ex: 12345-6"
-                                    value={formData.accountNumber}
-                                    onChange={handleInputChange}
+                                    value={formData.accountNumber || ''}
+                                    onChange={(value) => handleInputChange('accountNumber', value)}
                                     error={errors.accountNumber}
                                     required
                                 />
@@ -228,8 +246,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                         name="initialBalance"
                         label="Saldo Inicial"
                         placeholder="Ex: 1.000,00"
-                        value={formData.initialBalance}
-                        onChange={handleInputChange}
+                        value={formData.initialBalance.toString()}
+                        onChange={(value) => handleInputChange('initialBalance', value)}
                         error={errors.initialBalance}
                         required
                     />
@@ -240,8 +258,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                         name="description"
                         label="Descrição (Opcional)"
                         placeholder="Ex: Conta para despesas pessoais"
-                        value={formData.description}
-                        onChange={handleInputChange}
+                        value={formData.description || ''}
+                        onChange={(value) => handleInputChange('description', value)}
                         error={errors.description}
                     />
 

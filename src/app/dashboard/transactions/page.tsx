@@ -14,10 +14,16 @@ import {
   ArrowUpDown,
   CheckCircle,
   Circle,
-  Eye
+  Eye,
+  Plus
 } from "lucide-react";
 import { Toast } from "../../../components/ui/Toast";
 import { TransactionViewModal } from "../../../components/modals";
+import AddTransactionModal from "../../../components/modals/AddTransactionModal";
+import transactionsService from "../../../services/api/transactions.service";
+import accountsService from "../../../services/api/accounts.service";
+import { Transaction } from "../../../shared/types/transaction.types";
+import { Account } from "../../../shared/types/account.types";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -31,7 +37,136 @@ export default function Transactions() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [statusDropdowns, setStatusDropdowns] = useState<{ [key: number]: boolean }>({});
   const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
+
+  // Estados para dados dinâmicos
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+
+  // Carregar transações da API
+  useEffect(() => {
+    console.log("🔄 Carregando dados...");
+    loadTransactions();
+    loadCategories();
+    loadAccounts();
+  }, [currentPage, searchTerm, activeView, currentDate]);
+
+  const loadTransactions = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const filter = {
+        search: searchTerm || undefined,
+        // Adicionar filtros de data baseados na view ativa
+        ...(activeView === "Mês" && {
+          startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+          endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+        }),
+        ...(activeView === "Semana" && {
+          startDate: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000),
+          endDate: currentDate
+        })
+      };
+
+      const response = await transactionsService.getTransactions(filter, {
+        page: currentPage,
+        limit: 10
+      });
+
+      setTransactions(response.transactions);
+      setTotalTransactions(response.total);
+    } catch (err: any) {
+      console.error("Erro ao carregar transações:", err);
+      setError(err.message || "Erro ao carregar transações");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      console.log("🔄 Carregando categorias...");
+      const categoriesData = await transactionsService.getCategories();
+      console.log("✅ Categorias carregadas:", categoriesData);
+      console.log("📊 Quantidade de categorias:", categoriesData.length);
+      setCategories(categoriesData);
+    } catch (err) {
+      console.error("❌ Erro ao carregar categorias:", err);
+    }
+  };
+
+  const loadAccounts = async () => {
+    try {
+      console.log("🔄 Carregando contas...");
+      const accountsData = await accountsService.getAccounts();
+      console.log("✅ Contas carregadas:", accountsData);
+      console.log("📊 Quantidade de contas:", accountsData.length);
+      setAccounts(accountsData);
+    } catch (err) {
+      console.error("❌ Erro ao carregar contas:", err);
+    }
+  };
+
+  const handleAddTransaction = async (transactionData: any) => {
+    try {
+      const newTransaction = await transactionsService.createTransaction(transactionData);
+
+      // Atualizar a lista de transações
+      setTransactions(prev => [newTransaction, ...prev]);
+      setTotalTransactions(prev => prev + 1);
+
+      // Mostrar mensagem de sucesso
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+
+    } catch (error: any) {
+      console.error("Erro ao adicionar transação:", error);
+      throw new Error(error.message || "Erro ao adicionar transação");
+    }
+  };
+
+  // Funções auxiliares para formatação
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'completed': 'Concluída',
+      'pending': 'Pendente',
+      'cancelled': 'Cancelada',
+      'failed': 'Falhada'
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusTypeClass = (status: string) => {
+    const classes: Record<string, string> = {
+      'completed': styles.success,
+      'pending': styles.warning,
+      'cancelled': styles.error,
+      'failed': styles.error
+    };
+    return classes[status] || styles.warning;
+  };
+
+  const handleViewTransaction = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setShowTransactionViewModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setShowTransactionViewModal(false);
+    setSelectedTransaction(null);
+  };
+
+  // Atualizar contagem de transações no cabeçalho
+  const updateTransactionsTitle = () => {
+    return `${totalTransactions} Lançamento${totalTransactions !== 1 ? 's' : ''}`;
+  };
 
   // Fechar dropdowns ao clicar fora
   useEffect(() => {
@@ -166,16 +301,6 @@ export default function Transactions() {
   const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
     // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
     return;
-  };
-
-  const handleViewTransaction = (transaction: any) => {
-    setSelectedTransaction(transaction);
-    setShowTransactionViewModal(true);
-  };
-
-  const handleCloseTransactionModal = () => {
-    setShowTransactionViewModal(false);
-    setSelectedTransaction(null);
   };
 
   const handleEditTransaction = () => {
@@ -576,55 +701,6 @@ export default function Transactions() {
     }
   };
 
-  // Estado dos lançamentos (dados da imagem)
-  const [transactions, setTransactions] = useState([
-    {
-      id: 1,
-      type: "",
-      description: "Lorem ipsum sit amet doll",
-      category: "Outros",
-      value: "R$24.534.212,00",
-      status: "Status",
-      statusType: "warning"
-    },
-    {
-      id: 2,
-      type: "",
-      description: "Lorem ipsum sit amet doll",
-      category: "Outros",
-      value: "R$24.534.212,00",
-      status: "Status",
-      statusType: "success"
-    },
-    {
-      id: 3,
-      type: "",
-      description: "Lorem ipsum sit amet doll",
-      category: "Outros",
-      value: "R$24.534.212,00",
-      status: "Status",
-      statusType: "success"
-    },
-    {
-      id: 4,
-      type: "",
-      description: "Lorem ipsum sit amet doll",
-      category: "Outros",
-      value: "R$24.534.212,00",
-      status: "Status",
-      statusType: "warning"
-    },
-    {
-      id: 5,
-      type: "",
-      description: "Lorem ipsum sit amet doll",
-      category: "Outros",
-      value: "R$24.534.212,00",
-      status: "Status",
-      statusType: "warning"
-    }
-  ]);
-
   return (
     <DashboardLayout>
       <div className={styles.transactionsContainer}>
@@ -671,6 +747,13 @@ export default function Transactions() {
 
             {/* Botões de ação */}
             <div className={styles.actionButtons}>
+              <button
+                className={`${styles.actionButton} ${styles.primaryButton}`}
+                onClick={() => setShowAddTransactionModal(true)}
+              >
+                <Plus size={16} />
+                Nova Transação
+              </button>
               <button className={styles.actionButton} onClick={importData}>
                 <Upload size={16} />
                 Importar
@@ -690,7 +773,7 @@ export default function Transactions() {
         {/* Seção de transações */}
         <div className={styles.transactionsSection}>
           <div className={styles.transactionsHeader}>
-            <h2 className={styles.transactionsTitle}>23 Lançamentos</h2>
+            <h2 className={styles.transactionsTitle}>{updateTransactionsTitle()}</h2>
             <div className={styles.searchContainer}>
               <Search size={16} className={styles.searchIcon} />
               <input
@@ -838,17 +921,23 @@ export default function Transactions() {
                     </td>
                     <td className={styles.tableCell}>
                       <div className={styles.categoryCell}>
-                        <span className={styles.categoryText}>{transaction.category}</span>
-                        <ChevronDown size={14} className={styles.dropdownIcon} />
+                        <span className={styles.categoryText}>
+                          {transaction.category?.name || 'Sem categoria'}
+                        </span>
                       </div>
                     </td>
                     <td className={styles.tableCell}>
-                      <span className={styles.value}>{transaction.value}</span>
+                      <span className={`${styles.value} ${transaction.amount >= 0 ? styles.positive : styles.negative}`}>
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(Math.abs(transaction.amount))}
+                      </span>
                     </td>
                     <td className={styles.tableCell}>
                       <div className={styles.statusCell}>
-                        <span className={`${styles.statusTag} ${styles[transaction.statusType]}`}>
-                          {transaction.status}
+                        <span className={`${styles.statusTag} ${getStatusTypeClass(transaction.status)}`}>
+                          {getStatusLabel(transaction.status)}
                         </span>
                         <div className={`${styles.statusDropdownContainer} statusDropdownContainer`}>
                           <button
@@ -933,9 +1022,9 @@ export default function Transactions() {
             createdAt: new Date(),
             updatedAt: new Date()
           }}
-          category={{
+          category={selectedTransaction.category || {
             id: "1",
-            name: selectedTransaction.category,
+            name: "Sem categoria",
             type: "expense" as any,
             color: "#3b82f6",
             icon: "tag",
@@ -950,6 +1039,15 @@ export default function Transactions() {
           onShare={handleShareTransaction}
         />
       )}
+
+      {/* Modal de Adicionar Transação */}
+      <AddTransactionModal
+        isOpen={showAddTransactionModal}
+        onClose={() => setShowAddTransactionModal(false)}
+        onSubmit={handleAddTransaction}
+        accounts={accounts}
+        categories={categories}
+      />
     </DashboardLayout>
   );
 }

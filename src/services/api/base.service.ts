@@ -11,11 +11,13 @@ class BaseApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
+      withCredentials: false, // Desabilitar credentials para evitar problemas CORS
     });
 
     this.setupInterceptors();
@@ -77,8 +79,9 @@ class BaseApiService {
   }
 
   protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.api.get<ApiResponse<T>>(url, config);
-    return response.data.data;
+    const response = await this.api.get<any>(url, config);
+    // Se a resposta tem estrutura { data: ... }, extrair data, senão retornar diretamente
+    return response.data.data !== undefined ? response.data.data : response.data;
   }
 
   protected async post<T>(
@@ -86,8 +89,8 @@ class BaseApiService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.api.post<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await this.api.post<any>(url, data, config);
+    return response.data.data !== undefined ? response.data.data : response.data;
   }
 
   protected async put<T>(
@@ -95,8 +98,8 @@ class BaseApiService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.api.put<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await this.api.put<any>(url, data, config);
+    return response.data.data !== undefined ? response.data.data : response.data;
   }
 
   protected async patch<T>(
@@ -104,16 +107,16 @@ class BaseApiService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.api.patch<ApiResponse<T>>(url, data, config);
-    return response.data.data;
+    const response = await this.api.patch<any>(url, data, config);
+    return response.data.data !== undefined ? response.data.data : response.data;
   }
 
   protected async delete<T>(
     url: string,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.api.delete<ApiResponse<T>>(url, config);
-    return response.data.data;
+    const response = await this.api.delete<any>(url, config);
+    return response.data.data !== undefined ? response.data.data : response.data;
   }
 
   protected async getPaginated<T>(
