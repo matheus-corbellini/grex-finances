@@ -3,6 +3,7 @@ import { X, Plus, Calendar, DollarSign, Tag, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
+import CurrencyInput from '../ui/CurrencyInput';
 import styles from './AddTransactionModal.module.css';
 
 interface Account {
@@ -49,11 +50,6 @@ export default function AddTransactionModal({
     accounts,
     categories
 }: AddTransactionModalProps) {
-    // Debug logs
-    console.log("🔍 AddTransactionModal - accounts:", accounts);
-    console.log("🔍 AddTransactionModal - categories:", categories);
-    console.log("📊 Quantidade de contas recebidas:", accounts?.length || 0);
-    console.log("📊 Quantidade de categorias recebidas:", categories?.length || 0);
     const [formData, setFormData] = useState<TransactionFormData>({
         description: '',
         amount: 0,
@@ -138,14 +134,6 @@ export default function AddTransactionModal({
         }
     };
 
-    const handleAmountChange = (value: string) => {
-        const numericValue = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
-        setFormData(prev => ({ ...prev, amount: numericValue }));
-
-        if (errors.amount) {
-            setErrors(prev => ({ ...prev, amount: '' }));
-        }
-    };
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -216,18 +204,21 @@ export default function AddTransactionModal({
 
                         {/* Valor */}
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>Valor</label>
-                            <div className={styles.amountInput}>
-                                <span className={styles.currencySymbol}>R$</span>
-                                <input
-                                    type="text"
-                                    className={`${styles.input} ${errors.amount ? styles.error : ''}`}
-                                    placeholder="0,00"
-                                    value={formData.amount > 0 ? formData.amount.toFixed(2).replace('.', ',') : ''}
-                                    onChange={(e) => handleAmountChange(e.target.value)}
-                                />
-                            </div>
-                            {errors.amount && <span className={styles.errorText}>{errors.amount}</span>}
+                            <CurrencyInput
+                                id="amount"
+                                name="amount"
+                                label="Valor"
+                                placeholder="0,00"
+                                value={formData.amount}
+                                onChange={(value) => {
+                                    setFormData(prev => ({ ...prev, amount: value }));
+                                    if (errors.amount) {
+                                        setErrors(prev => ({ ...prev, amount: '' }));
+                                    }
+                                }}
+                                error={errors.amount}
+                                required
+                            />
                         </div>
 
                         {/* Categoria */}

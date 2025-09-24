@@ -39,9 +39,11 @@ export default function Transactions() {
   const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
+  const [showEditTransactionModal, setShowEditTransactionModal] = useState(false);
 
   // Estados para dados dinâmicos
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalTransactions, setTotalTransactions] = useState(0);
@@ -49,13 +51,28 @@ export default function Transactions() {
   const [categories, setCategories] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    type: '',
+    status: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+  const [showFiltersDropdown, setShowFiltersDropdown] = useState(false);
+
   // Carregar transações da API
   useEffect(() => {
-    console.log("🔄 Carregando dados...");
     loadTransactions();
     loadCategories();
     loadAccounts();
   }, [currentPage, searchTerm, activeView, currentDate]);
+
+  // Aplicar filtros quando mudarem
+  useEffect(() => {
+    applyFilters();
+  }, [transactions, filters]);
 
   const loadTransactions = async () => {
     try {
@@ -92,10 +109,7 @@ export default function Transactions() {
 
   const loadCategories = async () => {
     try {
-      console.log("🔄 Carregando categorias...");
       const categoriesData = await transactionsService.getCategories();
-      console.log("✅ Categorias carregadas:", categoriesData);
-      console.log("📊 Quantidade de categorias:", categoriesData.length);
       setCategories(categoriesData);
     } catch (err) {
       console.error("❌ Erro ao carregar categorias:", err);
@@ -104,14 +118,75 @@ export default function Transactions() {
 
   const loadAccounts = async () => {
     try {
-      console.log("🔄 Carregando contas...");
       const accountsData = await accountsService.getAccounts();
-      console.log("✅ Contas carregadas:", accountsData);
-      console.log("📊 Quantidade de contas:", accountsData.length);
       setAccounts(accountsData);
     } catch (err) {
       console.error("❌ Erro ao carregar contas:", err);
     }
+  };
+
+  // Função para aplicar filtros
+  const applyFilters = () => {
+    let filtered = [...transactions];
+
+    // Filtro por busca (descrição)
+    if (filters.search) {
+      filtered = filtered.filter(transaction =>
+        transaction.description.toLowerCase().includes(filters.search.toLowerCase())
+      );
+    }
+
+    // Filtro por categoria
+    if (filters.category) {
+      filtered = filtered.filter(transaction =>
+        transaction.category?.id === filters.category
+      );
+    }
+
+    // Filtro por tipo
+    if (filters.type) {
+      filtered = filtered.filter(transaction =>
+        transaction.type === filters.type
+      );
+    }
+
+    // Filtro por status
+    if (filters.status) {
+      filtered = filtered.filter(transaction =>
+        transaction.status === filters.status
+      );
+    }
+
+    // Filtro por data
+    if (filters.dateFrom) {
+      filtered = filtered.filter(transaction =>
+        new Date(transaction.date) >= new Date(filters.dateFrom)
+      );
+    }
+
+    if (filters.dateTo) {
+      filtered = filtered.filter(transaction =>
+        new Date(transaction.date) <= new Date(filters.dateTo)
+      );
+    }
+
+    setFilteredTransactions(filtered);
+  };
+
+  // Funções para atualizar filtros
+  const updateFilter = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      category: '',
+      type: '',
+      status: '',
+      dateFrom: '',
+      dateTo: ''
+    });
   };
 
   const handleAddTransaction = async (transactionData: any) => {
@@ -165,7 +240,8 @@ export default function Transactions() {
 
   // Atualizar contagem de transações no cabeçalho
   const updateTransactionsTitle = () => {
-    return `${totalTransactions} Lançamento${totalTransactions !== 1 ? 's' : ''}`;
+    const count = filteredTransactions.length;
+    return `${count} Lançamento${count !== 1 ? 's' : ''}`;
   };
 
   // Fechar dropdowns ao clicar fora
@@ -298,29 +374,106 @@ export default function Transactions() {
     return selectedRows.includes(transactionId);
   };
 
+  const toggleRowSelection = (id: number) => {
+    setSelectedRows(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(rowId => rowId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectAll) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(filteredTransactions.map(t => t.id));
+    }
+    setSelectAll(!selectAll);
+  };
+
   const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
     // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
     return;
   };
 
   const handleEditTransaction = () => {
-    console.log("Editar transação:", selectedTransaction);
-    // Implementar lógica de edição
+    if (selectedTransaction) {
+      setShowEditTransactionModal(true);
+      setShowTransactionViewModal(false);
+    }
   };
 
   const handleDeleteTransaction = () => {
-    console.log("Excluir transação:", selectedTransaction);
-    // Implementar lógica de exclusão
+    if (selectedTransaction) {
+      const confirmDelete = window.confirm(
+        `Tem certeza que deseja excluir a transação "${selectedTransaction.description}"?\n\nEsta ação não pode ser desfeita.`
+      );
+      
+      if (confirmDelete) {
+        // Implementar exclusão via API
+        transactionsService.deleteTransaction(selectedTransaction.id)
+          .then(() => {
+            // Recarregar transações
+            loadTransactions();
+            // Fechar modal
+            setShowTransactionViewModal(false);
+            setSelectedTransaction(null);
+            // Mostrar mensagem de sucesso
+            alert("Transação excluída com sucesso!");
+          })
+          .catch((error) => {
+            console.error("Erro ao excluir transação:", error);
+            alert("Erro ao excluir transação. Tente novamente.");
+          });
+      }
+    }
   };
 
   const handleDuplicateTransaction = () => {
-    console.log("Duplicar transação:", selectedTransaction);
-    // Implementar lógica de duplicação
+    if (selectedTransaction) {
+      // Criar uma cópia da transação com nova data
+      const duplicatedTransaction = {
+        ...selectedTransaction,
+        id: undefined, // Será gerado pelo backend
+        date: new Date().toISOString().split('T')[0], // Data atual
+        description: `${selectedTransaction.description} (Cópia)`,
+        status: 'pending' // Status pendente para a cópia
+      };
+      
+      // Abrir modal de adição com dados preenchidos
+      setShowAddTransactionModal(true);
+      setShowTransactionViewModal(false);
+      
+      // TODO: Passar dados para o modal de adição
+      console.log("Duplicando transação:", duplicatedTransaction);
+    }
   };
 
   const handleShareTransaction = () => {
-    console.log("Compartilhar transação:", selectedTransaction);
-    // Implementar lógica de compartilhamento
+    if (selectedTransaction) {
+      // Criar texto para compartilhamento
+      const shareText = `Transação: ${selectedTransaction.description}\n` +
+        `Valor: R$ ${selectedTransaction.amount.toFixed(2)}\n` +
+        `Data: ${new Date(selectedTransaction.date).toLocaleDateString('pt-BR')}\n` +
+        `Categoria: ${selectedTransaction.category?.name || 'N/A'}\n` +
+        `Status: ${selectedTransaction.status}`;
+      
+      // Copiar para área de transferência
+      navigator.clipboard.writeText(shareText).then(() => {
+        alert("Transação copiada para a área de transferência!");
+      }).catch(() => {
+        // Fallback para navegadores que não suportam clipboard API
+        const textArea = document.createElement('textarea');
+        textArea.value = shareText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert("Transação copiada para a área de transferência!");
+      });
+    }
   };
 
   // Função para alterar status de múltiplas transações
@@ -367,6 +520,13 @@ export default function Transactions() {
   };
 
   const exportToPDF = () => {
+    if (selectedRows.length === 0) {
+      alert("Selecione pelo menos uma transação para exportar");
+      return;
+    }
+    
+    const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
+    
     // Importar jsPDF dinamicamente
     import('jspdf').then(({ jsPDF }) => {
       const doc = new jsPDF();
@@ -406,7 +566,7 @@ export default function Transactions() {
       doc.setTextColor(darkGray[0], darkGray[1], darkGray[2]);
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Total de lançamentos: ${transactions.length}`, margin, 60);
+      doc.text(`Total de lançamentos selecionados: ${selectedTransactions.length}`, margin, 60);
       doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, margin, 70);
 
       // Cabeçalhos da tabela com fundo
@@ -434,7 +594,7 @@ export default function Transactions() {
       doc.setFontSize(9);
       let currentY = tableStartY + 15;
 
-      transactions.forEach((transaction, index) => {
+      selectedTransactions.forEach((transaction, index) => {
         // Verificar se precisa de nova página
         if (currentY > doc.internal.pageSize.getHeight() - 30) {
           doc.addPage();
@@ -650,13 +810,20 @@ export default function Transactions() {
   };
 
   const printData = () => {
+    if (selectedRows.length === 0) {
+      alert("Selecione pelo menos uma transação para imprimir");
+      return;
+    }
+    
+    const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
+    
     // Criar uma nova janela para impressão
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       const printContent = `
         <html>
           <head>
-            <title>Lançamentos - ${formatDate(currentDate)}</title>
+            <title>Lançamentos Selecionados - ${formatDate(currentDate)}</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; }
               table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -667,8 +834,8 @@ export default function Transactions() {
           </head>
           <body>
             <div class="header">
-              <h1>Lançamentos - ${formatDate(currentDate)}</h1>
-              <p>Total: ${transactions.length} lançamentos</p>
+              <h1>Lançamentos Selecionados - ${formatDate(currentDate)}</h1>
+              <p>Total: ${selectedTransactions.length} lançamentos selecionados</p>
             </div>
             <table>
               <thead>
@@ -681,7 +848,7 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody>
-                ${transactions.map(transaction => `
+                ${selectedTransactions.map(transaction => `
                   <tr>
                     <td></td>
                     <td>${transaction.description}</td>
@@ -719,10 +886,109 @@ export default function Transactions() {
             >
               Semana
             </button>
-            <button className={styles.filterButton}>
-              Filtros
-              <ChevronDown size={14} />
-            </button>
+            <div className={styles.filterContainer}>
+              <button 
+                className={styles.filterButton}
+                onClick={() => setShowFiltersDropdown(!showFiltersDropdown)}
+              >
+                Filtros
+                <ChevronDown size={14} />
+              </button>
+              
+              {showFiltersDropdown && (
+                <div className={styles.filtersDropdown}>
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Buscar por descrição:</label>
+                    <input
+                      type="text"
+                      className={styles.filterInput}
+                      placeholder="Digite a descrição..."
+                      value={filters.search}
+                      onChange={(e) => updateFilter('search', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Categoria:</label>
+                    <select
+                      className={styles.filterSelect}
+                      value={filters.category}
+                      onChange={(e) => updateFilter('category', e.target.value)}
+                    >
+                      <option value="">Todas as categorias</option>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Tipo:</label>
+                    <select
+                      className={styles.filterSelect}
+                      value={filters.type}
+                      onChange={(e) => updateFilter('type', e.target.value)}
+                    >
+                      <option value="">Todos os tipos</option>
+                      <option value="income">Receita</option>
+                      <option value="expense">Despesa</option>
+                      <option value="transfer">Transferência</option>
+                    </select>
+                  </div>
+                  
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Status:</label>
+                    <select
+                      className={styles.filterSelect}
+                      value={filters.status}
+                      onChange={(e) => updateFilter('status', e.target.value)}
+                    >
+                      <option value="">Todos os status</option>
+                      <option value="completed">Concluída</option>
+                      <option value="pending">Pendente</option>
+                      <option value="cancelled">Cancelada</option>
+                    </select>
+                  </div>
+                  
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Data de:</label>
+                    <input
+                      type="date"
+                      className={styles.filterInput}
+                      value={filters.dateFrom}
+                      onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className={styles.filterSection}>
+                    <label className={styles.filterLabel}>Data até:</label>
+                    <input
+                      type="date"
+                      className={styles.filterInput}
+                      value={filters.dateTo}
+                      onChange={(e) => updateFilter('dateTo', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className={styles.filterActions}>
+                    <button 
+                      className={styles.clearFiltersButton}
+                      onClick={clearFilters}
+                    >
+                      Limpar Filtros
+                    </button>
+                    <button 
+                      className={styles.applyFiltersButton}
+                      onClick={() => setShowFiltersDropdown(false)}
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.rightControls}>
@@ -881,10 +1147,15 @@ export default function Transactions() {
                       <ArrowUpDown size={14} className={styles.sortIcon} />
                     </span>
                   </th>
+                  <th className={styles.tableHeader}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                      Ações
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((transaction) => (
+                {filteredTransactions.map((transaction) => (
                   <tr
                     key={transaction.id}
                     className={`${styles.tableRow} ${selectedRow === transaction.id ? styles.selected : ''} ${isRowSelected(transaction.id) ? styles.rowSelected : ''}`}
@@ -907,16 +1178,6 @@ export default function Transactions() {
                     <td className={styles.tableCell}>
                       <div className={styles.descriptionCell}>
                         <span className={styles.description}>{transaction.description}</span>
-                        <button
-                          className={styles.viewButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewTransaction(transaction);
-                          }}
-                          title="Visualizar transação"
-                        >
-                          <Eye size={14} />
-                        </button>
                       </div>
                     </td>
                     <td className={styles.tableCell}>
@@ -968,6 +1229,21 @@ export default function Transactions() {
                             </div>
                           )}
                         </div>
+                      </div>
+                    </td>
+                    <td className={styles.tableCell}>
+                      <div className={styles.actionsCell}>
+                        <button
+                          className={styles.actionButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewTransaction(transaction);
+                          }}
+                          title="Visualizar transação"
+                        >
+                          <Eye size={16} />
+                          <span>Visualizar</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -1037,6 +1313,25 @@ export default function Transactions() {
           onDelete={handleDeleteTransaction}
           onDuplicate={handleDuplicateTransaction}
           onShare={handleShareTransaction}
+          onPrint={() => {
+            // Implementar funcionalidade de impressão
+            window.print();
+          }}
+          onExport={() => {
+            // Implementar funcionalidade de exportação
+            const data = {
+              transaction: selectedTransaction,
+              account: accounts.find(acc => acc.id === selectedTransaction.accountId),
+              category: categories.find(cat => cat.id === selectedTransaction.categoryId)
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `transacao-${selectedTransaction.id}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+          }}
         />
       )}
 

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, Building2, Wallet, CreditCard, PiggyBank } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
+import CurrencyInput from "../ui/CurrencyInput";
 import styles from "./AddAccountModal.module.css";
 
 interface AddAccountModalProps {
@@ -47,21 +48,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const handleInputChange = (field: string, value: string) => {
-        console.log(`🔄 Atualizando campo ${field}:`, value);
-
-        if (field === 'initialBalance') {
-            const numericValue = parseFloat(value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
-            setFormData(prev => ({ ...prev, [field]: numericValue }));
-        } else {
-            setFormData(prev => ({ ...prev, [field]: value }));
-        }
+        setFormData(prev => ({ ...prev, [field]: value }));
 
         // Clear error when user starts typing
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
-
-        console.log(`✅ Campo ${field} atualizado. Novo formData:`, formData);
     };
 
     const validateForm = () => {
@@ -89,23 +81,15 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             newErrors.initialBalance = 'Saldo inicial deve ser um número válido';
         }
 
-        console.log("🔍 Erros encontrados na validação:", newErrors);
-        console.log("🔍 Quantidade de erros:", Object.keys(newErrors).length);
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
-        console.log("🔍 Iniciando validação do formulário...");
-        console.log("📋 Dados do formulário:", formData);
-
         if (!validateForm()) {
-            console.log("❌ Validação falhou, erros:", errors);
             return;
         }
-
-        console.log("✅ Validação passou, enviando dados...");
         setIsLoading(true);
         try {
             await onSubmit(formData);
@@ -241,13 +225,18 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     )}
 
                     {/* Initial Balance */}
-                    <Input
+                    <CurrencyInput
                         id="initialBalance"
                         name="initialBalance"
                         label="Saldo Inicial"
                         placeholder="Ex: 1.000,00"
-                        value={formData.initialBalance.toString()}
-                        onChange={(value) => handleInputChange('initialBalance', value)}
+                        value={formData.initialBalance}
+                        onChange={(value) => {
+                            setFormData(prev => ({ ...prev, initialBalance: value }));
+                            if (errors.initialBalance) {
+                                setErrors(prev => ({ ...prev, initialBalance: '' }));
+                            }
+                        }}
                         error={errors.initialBalance}
                         required
                     />

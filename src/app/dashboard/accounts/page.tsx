@@ -285,7 +285,6 @@ export default function Accounts() {
 
     try {
       // Aqui você pode abrir um modal de edição ou navegar para uma página de edição
-      console.log("Editar conta:", selectedAccount);
 
       // Exemplo de como seria a chamada da API:
       // const updatedAccount = await accountsService.updateAccount(selectedAccount.id, updateData);
@@ -386,42 +385,35 @@ export default function Accounts() {
       switch (action) {
         case 'conciliar':
           // Implementar lógica de conciliação
-          console.log("Conciliando conta:", account.name);
           alert("Funcionalidade de conciliação será implementada em breve!");
           break;
 
         case 'regularizar':
           // Implementar lógica de regularização
-          console.log("Regularizando conta:", account.name);
           alert("Funcionalidade de regularização será implementada em breve!");
           break;
 
         case 'revisar':
           // Implementar lógica de revisão
-          console.log("Revisando conta:", account.name);
           alert("Funcionalidade de revisão será implementada em breve!");
           break;
 
         case 'ajustar':
           // Implementar lógica de ajuste
-          console.log("Ajustando conta:", account.name);
           alert("Funcionalidade de ajuste será implementada em breve!");
           break;
 
         case 'analisar':
           // Implementar lógica de análise
-          console.log("Analisando conta:", account.name);
           alert("Funcionalidade de análise será implementada em breve!");
           break;
 
         case 'fechar':
           // Implementar lógica de fechamento
-          console.log("Fechando conta:", account.name);
           alert("Funcionalidade de fechamento será implementada em breve!");
           break;
 
         default:
-          console.log("Ação não reconhecida:", action);
       }
     } catch (error: any) {
       console.error("Erro ao executar ação:", error);
@@ -431,11 +423,9 @@ export default function Accounts() {
 
   const handleAddAccount = async (accountData: CreateAccountDto) => {
     try {
-      console.log("Dados sendo enviados para API:", accountData);
 
       // Chamar API para criar conta
       const newAccount = await accountsService.createAccount(accountData);
-      console.log("Conta criada com sucesso:", newAccount);
 
       // Atualizar a lista de contas
       setAccounts(prev => [...prev, newAccount]);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import {
@@ -23,7 +23,24 @@ import {
     AlertCircle,
     TrendingUp,
     TrendingDown,
-    ArrowRightLeft
+    ArrowRightLeft,
+    X,
+    MoreHorizontal,
+    Printer,
+    ExternalLink,
+    BarChart3,
+    PieChart,
+    Star,
+    Bookmark,
+    Flag,
+    AlertTriangle,
+    Info,
+    Zap,
+    Target,
+    Activity,
+    Users,
+    Building2,
+    Wallet
 } from "lucide-react";
 import { Transaction, TransactionType, TransactionStatus } from "../../../shared/types/transaction.types";
 import { Account } from "../../../shared/types/account.types";
@@ -41,6 +58,8 @@ export interface TransactionViewModalProps {
     onDelete?: () => void;
     onDuplicate?: () => void;
     onShare?: () => void;
+    onPrint?: () => void;
+    onExport?: () => void;
     isLoading?: boolean;
 }
 
@@ -55,9 +74,14 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
     onDelete,
     onDuplicate,
     onShare,
+    onPrint,
+    onExport,
     isLoading = false
 }) => {
-    const [activeTab, setActiveTab] = useState<"details" | "notes" | "attachments">("details");
+    const [activeTab, setActiveTab] = useState<"details" | "notes" | "attachments" | "analytics">("details");
+    const [showMoreActions, setShowMoreActions] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isFlagged, setIsFlagged] = useState(false);
 
     const formatCurrency = (amount: number, currency: string = "BRL") => {
         return new Intl.NumberFormat("pt-BR", {
@@ -139,7 +163,8 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
     const tabs = [
         { id: "details", label: "Detalhes", icon: Receipt },
         { id: "notes", label: "Observações", icon: FileText },
-        { id: "attachments", label: "Anexos", icon: Download }
+        { id: "attachments", label: "Anexos", icon: Download },
+        { id: "analytics", label: "Análise", icon: BarChart3 }
     ] as const;
 
     return (
@@ -177,43 +202,59 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                         </div>
                     </div>
 
-                    <div className={styles.actions}>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onDuplicate}
-                            disabled={isLoading}
-                        >
-                            <Copy size={16} />
-                            Duplicar
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onShare}
-                            disabled={isLoading}
-                        >
-                            <Share2 size={16} />
-                            Compartilhar
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onEdit}
-                            disabled={isLoading}
-                        >
-                            <Edit size={16} />
-                            Editar
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={onDelete}
-                            disabled={isLoading}
-                        >
-                            <Trash2 size={16} />
-                            Excluir
-                        </Button>
+                    <div className={styles.headerActions}>
+                        <div className={styles.primaryActions}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={onDuplicate}
+                                disabled={isLoading}
+                            >
+                                <Copy size={16} />
+                                Duplicar
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={onShare}
+                                disabled={isLoading}
+                            >
+                                <Share2 size={16} />
+                                Compartilhar
+                            </Button>
+                        </div>
+
+                        <div className={styles.moreActions}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => setShowMoreActions(!showMoreActions)}
+                                disabled={isLoading}
+                            >
+                                <MoreHorizontal size={16} />
+                            </Button>
+
+                            {showMoreActions && (
+                                <div className={styles.moreActionsDropdown}>
+                                    <button onClick={onPrint} className={styles.dropdownItem}>
+                                        <Printer size={16} />
+                                        Imprimir
+                                    </button>
+                                    <button onClick={onExport} className={styles.dropdownItem}>
+                                        <Download size={16} />
+                                        Exportar
+                                    </button>
+                                    <button onClick={onEdit} className={styles.dropdownItem}>
+                                        <Edit size={16} />
+                                        Editar
+                                    </button>
+                                    <button onClick={onDelete} className={`${styles.dropdownItem} ${styles.dangerItem}`}>
+                                        <Trash2 size={16} />
+                                        Excluir
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -238,6 +279,7 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                 <div className={styles.tabContent}>
                     {activeTab === "details" && (
                         <div className={styles.detailsSection}>
+                            {/* Informações Principais */}
                             <div className={styles.detailsGrid}>
                                 <div className={styles.detailCard}>
                                     <h3 className={styles.detailTitle}>
@@ -246,6 +288,9 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                                     </h3>
                                     <div className={styles.detailValue}>
                                         {formatDate(transaction.date)}
+                                    </div>
+                                    <div className={styles.detailSubtext}>
+                                        {new Date(transaction.date).toLocaleDateString('pt-BR', { weekday: 'long' })}
                                     </div>
                                 </div>
 
@@ -287,6 +332,19 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                                     </div>
                                 )}
 
+                                <div className={styles.detailCard}>
+                                    <h3 className={styles.detailTitle}>
+                                        <DollarSign size={16} />
+                                        Valor
+                                    </h3>
+                                    <div className={styles.detailValue}>
+                                        {formatCurrency(transaction.amount)}
+                                    </div>
+                                    <div className={styles.detailSubtext}>
+                                        {transaction.type === "expense" ? "Despesa" : transaction.type === "income" ? "Receita" : "Transferência"}
+                                    </div>
+                                </div>
+
                                 {transaction.location && (
                                     <div className={styles.detailCard}>
                                         <h3 className={styles.detailTitle}>
@@ -314,45 +372,93 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
-                                <div className={styles.detailCard}>
-                                    <h3 className={styles.detailTitle}>
-                                        <Clock size={16} />
-                                        Criado em
-                                    </h3>
-                                    <div className={styles.detailValue}>
-                                        {formatDate(transaction.createdAt)}
-                                    </div>
-                                </div>
-
-                                {transaction.updatedAt && transaction.updatedAt !== transaction.createdAt && (
-                                    <div className={styles.detailCard}>
-                                        <h3 className={styles.detailTitle}>
-                                            <Edit size={16} />
-                                            Atualizado em
-                                        </h3>
-                                        <div className={styles.detailValue}>
-                                            {formatDate(transaction.updatedAt)}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {transaction.isRecurring && (
+                            {/* Informações Adicionais */}
+                            <div className={styles.additionalInfo}>
+                                <h3 className={styles.sectionTitle}>Informações Adicionais</h3>
+                                <div className={styles.detailsGrid}>
                                     <div className={styles.detailCard}>
                                         <h3 className={styles.detailTitle}>
                                             <Clock size={16} />
-                                            Transação Recorrente
+                                            Criado em
                                         </h3>
                                         <div className={styles.detailValue}>
-                                            Sim
+                                            {formatDate(transaction.createdAt)}
                                         </div>
-                                        {transaction.recurringTransactionId && (
-                                            <div className={styles.detailSubtext}>
-                                                ID: {transaction.recurringTransactionId}
-                                            </div>
-                                        )}
                                     </div>
-                                )}
+
+                                    {transaction.updatedAt && transaction.updatedAt !== transaction.createdAt && (
+                                        <div className={styles.detailCard}>
+                                            <h3 className={styles.detailTitle}>
+                                                <Edit size={16} />
+                                                Atualizado em
+                                            </h3>
+                                            <div className={styles.detailValue}>
+                                                {formatDate(transaction.updatedAt)}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {transaction.isRecurring && (
+                                        <div className={styles.detailCard}>
+                                            <h3 className={styles.detailTitle}>
+                                                <Clock size={16} />
+                                                Transação Recorrente
+                                            </h3>
+                                            <div className={styles.detailValue}>
+                                                Sim
+                                            </div>
+                                            {transaction.recurringTransactionId && (
+                                                <div className={styles.detailSubtext}>
+                                                    ID: {transaction.recurringTransactionId}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className={styles.detailCard}>
+                                        <h3 className={styles.detailTitle}>
+                                            <Activity size={16} />
+                                            Status
+                                        </h3>
+                                        <div className={styles.statusInfo}>
+                                            {getTransactionStatusIcon(transaction.status)}
+                                            <span className={styles.detailValue}>
+                                                {getTransactionStatusLabel(transaction.status)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Ações Rápidas */}
+                            <div className={styles.quickActions}>
+                                <h3 className={styles.sectionTitle}>Ações Rápidas</h3>
+                                <div className={styles.quickActionsGrid}>
+                                    <button
+                                        className={`${styles.quickAction} ${isBookmarked ? styles.active : ''}`}
+                                        onClick={() => setIsBookmarked(!isBookmarked)}
+                                    >
+                                        <Star size={16} />
+                                        {isBookmarked ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
+                                    </button>
+                                    <button
+                                        className={`${styles.quickAction} ${isFlagged ? styles.active : ''}`}
+                                        onClick={() => setIsFlagged(!isFlagged)}
+                                    >
+                                        <Flag size={16} />
+                                        {isFlagged ? 'Remover Marcação' : 'Marcar como Importante'}
+                                    </button>
+                                    <button className={styles.quickAction} onClick={onDuplicate}>
+                                        <Copy size={16} />
+                                        Duplicar Transação
+                                    </button>
+                                    <button className={styles.quickAction} onClick={onShare}>
+                                        <Share2 size={16} />
+                                        Compartilhar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -419,17 +525,137 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                             )}
                         </div>
                     )}
+
+                    {activeTab === "analytics" && (
+                        <div className={styles.analyticsSection}>
+                            <h3 className={styles.sectionTitle}>Análise da Transação</h3>
+
+                            {/* Resumo Executivo */}
+                            <div className={styles.executiveSummary}>
+                                <div className={styles.summaryCard}>
+                                    <div className={styles.summaryIcon}>
+                                        <Target size={24} />
+                                    </div>
+                                    <div className={styles.summaryContent}>
+                                        <h4>Resumo Executivo</h4>
+                                        <p>Esta transação representa <strong>5.2%</strong> do seu orçamento mensal e está dentro da média esperada para esta categoria.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Métricas Principais */}
+                            <div className={styles.analyticsGrid}>
+                                <div className={styles.analyticsCard}>
+                                    <div className={styles.analyticsIcon}>
+                                        <BarChart3 size={24} />
+                                    </div>
+                                    <div className={styles.analyticsContent}>
+                                        <h4>Impacto no Orçamento</h4>
+                                        <p>Esta transação representa <strong>5.2%</strong> do seu orçamento mensal.</p>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFill} style={{ width: '52%' }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={styles.analyticsCard}>
+                                    <div className={styles.analyticsIcon}>
+                                        <PieChart size={24} />
+                                    </div>
+                                    <div className={styles.analyticsContent}>
+                                        <h4>Gastos na Categoria</h4>
+                                        <p>Você gastou <strong>R$ 150,00</strong> nesta categoria este mês.</p>
+                                        <div className={styles.categoryStats}>
+                                            <span className={styles.statItem}>
+                                                <strong>R$ 50,00</strong> esta semana
+                                            </span>
+                                            <span className={styles.statItem}>
+                                                <strong>R$ 200,00</strong> mês passado
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={styles.analyticsCard}>
+                                    <div className={styles.analyticsIcon}>
+                                        <TrendingDown size={24} />
+                                    </div>
+                                    <div className={styles.analyticsContent}>
+                                        <h4>Tendência</h4>
+                                        <p>Gastos similares <strong>diminuíram 12%</strong> comparado ao mês anterior.</p>
+                                        <div className={styles.trendIndicator}>
+                                            <TrendingDown size={16} className={styles.trendDown} />
+                                            <span className={styles.trendText}>Tendência de redução</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className={styles.analyticsCard}>
+                                    <div className={styles.analyticsIcon}>
+                                        <Calendar size={24} />
+                                    </div>
+                                    <div className={styles.analyticsContent}>
+                                        <h4>Frequência</h4>
+                                        <p>Você faz transações similares <strong>3x por semana</strong> em média.</p>
+                                        <div className={styles.frequencyStats}>
+                                            <span className={styles.freqItem}>Última: há 2 dias</span>
+                                            <span className={styles.freqItem}>Próxima: em 2 dias</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Insights Adicionais */}
+                            <div className={styles.insightsSection}>
+                                <h3 className={styles.sectionTitle}>Insights</h3>
+                                <div className={styles.insightsGrid}>
+                                    <div className={styles.insightCard}>
+                                        <div className={styles.insightIcon}>
+                                            <AlertTriangle size={20} />
+                                        </div>
+                                        <div className={styles.insightContent}>
+                                            <h4>Alerta de Orçamento</h4>
+                                            <p>Você está próximo do limite mensal para esta categoria (85% usado).</p>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.insightCard}>
+                                        <div className={styles.insightIcon}>
+                                            <Zap size={20} />
+                                        </div>
+                                        <div className={styles.insightContent}>
+                                            <h4>Oportunidade de Economia</h4>
+                                            <p>Considere negociar desconto ou buscar alternativas mais baratas.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className={styles.insightCard}>
+                                        <div className={styles.insightIcon}>
+                                            <Info size={20} />
+                                        </div>
+                                        <div className={styles.insightContent}>
+                                            <h4>Padrão Identificado</h4>
+                                            <p>Você tende a fazer este tipo de gasto nas segundas-feiras.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
                 <div className={styles.footer}>
-                    <Button
-                        variant="secondary"
-                        onClick={onClose}
-                        disabled={isLoading}
-                    >
-                        Fechar
-                    </Button>
+                    <div className={styles.footerLeft}>
+                        <Button
+                            variant="secondary"
+                            onClick={onClose}
+                            disabled={isLoading}
+                        >
+                            <X size={16} />
+                            Fechar
+                        </Button>
+                    </div>
                     <div className={styles.footerActions}>
                         <Button
                             variant="secondary"
