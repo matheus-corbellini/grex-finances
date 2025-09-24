@@ -4,7 +4,7 @@ import { CategoriesController } from "./categories.controller";
 import { CategoriesService } from "./categories.service";
 import { Category } from "./entities/category.entity";
 import { Subcategory } from "./entities/subcategory.entity";
-import { UsersModule } from "@/modules/users/users.module";
+import { UsersModule } from "../users/users.module";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Category, Subcategory]), UsersModule],

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
+import { User } from "../../users/entities/user.entity";
 import { BudgetCategory } from "./budget-category.entity";
 import { BudgetAlert } from "./budget-alert.entity";
 
@@ -24,10 +24,10 @@ export class Budget {
   @Column({ type: "varchar" })
   period: string;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   startDate: Date;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   endDate: Date;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })

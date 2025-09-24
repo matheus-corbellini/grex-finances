@@ -19,11 +19,11 @@ export async function seedAdminUser(dataSource: DataSource): Promise<void> {
     // Criar usuário administrador
     const adminUser = userRepository.create({
         email: "admin@grexfinances.com",
-        name: "Administrador",
-        firebaseUid: "admin-firebase-uid", // Em produção, usar UID real do Firebase
+        firstName: "Admin",
+        lastName: "Grex Finances",
+        password: "admin123", // Em produção, usar hash da senha
         isActive: true,
-        emailVerified: true,
-        lastLoginAt: new Date()
+        emailVerified: true
     });
 
     const savedAdminUser = await userRepository.save(adminUser);
@@ -32,12 +32,17 @@ export async function seedAdminUser(dataSource: DataSource): Promise<void> {
     // Criar perfil do usuário administrador
     const adminProfile = userProfileRepository.create({
         userId: savedAdminUser.id,
-        firstName: "Admin",
-        lastName: "Grex Finances",
         phone: "+55 11 99999-9999",
-        city: "São Paulo",
-        state: "SP",
-        country: "Brasil"
+        address: {
+            city: "São Paulo",
+            state: "SP",
+            country: "Brasil"
+        },
+        preferences: {
+            language: "pt-BR",
+            currency: "BRL",
+            dateFormat: "DD/MM/YYYY"
+        }
     });
 
     await userProfileRepository.save(adminProfile);

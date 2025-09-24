@@ -1,52 +1,54 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
-import { Account } from "@/modules/accounts/entities/account.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Account } from '../../accounts/entities/account.entity';
+import { Category } from '../../categories/entities/category.entity';
 
-@Entity("transactions")
+export enum TransactionType {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+  TRANSFER = 'transfer'
+}
+
+export enum TransactionStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
+@Entity('transactions')
 export class Transaction {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column()
-  userId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn()
-  user: User;
-
-  @Column()
-  accountId: string;
-
-  @ManyToOne(() => Account)
-  @JoinColumn()
-  account: Account;
-
-  @Column({ type: "decimal", precision: 15, scale: 2 })
-  amount: number;
 
   @Column()
   description: string;
 
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount: number;
+
+  @Column({
+    type: 'enum',
+    enum: TransactionType
+  })
+  type: TransactionType;
+
+  @Column({
+    type: 'enum',
+    enum: TransactionStatus,
+    default: TransactionStatus.COMPLETED
+  })
+  status: TransactionStatus;
+
+  @Column()
+  accountId: string;
+
   @Column({ nullable: true })
-  notes?: string;
+  categoryId?: string;
 
-  @Column({ type: "varchar" })
-  type: string;
-
-  @Column({ type: "varchar", default: "completed" })
-  status: string;
-
-  @Column({ type: "datetime" })
+  @Column('date')
   date: Date;
 
-  @Column({ type: "simple-json", nullable: true })
-  tags?: string[];
-
-  @Column({ nullable: true })
-  location?: string;
-
-  @Column({ nullable: true })
-  receipt?: string;
+  @Column('text', { nullable: true })
+  notes?: string;
 
   @Column({ default: false })
   isRecurring: boolean;
@@ -59,4 +61,18 @@ export class Transaction {
 
   @UpdateDateColumn()
   updatedAt: Date;
-} 
+
+  // Relacionamentos
+  @ManyToOne(() => Account, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'accountId' })
+  account: Account;
+
+  @ManyToOne(() => Category, { nullable: true })
+  @JoinColumn({ name: 'categoryId' })
+  category?: Category;
+
+  // Relacionamento com transação recorrente (auto-referência)
+  @ManyToOne(() => Transaction, { nullable: true })
+  @JoinColumn({ name: 'recurringTransactionId' })
+  recurringTransaction?: Transaction;
+}

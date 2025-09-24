@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, Index } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from "typeorm";
 
 export class CreateCategoriesTables1700000000002 implements MigrationInterface {
     name = 'CreateCategoriesTables1700000000002'
@@ -169,27 +169,42 @@ export class CreateCategoriesTables1700000000002 implements MigrationInterface {
         // Criar índices
         await queryRunner.createIndex(
             "categories",
-            new Index("IDX_categories_userId", ["userId"])
+            new TableIndex({
+                name: "IDX_categories_userId",
+                columnNames: ["userId"]
+            })
         );
 
         await queryRunner.createIndex(
             "categories",
-            new Index("IDX_categories_type", ["type"])
+            new TableIndex({
+                name: "IDX_categories_type",
+                columnNames: ["type"]
+            })
         );
 
         await queryRunner.createIndex(
             "categories",
-            new Index("IDX_categories_isActive", ["isActive"])
+            new TableIndex({
+                name: "IDX_categories_isActive",
+                columnNames: ["isActive"]
+            })
         );
 
         await queryRunner.createIndex(
             "subcategories",
-            new Index("IDX_subcategories_categoryId", ["categoryId"])
+            new TableIndex({
+                name: "IDX_subcategories_categoryId",
+                columnNames: ["categoryId"]
+            })
         );
 
         await queryRunner.createIndex(
             "subcategories",
-            new Index("IDX_subcategories_isActive", ["isActive"])
+            new TableIndex({
+                name: "IDX_subcategories_isActive",
+                columnNames: ["isActive"]
+            })
         );
     }
 

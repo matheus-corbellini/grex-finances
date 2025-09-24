@@ -1,0 +1,290 @@
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.modalBody {
+  padding: 0 24px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px 0;
+}
+
+.dropZone {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f9fafb;
+}
+
+.dropZone:hover,
+.dragActive {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.dropZoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.uploadIcon {
+  color: #6b7280;
+}
+
+.dropZoneText {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.dropZoneSubtext {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileSelected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.fileIcon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.fileInfo {
+  flex: 1;
+  text-align: left;
+}
+
+.fileName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 0 4px 0;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.removeFile {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.removeFile:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.accountSelect {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accountSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.templateSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.templateText {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  flex: 1;
+}
+
+.templateButton {
+  flex-shrink: 0;
+}
+
+.resultContainer {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.resultItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.successIcon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.resultText {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.errorContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.errorIcon {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.errorContent {
+  flex: 1;
+}
+
+.errorTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #dc2626;
+  margin: 0 0 8px 0;
+}
+
+.errorList {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.errorItem {
+  font-size: 13px;
+  color: #dc2626;
+  margin-bottom: 4px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px 24px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .modalContent {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+  }
+  
+  .modalHeader {
+    padding: 16px 16px 0 16px;
+  }
+  
+  .modalBody {
+    padding: 0 16px;
+  }
+  
+  .modalActions {
+    padding: 16px 16px 16px 16px;
+    flex-direction: column-reverse;
+  }
+  
+  .templateSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .templateButton {
+    width: 100%;
+  }
+}

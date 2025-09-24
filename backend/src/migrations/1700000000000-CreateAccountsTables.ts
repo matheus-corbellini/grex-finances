@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, Index } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from "typeorm";
 
 export class CreateAccountsTables1700000000000 implements MigrationInterface {
     name = 'CreateAccountsTables1700000000000'
@@ -269,37 +269,58 @@ export class CreateAccountsTables1700000000000 implements MigrationInterface {
         // Criar índices para performance
         await queryRunner.createIndex(
             "accounts",
-            new Index("IDX_accounts_userId", ["userId"])
+            new TableIndex({
+                name: "IDX_accounts_userId",
+                columnNames: ["userId"]
+            })
         );
 
         await queryRunner.createIndex(
             "accounts",
-            new Index("IDX_accounts_typeId", ["typeId"])
+            new TableIndex({
+                name: "IDX_accounts_typeId",
+                columnNames: ["typeId"]
+            })
         );
 
         await queryRunner.createIndex(
             "accounts",
-            new Index("IDX_accounts_isActive", ["isActive"])
+            new TableIndex({
+                name: "IDX_accounts_isActive",
+                columnNames: ["isActive"]
+            })
         );
 
         await queryRunner.createIndex(
             "accounts",
-            new Index("IDX_accounts_isArchived", ["isArchived"])
+            new TableIndex({
+                name: "IDX_accounts_isArchived",
+                columnNames: ["isArchived"]
+            })
         );
 
         await queryRunner.createIndex(
             "account_balance_history",
-            new Index("IDX_balance_history_accountId", ["accountId"])
+            new TableIndex({
+                name: "IDX_balance_history_accountId",
+                columnNames: ["accountId"]
+            })
         );
 
         await queryRunner.createIndex(
             "account_balance_history",
-            new Index("IDX_balance_history_createdAt", ["createdAt"])
+            new TableIndex({
+                name: "IDX_balance_history_createdAt",
+                columnNames: ["createdAt"]
+            })
         );
 
         await queryRunner.createIndex(
             "account_types",
-            new Index("IDX_account_types_category", ["category"])
+            new TableIndex({
+                name: "IDX_account_types_category",
+                columnNames: ["category"]
+            })
         );
     }
 

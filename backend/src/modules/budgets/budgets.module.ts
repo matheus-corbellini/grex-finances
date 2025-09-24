@@ -5,9 +5,9 @@ import { BudgetsService } from "./budgets.service";
 import { Budget } from "./entities/budget.entity";
 import { BudgetCategory } from "./entities/budget-category.entity";
 import { BudgetAlert } from "./entities/budget-alert.entity";
-import { CategoriesModule } from "@/modules/categories/categories.module";
-import { TransactionsModule } from "@/modules/transactions/transactions.module";
-import { UsersModule } from "@/modules/users/users.module";
+import { CategoriesModule } from "../categories/categories.module";
+import { TransactionsModule } from "../transactions/transactions.module";
+import { UsersModule } from "../users/users.module";
 
 @Module({
   imports: [

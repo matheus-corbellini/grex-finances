@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
-import { Account } from "@/modules/accounts/entities/account.entity";
+import { User } from "../../users/entities/user.entity";
+import { Account } from "../../accounts/entities/account.entity";
 
 @Entity("recurring_transactions")
 export class RecurringTransaction {
@@ -36,10 +36,10 @@ export class RecurringTransaction {
   @Column({ type: "varchar" })
   frequency: string;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   startDate: Date;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   endDate?: Date;
 
   @Column({ default: true })

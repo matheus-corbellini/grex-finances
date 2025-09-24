@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
 import { ChevronLeft, ChevronRight, Plus, TrendingUp, TrendingDown, Eye } from "lucide-react";
 import { BankIconComponent } from "../../../components/ui/BankIcons";
-import { AccountDetailsModal, AddAccountModal } from "../../../components/modals";
+import { AccountDetailsModal, AddAccountModal, EditAccountModal, AccountActionModal } from "../../../components/modals";
 import { Icon } from "../../../components/ui/Icon";
 import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
 import accountsService, { CreateAccountDto, Account as ApiAccount } from "../../../services/api/accounts.service";
@@ -26,7 +26,11 @@ export default function Accounts() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 6, 1)); // Julho 2024
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showEditAccountModal, setShowEditAccountModal] = useState(false);
+  const [showAccountActionModal, setShowAccountActionModal] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<ApiAccount | null>(null);
+  const [editingAccount, setEditingAccount] = useState<ApiAccount | null>(null);
+  const [currentAction, setCurrentAction] = useState<string>('');
   const [accounts, setAccounts] = useState<ApiAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,23 +57,14 @@ export default function Accounts() {
 
       setBalanceHistory(prev => ({
         ...prev,
-        [accountId]: history.history
+        [accountId]: history.history || []
       }));
     } catch (err: any) {
       console.error("Erro ao carregar histórico de saldos:", err);
-      // Em caso de erro, usar dados mockados
-      const mockData = [
-        { date: "01", balance: 1000 },
-        { date: "05", balance: 1200 },
-        { date: "10", balance: 1100 },
-        { date: "15", balance: 1300 },
-        { date: "20", balance: 1250 },
-        { date: "25", balance: 1400 },
-        { date: "30", balance: 1350 }
-      ];
+      // Em caso de erro, não usar dados mockados - deixar vazio
       setBalanceHistory(prev => ({
         ...prev,
-        [accountId]: mockData
+        [accountId]: []
       }));
     }
   };
@@ -86,34 +81,14 @@ export default function Accounts() {
 
       setRecentTransactions(prev => ({
         ...prev,
-        [accountId]: transactions.transactions
+        [accountId]: transactions.transactions || []
       }));
     } catch (err: any) {
       console.error("Erro ao carregar transações:", err);
-      // Em caso de erro, usar dados mockados
-      const mockTransactions = [
-        {
-          id: "1",
-          description: "Transferência recebida",
-          amount: 1000,
-          type: "income",
-          status: "completed",
-          date: new Date().toISOString(),
-          isRecurring: false
-        },
-        {
-          id: "2",
-          description: "Pagamento de conta",
-          amount: -150,
-          type: "expense",
-          status: "completed",
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          isRecurring: false
-        }
-      ];
+      // Em caso de erro, não usar dados mockados - deixar vazio
       setRecentTransactions(prev => ({
         ...prev,
-        [accountId]: mockTransactions
+        [accountId]: []
       }));
     }
   };
@@ -249,10 +224,17 @@ export default function Accounts() {
   };
 
   const getMaxValue = (graphData: { value: number }[]) => {
-    return Math.max(...graphData.map(d => d.value));
+    if (!graphData || graphData.length === 0) return 1;
+    const values = graphData.map(d => d.value).filter(v => !isNaN(v) && isFinite(v));
+    if (values.length === 0) return 1;
+    return Math.max(...values);
   };
 
   const generateLinePath = (data: any[], maxValue: number) => {
+    if (!data || data.length === 0 || maxValue <= 0) {
+      return 'M 0,80 L 200,80';
+    }
+
     const points = data.map((point, index) => {
       const x = (index / (data.length - 1)) * 200;
       const y = 80 - (point.value / maxValue) * 80;
@@ -262,6 +244,10 @@ export default function Accounts() {
   };
 
   const generateAreaPath = (data: any[], maxValue: number) => {
+    if (!data || data.length === 0 || maxValue <= 0) {
+      return 'M 0,80 L 200,80 L 0,80 Z';
+    }
+
     const linePath = generateLinePath(data, maxValue);
     const firstX = 0;
     const lastX = 200;
@@ -280,20 +266,27 @@ export default function Accounts() {
     setSelectedAccount(null);
   };
 
-  const handleEditAccount = async () => {
-    if (!selectedAccount) return;
+  const handleEditAccount = () => {
+    if (selectedAccount) {
+      setEditingAccount(selectedAccount);
+      setShowEditAccountModal(true);
+      setShowAccountDetailsModal(false);
+    }
+  };
 
+  const handleUpdateAccount = async (accountData: any) => {
     try {
-      // Aqui você pode abrir um modal de edição ou navegar para uma página de edição
+      const updatedAccount = await accountsService.updateAccount(accountData.id, accountData);
 
-      // Exemplo de como seria a chamada da API:
-      // const updatedAccount = await accountsService.updateAccount(selectedAccount.id, updateData);
-      // setAccounts(prev => prev.map(acc => acc.id === selectedAccount.id ? updatedAccount : acc));
+      // Atualizar a lista de contas
+      setAccounts(prev => prev.map(acc => acc.id === updatedAccount.id ? updatedAccount : acc));
 
-      alert("Funcionalidade de edição será implementada em breve!");
+      // Mostrar mensagem de sucesso
+      alert("Conta atualizada com sucesso!");
+
     } catch (error: any) {
-      console.error("Erro ao editar conta:", error);
-      alert("Erro ao editar conta: " + error.message);
+      console.error("Erro ao atualizar conta:", error);
+      throw new Error(error.message || "Erro ao atualizar conta");
     }
   };
 
@@ -380,44 +373,112 @@ export default function Accounts() {
     }
   };
 
-  const handleAccountAction = async (account: ApiAccount, action: string) => {
+  const handleAccountAction = (account: ApiAccount, action: string) => {
+    setSelectedAccount(account);
+    setCurrentAction(action);
+    setShowAccountActionModal(true);
+  };
+
+  const handleActionSubmit = async (action: string, data: any) => {
     try {
       switch (action) {
         case 'conciliar':
-          // Implementar lógica de conciliação
-          alert("Funcionalidade de conciliação será implementada em breve!");
+          await handleConciliation(data);
           break;
-
         case 'regularizar':
-          // Implementar lógica de regularização
-          alert("Funcionalidade de regularização será implementada em breve!");
+          await handleRegularization(data);
           break;
-
         case 'revisar':
-          // Implementar lógica de revisão
-          alert("Funcionalidade de revisão será implementada em breve!");
+          await handleReview(data);
           break;
-
         case 'ajustar':
-          // Implementar lógica de ajuste
-          alert("Funcionalidade de ajuste será implementada em breve!");
+          await handleAdjustment(data);
           break;
-
         case 'analisar':
-          // Implementar lógica de análise
-          alert("Funcionalidade de análise será implementada em breve!");
+          await handleAnalysis(data);
           break;
-
         case 'fechar':
-          // Implementar lógica de fechamento
-          alert("Funcionalidade de fechamento será implementada em breve!");
+          await handleAccountClosure(data);
           break;
-
         default:
+          throw new Error('Ação não reconhecida');
       }
+
+      alert(`${action.charAt(0).toUpperCase() + action.slice(1)} executada com sucesso!`);
     } catch (error: any) {
-      console.error("Erro ao executar ação:", error);
-      alert("Erro ao executar ação: " + error.message);
+      console.error(`Erro ao executar ação ${action}:`, error);
+      throw new Error(error.message || `Erro ao executar ação ${action}`);
+    }
+  };
+
+  const handleConciliation = async (data: any) => {
+    // Implementar lógica de conciliação
+    console.log('Conciliando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para conciliação
+  };
+
+  const handleRegularization = async (data: any) => {
+    // Implementar lógica de regularização
+    console.log('Regularizando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para regularização
+  };
+
+  const handleReview = async (data: any) => {
+    // Implementar lógica de revisão
+    console.log('Revisando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para revisão
+  };
+
+  const handleAdjustment = async (data: any) => {
+    // Implementar lógica de ajuste
+    console.log('Ajustando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para ajuste
+  };
+
+  const handleAnalysis = async (data: any) => {
+    // Implementar lógica de análise
+    console.log('Analisando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para análise
+  };
+
+  const handleAccountClosure = async (data: any) => {
+    // Implementar lógica de fechamento
+    console.log('Fechando conta:', selectedAccount?.id, data);
+    // Aqui você pode chamar uma API específica para fechamento
+  };
+
+  const handleSyncAccount = async (account: ApiAccount) => {
+    try {
+      // Mostrar loading
+      const originalAccounts = [...accounts];
+      setAccounts(prev => prev.map(acc =>
+        acc.id === account.id ? { ...acc, isSyncing: true } : acc
+      ));
+
+      // Chamar API de sincronização
+      const syncedAccount = await accountsService.syncAccount(account.id);
+
+      // Atualizar conta com dados sincronizados
+      setAccounts(prev => prev.map(acc =>
+        acc.id === account.id ? { ...syncedAccount, isSyncing: false } : acc
+      ));
+
+      // Recarregar histórico e transações
+      await Promise.all([
+        loadBalanceHistory(account.id),
+        loadRecentTransactions(account.id)
+      ]);
+
+      alert("Conta sincronizada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao sincronizar conta:", error);
+
+      // Reverter estado de loading
+      setAccounts(prev => prev.map(acc =>
+        acc.id === account.id ? { ...acc, isSyncing: false } : acc
+      ));
+
+      alert("Erro ao sincronizar conta: " + error.message);
     }
   };
 
@@ -609,7 +670,7 @@ export default function Accounts() {
               </div>
             ) : (
               (filteredAccounts.length > 0 ? filteredAccounts : accounts).map((account) => {
-                // Usar dados reais do histórico ou fallback para mockados
+                // Usar dados reais do histórico
                 const historyData = balanceHistory[account.id] || [];
                 const graphData = historyData.length > 0
                   ? historyData.map(item => ({
@@ -617,13 +678,8 @@ export default function Accounts() {
                     value: item.balance / 1000 // Normalizar para exibição
                   }))
                   : [
-                    { date: "01", value: account.balance / 1000 * 0.8 },
-                    { date: "05", value: account.balance / 1000 * 0.9 },
-                    { date: "10", value: account.balance / 1000 * 0.85 },
-                    { date: "15", value: account.balance / 1000 * 0.95 },
-                    { date: "20", value: account.balance / 1000 * 0.9 },
-                    { date: "25", value: account.balance / 1000 },
-                    { date: "30", value: account.balance / 1000 * 0.95 }
+                    // Se não há dados históricos, mostrar apenas o saldo atual
+                    { date: "Atual", value: account.balance / 1000 }
                   ];
                 const maxValue = getMaxValue(graphData);
 
@@ -660,9 +716,10 @@ export default function Accounts() {
                       </button>
                       <button
                         className={styles.actionButton}
-                        onClick={() => handleAccountAction(account, 'conciliar')}
+                        onClick={() => handleSyncAccount(account)}
+                        disabled={account.isSyncing}
                       >
-                        Conciliar
+                        {account.isSyncing ? 'Sincronizando...' : 'Sincronizar'}
                       </button>
                     </div>
 
@@ -696,8 +753,8 @@ export default function Accounts() {
                           {/* Pontos do gráfico */}
                           <div className={styles.graphPoints}>
                             {graphData.map((point, index) => {
-                              const x = (index / (graphData.length - 1)) * 100;
-                              const y = 100 - (point.value / maxValue) * 100;
+                              const x = graphData.length > 1 ? (index / (graphData.length - 1)) * 100 : 50;
+                              const y = maxValue > 0 ? 100 - (point.value / maxValue) * 100 : 50;
 
                               return (
                                 <div
@@ -791,6 +848,29 @@ export default function Accounts() {
         isOpen={showAddAccountModal}
         onClose={() => setShowAddAccountModal(false)}
         onSubmit={handleAddAccount}
+      />
+
+      {/* Modal Editar Conta */}
+      <EditAccountModal
+        isOpen={showEditAccountModal}
+        onClose={() => {
+          setShowEditAccountModal(false);
+          setEditingAccount(null);
+        }}
+        onSubmit={handleUpdateAccount}
+        account={editingAccount}
+      />
+
+      {/* Modal Ações da Conta */}
+      <AccountActionModal
+        isOpen={showAccountActionModal}
+        onClose={() => {
+          setShowAccountActionModal(false);
+          setCurrentAction('');
+        }}
+        onSubmit={handleActionSubmit}
+        account={selectedAccount as any}
+        action={currentAction}
       />
     </DashboardLayout>
   );

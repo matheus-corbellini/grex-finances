@@ -30,6 +30,7 @@ export interface Account {
   archivedAt?: string;
   createdAt: string;
   updatedAt: string;
+  isSyncing?: boolean;
 }
 
 export interface CreateAccountDto {

@@ -5,14 +5,14 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 
 // Import all feature modules
-import { UsersModule } from "@/modules/users/users.module";
-import { AccountsModule } from "@/modules/accounts/accounts.module";
-import { TransactionsModule } from "@/modules/transactions/transactions.module";
-import { CategoriesModule } from "@/modules/categories/categories.module";
-import { BudgetsModule } from "@/modules/budgets/budgets.module";
-import { InvestmentsModule } from "@/modules/investments/investments.module";
-import { ReportsModule } from "@/modules/reports/reports.module";
-import { GoalsModule } from "@/modules/goals/goals.module";
+import { UsersModule } from "./modules/users/users.module";
+import { AccountsModule } from "./modules/accounts/accounts.module";
+import { TransactionsModule } from "./modules/transactions/transactions.module";
+import { CategoriesModule } from "./modules/categories/categories.module";
+import { BudgetsModule } from "./modules/budgets/budgets.module";
+import { InvestmentsModule } from "./modules/investments/investments.module";
+import { ReportsModule } from "./modules/reports/reports.module";
+import { GoalsModule } from "./modules/goals/goals.module";
 
 @Module({
   imports: [
@@ -20,11 +20,16 @@ import { GoalsModule } from "@/modules/goals/goals.module";
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
-      type: "sqlite",
-      database: "grex_finances.db",
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
+      port: parseInt(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "password",
+      database: process.env.DB_DATABASE || "grex_finances",
       autoLoadEntities: true,
       synchronize: true,
-      logging: true,
+      logging: process.env.NODE_ENV === 'development',
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     UsersModule,
     AccountsModule,

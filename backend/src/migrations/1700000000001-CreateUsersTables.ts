@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, Index } from "typeorm";
+import { MigrationInterface, QueryRunner, Table, TableColumn, TableForeignKey, TableIndex } from "typeorm";
 
 export class CreateUsersTables1700000000001 implements MigrationInterface {
     name = 'CreateUsersTables1700000000001'
@@ -178,22 +178,34 @@ export class CreateUsersTables1700000000001 implements MigrationInterface {
         // Criar índices
         await queryRunner.createIndex(
             "users",
-            new Index("IDX_users_email", ["email"])
+            new TableIndex({
+                name: "IDX_users_email",
+                columnNames: ["email"]
+            })
         );
 
         await queryRunner.createIndex(
             "users",
-            new Index("IDX_users_firebaseUid", ["firebaseUid"])
+            new TableIndex({
+                name: "IDX_users_firebaseUid",
+                columnNames: ["firebaseUid"]
+            })
         );
 
         await queryRunner.createIndex(
             "users",
-            new Index("IDX_users_isActive", ["isActive"])
+            new TableIndex({
+                name: "IDX_users_isActive",
+                columnNames: ["isActive"]
+            })
         );
 
         await queryRunner.createIndex(
             "user_profiles",
-            new Index("IDX_user_profiles_userId", ["userId"])
+            new TableIndex({
+                name: "IDX_user_profiles_userId",
+                columnNames: ["userId"]
+            })
         );
     }
 

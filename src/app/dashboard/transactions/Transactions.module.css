@@ -367,6 +367,35 @@
 .sortIcon {
   color: #9CA3AF;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sortIcon.active {
+  color: #3B82F6;
+}
+
+.sortableHeader {
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.sortableHeader:hover {
+  color: #3B82F6;
+}
+
+.sortableHeader:hover .sortIcon {
+  color: #3B82F6;
 }
 
 .headerCell {

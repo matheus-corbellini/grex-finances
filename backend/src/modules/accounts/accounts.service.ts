@@ -77,12 +77,19 @@ export class AccountsService {
 
     // Criar conta
     const account = this.accountRepository.create({
-      ...createAccountDto,
+      name: createAccountDto.name,
       userId,
       typeId: accountType.id,
       balance: createAccountDto.initialBalance,
+      currency: createAccountDto.currency || 'BRL',
       isActive: true,
       isArchived: false,
+      bankName: createAccountDto.bankName,
+      accountNumber: createAccountDto.accountNumber,
+      agency: createAccountDto.agency,
+      description: createAccountDto.description,
+      color: createAccountDto.color,
+      icon: createAccountDto.icon,
     });
 
     const savedAccount = await this.accountRepository.save(account);

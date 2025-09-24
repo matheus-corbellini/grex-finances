@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
+import { User } from "../../users/entities/user.entity";
 import { Investment } from "./investment.entity";
 
 @Entity("investment_transactions")
@@ -33,7 +33,7 @@ export class InvestmentTransaction {
   @Column({ type: "decimal", precision: 15, scale: 2 })
   totalAmount: number;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   date: Date;
 
   @Column({ nullable: true })

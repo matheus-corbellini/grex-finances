@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
+import { User } from "../../users/entities/user.entity";
 import { GoalProgress } from "./goal-progress.entity";
 
 @Entity("goals")
@@ -29,7 +29,7 @@ export class Goal {
   @Column({ type: "decimal", precision: 15, scale: 2, default: 0 })
   currentAmount: number;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   targetDate: Date;
 
   @Column({ type: "varchar" })

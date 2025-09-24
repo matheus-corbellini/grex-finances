@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
+import { User } from "../../users/entities/user.entity";
 import { Portfolio } from "./portfolio.entity";
 import { InvestmentType } from "./investment-type.entity";
 
@@ -65,7 +65,7 @@ export class Investment {
   @Column({ nullable: true })
   exchange?: string;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   lastUpdated: Date;
 
   @CreateDateColumn()

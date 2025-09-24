@@ -18,7 +18,7 @@ import {
   Plus
 } from "lucide-react";
 import { Toast } from "../../../components/ui/Toast";
-import { TransactionViewModal } from "../../../components/modals";
+import { TransactionViewModal, EditTransactionModal, ImportTransactionsModal } from "../../../components/modals";
 import AddTransactionModal from "../../../components/modals/AddTransactionModal";
 import transactionsService from "../../../services/api/transactions.service";
 import accountsService from "../../../services/api/accounts.service";
@@ -40,6 +40,19 @@ export default function Transactions() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
   const [showEditTransactionModal, setShowEditTransactionModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  // Estados para ordenação
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Estados para resumo dinâmico
+  const [balanceSummary, setBalanceSummary] = useState({
+    dailyBalance: 0,
+    expectedBalance: 0,
+    actualBalance: 0
+  });
 
   // Estados para dados dinâmicos
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -73,6 +86,11 @@ export default function Transactions() {
   useEffect(() => {
     applyFilters();
   }, [transactions, filters]);
+
+  // Calcular resumo de saldos quando transações mudarem
+  useEffect(() => {
+    calculateBalanceSummary();
+  }, [filteredTransactions]);
 
   const loadTransactions = async () => {
     try {
@@ -186,6 +204,91 @@ export default function Transactions() {
       status: '',
       dateFrom: '',
       dateTo: ''
+    });
+  };
+
+  // Função para calcular resumo de saldos dinâmico
+  const calculateBalanceSummary = () => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    let dailyBalance = 0;
+    let expectedBalance = 0;
+    let actualBalance = 0;
+
+    filteredTransactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.date).toISOString().split('T')[0];
+      const amount = transaction.amount;
+
+      // Saldo do dia (transações de hoje)
+      if (transactionDate === todayStr) {
+        dailyBalance += amount;
+      }
+
+      // Saldo previsto (todas as transações pendentes e concluídas)
+      if (transaction.status === 'pending' || transaction.status === 'completed') {
+        expectedBalance += amount;
+      }
+
+      // Saldo realizado (apenas transações concluídas)
+      if (transaction.status === 'completed') {
+        actualBalance += amount;
+      }
+    });
+
+    setBalanceSummary({
+      dailyBalance,
+      expectedBalance,
+      actualBalance
+    });
+  };
+
+  // Função para ordenar transações
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Aplicar ordenação às transações filtradas
+  const getSortedTransactions = () => {
+    if (!sortField) return filteredTransactions;
+
+    return [...filteredTransactions].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'description':
+          aValue = a.description.toLowerCase();
+          bValue = b.description.toLowerCase();
+          break;
+        case 'category':
+          aValue = a.category?.name?.toLowerCase() || '';
+          bValue = b.category?.name?.toLowerCase() || '';
+          break;
+        case 'amount':
+          aValue = Math.abs(a.amount);
+          bValue = Math.abs(b.amount);
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case 'date':
+          aValue = new Date(a.date).getTime();
+          bValue = new Date(b.date).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
     });
   };
 
@@ -351,21 +454,11 @@ export default function Transactions() {
   };
 
   // Funções de seleção
-  const toggleRowSelection = (transactionId: number) => {
-    setSelectedRows(prev => {
-      if (prev.includes(transactionId)) {
-        return prev.filter(id => id !== transactionId);
-      } else {
-        return [...prev, transactionId];
-      }
-    });
-  };
-
   const toggleSelectAll = () => {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(transactions.map(t => t.id));
+      setSelectedRows(filteredTransactions.map(t => t.id));
     }
     setSelectAll(!selectAll);
   };
@@ -384,15 +477,6 @@ export default function Transactions() {
     });
   };
 
-  const toggleSelectAll = () => {
-    if (selectAll) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(filteredTransactions.map(t => t.id));
-    }
-    setSelectAll(!selectAll);
-  };
-
   const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
     // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
     return;
@@ -400,8 +484,31 @@ export default function Transactions() {
 
   const handleEditTransaction = () => {
     if (selectedTransaction) {
+      setEditingTransaction(selectedTransaction);
       setShowEditTransactionModal(true);
       setShowTransactionViewModal(false);
+    }
+  };
+
+  const handleUpdateTransaction = async (transactionData: any) => {
+    try {
+      const updatedTransaction = await transactionsService.updateTransaction(
+        transactionData.id,
+        transactionData
+      );
+
+      // Atualizar a lista de transações
+      setTransactions(prev =>
+        prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t)
+      );
+
+      // Mostrar mensagem de sucesso
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+
+    } catch (error: any) {
+      console.error("Erro ao atualizar transação:", error);
+      throw new Error(error.message || "Erro ao atualizar transação");
     }
   };
 
@@ -410,7 +517,7 @@ export default function Transactions() {
       const confirmDelete = window.confirm(
         `Tem certeza que deseja excluir a transação "${selectedTransaction.description}"?\n\nEsta ação não pode ser desfeita.`
       );
-      
+
       if (confirmDelete) {
         // Implementar exclusão via API
         transactionsService.deleteTransaction(selectedTransaction.id)
@@ -431,23 +538,28 @@ export default function Transactions() {
     }
   };
 
-  const handleDuplicateTransaction = () => {
+  const handleDuplicateTransaction = async () => {
     if (selectedTransaction) {
-      // Criar uma cópia da transação com nova data
-      const duplicatedTransaction = {
-        ...selectedTransaction,
-        id: undefined, // Será gerado pelo backend
-        date: new Date().toISOString().split('T')[0], // Data atual
-        description: `${selectedTransaction.description} (Cópia)`,
-        status: 'pending' // Status pendente para a cópia
-      };
-      
-      // Abrir modal de adição com dados preenchidos
-      setShowAddTransactionModal(true);
-      setShowTransactionViewModal(false);
-      
-      // TODO: Passar dados para o modal de adição
-      console.log("Duplicando transação:", duplicatedTransaction);
+      try {
+        // Usar a API para duplicar a transação
+        const duplicatedTransaction = await transactionsService.duplicateTransaction(selectedTransaction.id);
+
+        // Atualizar a lista de transações
+        setTransactions(prev => [duplicatedTransaction, ...prev]);
+        setTotalTransactions(prev => prev + 1);
+
+        // Mostrar mensagem de sucesso
+        setShowSuccessMessage(true);
+        setTimeout(() => setShowSuccessMessage(false), 3000);
+
+        // Fechar modal de visualização
+        setShowTransactionViewModal(false);
+        setSelectedTransaction(null);
+
+      } catch (error: any) {
+        console.error("Erro ao duplicar transação:", error);
+        alert("Erro ao duplicar transação: " + error.message);
+      }
     }
   };
 
@@ -459,7 +571,7 @@ export default function Transactions() {
         `Data: ${new Date(selectedTransaction.date).toLocaleDateString('pt-BR')}\n` +
         `Categoria: ${selectedTransaction.category?.name || 'N/A'}\n` +
         `Status: ${selectedTransaction.status}`;
-      
+
       // Copiar para área de transferência
       navigator.clipboard.writeText(shareText).then(() => {
         alert("Transação copiada para a área de transferência!");
@@ -524,9 +636,9 @@ export default function Transactions() {
       alert("Selecione pelo menos uma transação para exportar");
       return;
     }
-    
+
     const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
-    
+
     // Importar jsPDF dinamicamente
     import('jspdf').then(({ jsPDF }) => {
       const doc = new jsPDF();
@@ -793,20 +905,15 @@ export default function Transactions() {
     });
   };
 
-  const importData = () => {
-    // Criar input de arquivo
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv,.xlsx,.xls';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        // Aqui você pode implementar a lógica de importação
-        console.log('Arquivo selecionado:', file.name);
-        alert(`Arquivo "${file.name}" selecionado para importação. Funcionalidade será implementada.`);
-      }
-    };
-    input.click();
+  const handleImportComplete = (result: { imported: number; errors: any[] }) => {
+    if (result.imported > 0) {
+      // Recarregar transações após importação bem-sucedida
+      loadTransactions();
+
+      // Mostrar mensagem de sucesso
+      setShowSuccessMessage(true);
+      setTimeout(() => setShowSuccessMessage(false), 3000);
+    }
   };
 
   const printData = () => {
@@ -814,9 +921,9 @@ export default function Transactions() {
       alert("Selecione pelo menos uma transação para imprimir");
       return;
     }
-    
+
     const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
-    
+
     // Criar uma nova janela para impressão
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -887,14 +994,14 @@ export default function Transactions() {
               Semana
             </button>
             <div className={styles.filterContainer}>
-              <button 
+              <button
                 className={styles.filterButton}
                 onClick={() => setShowFiltersDropdown(!showFiltersDropdown)}
               >
                 Filtros
                 <ChevronDown size={14} />
               </button>
-              
+
               {showFiltersDropdown && (
                 <div className={styles.filtersDropdown}>
                   <div className={styles.filterSection}>
@@ -907,7 +1014,7 @@ export default function Transactions() {
                       onChange={(e) => updateFilter('search', e.target.value)}
                     />
                   </div>
-                  
+
                   <div className={styles.filterSection}>
                     <label className={styles.filterLabel}>Categoria:</label>
                     <select
@@ -923,7 +1030,7 @@ export default function Transactions() {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className={styles.filterSection}>
                     <label className={styles.filterLabel}>Tipo:</label>
                     <select
@@ -937,7 +1044,7 @@ export default function Transactions() {
                       <option value="transfer">Transferência</option>
                     </select>
                   </div>
-                  
+
                   <div className={styles.filterSection}>
                     <label className={styles.filterLabel}>Status:</label>
                     <select
@@ -951,7 +1058,7 @@ export default function Transactions() {
                       <option value="cancelled">Cancelada</option>
                     </select>
                   </div>
-                  
+
                   <div className={styles.filterSection}>
                     <label className={styles.filterLabel}>Data de:</label>
                     <input
@@ -961,7 +1068,7 @@ export default function Transactions() {
                       onChange={(e) => updateFilter('dateFrom', e.target.value)}
                     />
                   </div>
-                  
+
                   <div className={styles.filterSection}>
                     <label className={styles.filterLabel}>Data até:</label>
                     <input
@@ -971,15 +1078,15 @@ export default function Transactions() {
                       onChange={(e) => updateFilter('dateTo', e.target.value)}
                     />
                   </div>
-                  
+
                   <div className={styles.filterActions}>
-                    <button 
+                    <button
                       className={styles.clearFiltersButton}
                       onClick={clearFilters}
                     >
                       Limpar Filtros
                     </button>
-                    <button 
+                    <button
                       className={styles.applyFiltersButton}
                       onClick={() => setShowFiltersDropdown(false)}
                     >
@@ -1020,7 +1127,7 @@ export default function Transactions() {
                 <Plus size={16} />
                 Nova Transação
               </button>
-              <button className={styles.actionButton} onClick={importData}>
+              <button className={styles.actionButton} onClick={() => setShowImportModal(true)}>
                 <Upload size={16} />
                 Importar
               </button>
@@ -1124,28 +1231,52 @@ export default function Transactions() {
                     </div>
                   </th>
                   <th className={styles.tableHeader}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      Descrição
-                      <ArrowUpDown size={14} className={styles.sortIcon} />
-                    </span>
+                    <button
+                      className={styles.sortableHeader}
+                      onClick={() => handleSort('description')}
+                    >
+                      <span>Descrição</span>
+                      <ArrowUpDown
+                        size={14}
+                        className={`${styles.sortIcon} ${sortField === 'description' ? styles.active : ''}`}
+                      />
+                    </button>
                   </th>
                   <th className={styles.tableHeader}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      Categoria
-                      <ArrowUpDown size={14} className={styles.sortIcon} />
-                    </span>
+                    <button
+                      className={styles.sortableHeader}
+                      onClick={() => handleSort('category')}
+                    >
+                      <span>Categoria</span>
+                      <ArrowUpDown
+                        size={14}
+                        className={`${styles.sortIcon} ${sortField === 'category' ? styles.active : ''}`}
+                      />
+                    </button>
                   </th>
                   <th className={styles.tableHeader}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      Valor
-                      <ArrowUpDown size={14} className={styles.sortIcon} />
-                    </span>
+                    <button
+                      className={styles.sortableHeader}
+                      onClick={() => handleSort('amount')}
+                    >
+                      <span>Valor</span>
+                      <ArrowUpDown
+                        size={14}
+                        className={`${styles.sortIcon} ${sortField === 'amount' ? styles.active : ''}`}
+                      />
+                    </button>
                   </th>
                   <th className={styles.tableHeader}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      Status
-                      <ArrowUpDown size={14} className={styles.sortIcon} />
-                    </span>
+                    <button
+                      className={styles.sortableHeader}
+                      onClick={() => handleSort('status')}
+                    >
+                      <span>Status</span>
+                      <ArrowUpDown
+                        size={14}
+                        className={`${styles.sortIcon} ${sortField === 'status' ? styles.active : ''}`}
+                      />
+                    </button>
                   </th>
                   <th className={styles.tableHeader}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
@@ -1155,7 +1286,7 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTransactions.map((transaction) => (
+                {getSortedTransactions().map((transaction) => (
                   <tr
                     key={transaction.id}
                     className={`${styles.tableRow} ${selectedRow === transaction.id ? styles.selected : ''} ${isRowSelected(transaction.id) ? styles.rowSelected : ''}`}
@@ -1257,15 +1388,30 @@ export default function Transactions() {
         <div className={styles.summarySection}>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Saldo do dia</span>
-            <span className={`${styles.summaryValue} ${styles.negative}`}>R$-250,00</span>
+            <span className={`${styles.summaryValue} ${balanceSummary.dailyBalance >= 0 ? styles.positive : styles.negative}`}>
+              {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+              }).format(balanceSummary.dailyBalance)}
+            </span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Saldo previsto</span>
-            <span className={styles.summaryValue}>R$-250,00</span>
+            <span className={`${styles.summaryValue} ${balanceSummary.expectedBalance >= 0 ? styles.positive : styles.negative}`}>
+              {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+              }).format(balanceSummary.expectedBalance)}
+            </span>
           </div>
           <div className={styles.summaryItem}>
             <span className={styles.summaryLabel}>Saldo realizado</span>
-            <span className={`${styles.summaryValue} ${styles.positive}`}>R$800,00</span>
+            <span className={`${styles.summaryValue} ${balanceSummary.actualBalance >= 0 ? styles.positive : styles.negative}`}>
+              {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+              }).format(balanceSummary.actualBalance)}
+            </span>
           </div>
         </div>
       </div>
@@ -1342,6 +1488,27 @@ export default function Transactions() {
         onSubmit={handleAddTransaction}
         accounts={accounts}
         categories={categories}
+      />
+
+      {/* Modal de Editar Transação */}
+      <EditTransactionModal
+        isOpen={showEditTransactionModal}
+        onClose={() => {
+          setShowEditTransactionModal(false);
+          setEditingTransaction(null);
+        }}
+        onSubmit={handleUpdateTransaction}
+        transaction={editingTransaction}
+        accounts={accounts}
+        categories={categories}
+      />
+
+      {/* Modal de Importar Transações */}
+      <ImportTransactionsModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={handleImportComplete}
+        accounts={accounts}
       />
     </DashboardLayout>
   );

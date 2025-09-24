@@ -6,8 +6,8 @@ import { Investment } from "./entities/investment.entity";
 import { InvestmentType } from "./entities/investment-type.entity";
 import { Portfolio } from "./entities/portfolio.entity";
 import { InvestmentTransaction } from "./entities/investment-transaction.entity";
-import { AccountsModule } from "@/modules/accounts/accounts.module";
-import { UsersModule } from "@/modules/users/users.module";
+import { AccountsModule } from "../accounts/accounts.module";
+import { UsersModule } from "../users/users.module";
 
 @Module({
   imports: [

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from "typeorm";
-import { User } from "@/modules/users/entities/user.entity";
+import { User } from "../../users/entities/user.entity";
 import { Budget } from "./budget.entity";
 
 @Entity("budget_alerts")
@@ -39,7 +39,7 @@ export class BudgetAlert {
   @Column({ default: false })
   isTriggered: boolean;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   triggeredAt?: Date;
 
   @CreateDateColumn()
