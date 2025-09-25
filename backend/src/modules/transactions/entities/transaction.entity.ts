@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Account } from '../../accounts/entities/account.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { RecurringTransaction } from './recurring-transaction.entity';
 
 export enum TransactionType {
   INCOME = 'income',
@@ -26,14 +27,14 @@ export class Transaction {
   amount: number;
 
   @Column({
-    type: 'enum',
-    enum: TransactionType
+    type: 'varchar',
+    length: 20
   })
   type: TransactionType;
 
   @Column({
-    type: 'enum',
-    enum: TransactionStatus,
+    type: 'varchar',
+    length: 20,
     default: TransactionStatus.COMPLETED
   })
   status: TransactionStatus;
@@ -44,7 +45,7 @@ export class Transaction {
   @Column({ nullable: true })
   categoryId?: string;
 
-  @Column('date')
+  @Column('datetime')
   date: Date;
 
   @Column('text', { nullable: true })
@@ -71,8 +72,8 @@ export class Transaction {
   @JoinColumn({ name: 'categoryId' })
   category?: Category;
 
-  // Relacionamento com transação recorrente (auto-referência)
-  @ManyToOne(() => Transaction, { nullable: true })
-  @JoinColumn({ name: 'recurringTransactionId' })
-  recurringTransaction?: Transaction;
+  // Relacionamento com transação recorrente (temporariamente comentado)
+  // @ManyToOne(() => RecurringTransaction, { nullable: true })
+  // @JoinColumn({ name: 'recurringTransactionId' })
+  // recurringTransaction?: RecurringTransaction;
 }

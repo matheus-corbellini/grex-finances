@@ -13,8 +13,11 @@ import {
   HttpCode,
   HttpStatus,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
+  Res,
+  Header
 } from "@nestjs/common";
+import { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -25,6 +28,8 @@ import {
   ApiConsumes
 } from "@nestjs/swagger";
 import { FileInterceptor } from "@nestjs/platform-express";
+import * as fs from 'fs';
+import * as path from 'path';
 import { TransactionsService } from "./transactions.service";
 import {
   CreateTransactionDto,
@@ -32,7 +37,10 @@ import {
   TransactionFiltersDto,
   TransactionSummaryDto,
   BulkUpdateDto,
-  BulkDeleteDto
+  BulkDeleteDto,
+  ExportTransactionsDto,
+  ExportResultDto,
+  ImportResultDto
 } from "./dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 
@@ -167,30 +175,94 @@ export class TransactionsController {
   }
 
   @Post('import')
-  @ApiOperation({ summary: 'Importar transações de arquivo' })
+  @ApiOperation({ summary: 'Importar transações de arquivo (CSV/Excel)' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @ApiResponse({ status: 200, description: 'Transações importadas com sucesso' })
   async import(
     @UploadedFile() file: any,
     @Body('accountId') accountId: string,
+    @Body('options') options: any,
     @Request() req: any
-  ) {
+  ): Promise<ImportResultDto> {
     const userId = req.user.id;
-    return this.transactionsService.import(file, accountId, userId);
+    return this.transactionsService.import(file, accountId, userId, options);
   }
 
   @Get('export/csv')
   @ApiOperation({ summary: 'Exportar transações para CSV' })
-  async exportCsv(@Request() req: any, @Query() filters: TransactionFiltersDto) {
+  @Header('Content-Type', 'text/csv')
+  async exportCsv(
+    @Request() req: any,
+    @Query() filters: TransactionFiltersDto,
+    @Query() options: ExportTransactionsDto,
+    @Res() res: Response
+  ) {
     const userId = req.user.id;
-    return this.transactionsService.exportCsv(userId, filters);
+    const result = await this.transactionsService.exportCsv(userId, filters, options);
+
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Length', result.size.toString());
+
+    res.send(result.content);
   }
 
   @Get('export/pdf')
   @ApiOperation({ summary: 'Exportar transações para PDF' })
-  async exportPdf(@Request() req: any, @Query() filters: TransactionFiltersDto) {
+  @Header('Content-Type', 'application/pdf')
+  async exportPdf(
+    @Request() req: any,
+    @Query() filters: TransactionFiltersDto,
+    @Query() options: ExportTransactionsDto,
+    @Res() res: Response
+  ) {
     const userId = req.user.id;
-    return this.transactionsService.exportPdf(userId, filters);
+    const result = await this.transactionsService.exportPdf(userId, filters, options);
+
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Length', result.size.toString());
+
+    res.send(result.content);
+  }
+
+  @Get('export/excel')
+  @ApiOperation({ summary: 'Exportar transações para Excel' })
+  @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  async exportExcel(
+    @Request() req: any,
+    @Query() filters: TransactionFiltersDto,
+    @Query() options: ExportTransactionsDto,
+    @Res() res: Response
+  ) {
+    const userId = req.user.id;
+    const result = await this.transactionsService.exportExcel(userId, filters, options);
+
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Length', result.size.toString());
+
+    res.send(result.content);
+  }
+
+  @Get('import/template')
+  @ApiOperation({ summary: 'Baixar template de importação CSV' })
+  @Header('Content-Type', 'text/csv')
+  async downloadImportTemplate(@Res() res: Response) {
+    const templatePath = path.join(__dirname, 'templates', 'import-template.csv');
+
+    if (!fs.existsSync(templatePath)) {
+      res.status(404).json({ message: 'Template não encontrado' });
+      return;
+    }
+
+    const templateContent = fs.readFileSync(templatePath, 'utf8');
+
+    res.setHeader('Content-Disposition', 'attachment; filename="template-importacao-transacoes.csv"');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Length', Buffer.byteLength(templateContent, 'utf8').toString());
+
+    res.send(templateContent);
   }
 }

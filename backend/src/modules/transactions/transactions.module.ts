@@ -1,17 +1,33 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+// import { ScheduleModule } from '@nestjs/schedule';
 import { TransactionsController } from './transactions.controller';
+import { RecurringTransactionsController } from './recurring-transactions.controller';
 import { TransactionsService } from './transactions.service';
+import { RecurringTransactionsService } from './services/recurring-transactions.service';
+import { ImportExportService } from './services/import-export.service';
+import { RecurringTransactionsTask } from './tasks/recurring-transactions.task';
 import { Transaction } from './entities/transaction.entity';
+import { RecurringTransaction } from './entities/recurring-transaction.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Account } from '../accounts/entities/account.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction, Category, Account])
+    TypeOrmModule.forFeature([Transaction, RecurringTransaction, Category, Account]),
+    // ScheduleModule.forRoot()
   ],
-  controllers: [TransactionsController],
-  providers: [TransactionsService],
-  exports: [TransactionsService]
+  controllers: [TransactionsController, RecurringTransactionsController],
+  providers: [
+    TransactionsService,
+    RecurringTransactionsService,
+    ImportExportService,
+    // RecurringTransactionsTask
+  ],
+  exports: [
+    TransactionsService,
+    RecurringTransactionsService,
+    ImportExportService
+  ]
 })
 export class TransactionsModule { }

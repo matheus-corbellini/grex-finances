@@ -4,3 +4,6 @@ export * from './transaction-filters.dto';
 export * from './transaction-summary.dto';
 export * from './bulk-update.dto';
 export * from './bulk-delete.dto';
+export * from './import-transactions.dto';
+export * from './export-transactions.dto';
+export * from './recurring-transaction.dto';

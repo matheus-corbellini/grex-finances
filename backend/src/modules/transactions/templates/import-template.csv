@@ -1,0 +1,6 @@
+Data,Descrição,Valor,Tipo,Status,Categoria,Observações
+2024-01-15,Salário mensal,5000.00,income,completed,Salário,Salário do mês de janeiro
+2024-01-16,Supermercado,-150.50,expense,completed,Alimentação,Compras do mês
+2024-01-17,Conta de luz,-89.90,expense,completed,Utilidades,Conta de energia elétrica
+2024-01-18,Freelance,800.00,income,completed,Trabalho extra,Projeto de desenvolvimento
+2024-01-19,Transferência para poupança,-1000.00,transfer,completed,Investimentos,Transferência mensal

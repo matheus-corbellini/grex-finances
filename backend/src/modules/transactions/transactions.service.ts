@@ -10,8 +10,12 @@ import {
   TransactionFiltersDto,
   TransactionSummaryDto,
   BulkUpdateDto,
-  BulkDeleteDto
+  BulkDeleteDto,
+  ExportTransactionsDto,
+  ExportResultDto,
+  ImportResultDto
 } from "./dto";
+import { ImportExportService } from "./services/import-export.service";
 
 @Injectable()
 export class TransactionsService {
@@ -22,6 +26,7 @@ export class TransactionsService {
     private categoryRepository: Repository<Category>,
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
+    private importExportService: ImportExportService,
   ) { }
 
   async findAll(
@@ -329,63 +334,28 @@ export class TransactionsService {
     return { message: `${transactionIds.length} transações excluídas com sucesso` };
   }
 
-  async import(file: any, accountId: string, userId: string) {
-    // Verificar se a conta pertence ao usuário
-    const account = await this.accountRepository.findOne({
-      where: { id: accountId, userId }
-    });
+  async import(file: any, accountId: string, userId: string, options?: any): Promise<ImportResultDto> {
+    const fileExtension = file.originalname.split('.').pop().toLowerCase();
 
-    if (!account) {
-      throw new NotFoundException('Conta não encontrada');
+    if (fileExtension === 'csv') {
+      return this.importExportService.importFromCsv(file, accountId, userId, options);
+    } else if (['xlsx', 'xls'].includes(fileExtension)) {
+      return this.importExportService.importFromExcel(file, accountId, userId, options);
+    } else {
+      throw new BadRequestException('Formato de arquivo não suportado. Use CSV ou Excel.');
     }
-
-    // Implementação básica de importação
-    // Aqui você pode adicionar parsing de CSV/Excel
-    return {
-      message: 'Importação implementada - adicione parsing de arquivo',
-      transactions: []
-    };
   }
 
-  async exportCsv(userId: string, filters?: TransactionFiltersDto) {
-    const { transactions } = await this.findAll(userId, filters, { page: 1, limit: 10000 });
-
-    const csvData = transactions.map(t => ({
-      Data: t.date,
-      Descrição: t.description,
-      Valor: t.amount,
-      Tipo: t.type,
-      Status: t.status,
-      Categoria: t.category?.name || '',
-      Conta: t.account.name,
-      Observações: t.notes || ''
-    }));
-
-    // Converter para CSV
-    const headers = Object.keys(csvData[0] || {});
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
-    ].join('\n');
-
-    return {
-      content: csvContent,
-      filename: `transacoes_${new Date().toISOString().split('T')[0]}.csv`,
-      mimeType: 'text/csv'
-    };
+  async exportCsv(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
+    return this.importExportService.exportToCsv(userId, filters, options);
   }
 
-  async exportPdf(userId: string, filters?: TransactionFiltersDto) {
-    const { transactions } = await this.findAll(userId, filters, { page: 1, limit: 1000 });
+  async exportPdf(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
+    return this.importExportService.exportToPdf(userId, filters, options);
+  }
 
-    // Aqui você implementaria a geração de PDF usando uma biblioteca como puppeteer ou jsPDF
-    // Por enquanto, retornamos os dados para o frontend gerar o PDF
-
-    return {
-      transactions,
-      summary: await this.getSummary(userId, filters),
-      generatedAt: new Date().toISOString()
-    };
+  async exportExcel(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
+    return this.importExportService.exportToExcel(userId, filters, options);
   }
 
   private async updateAccountBalance(accountId: string, amountChange: number) {
