@@ -1,7 +1,7 @@
 /* Sidebar Container */
 .sidebarContainer {
   width: 280px;
-  background-color: var(--color-base-white);
+  background-color: #e5f0fb;
   border-right: 1px solid var(--color-neutrals-200);
   transition: all 0.3s ease;
   display: flex;

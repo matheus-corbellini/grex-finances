@@ -90,6 +90,9 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
         if (!validateForm()) {
             return;
         }
+
+        console.log('Dados do formulário antes de enviar:', formData);
+        
         setIsLoading(true);
         try {
             await onSubmit(formData);

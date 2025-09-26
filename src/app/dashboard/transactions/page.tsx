@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "../../../components/layout/DashboardLayout";
+import { DropdownPortal } from "../../../components/ui/DropdownPortal";
 import styles from "./Transactions.module.css";
 import {
   ChevronDown,
@@ -22,7 +23,8 @@ import { TransactionViewModal, EditTransactionModal, ImportTransactionsModal } f
 import AddTransactionModal from "../../../components/modals/AddTransactionModal";
 import transactionsService from "../../../services/api/transactions.service";
 import accountsService from "../../../services/api/accounts.service";
-import { Transaction } from "../../../shared/types/transaction.types";
+// PDF functionality moved inline to avoid build issues
+import { Transaction, TransactionType, TransactionStatus } from "../../../shared/types/transaction.types";
 import { Account } from "../../../shared/types/account.types";
 
 export default function Transactions() {
@@ -33,9 +35,17 @@ export default function Transactions() {
   const [selectedRows, setSelectedRows] = useState<number[]>([3]); // Linhas selecionadas
   const [selectAll, setSelectAll] = useState(false); // Selecionar todos
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
-  const [showBulkStatusDropdown, setShowBulkStatusDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [statusDropdowns, setStatusDropdowns] = useState<{ [key: number]: boolean }>({});
+  const [statusButtonRefs, setStatusButtonRefs] = useState<{ [key: number]: React.RefObject<HTMLButtonElement> }>({});
+
+  // Criar refs para os botões de status individuais
+  const getStatusButtonRef = (transactionId: number) => {
+    if (!statusButtonRefs[transactionId]) {
+      statusButtonRefs[transactionId] = React.createRef<HTMLButtonElement>();
+    }
+    return statusButtonRefs[transactionId];
+  };
   const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showAddTransactionModal, setShowAddTransactionModal] = useState(false);
@@ -217,8 +227,15 @@ export default function Transactions() {
     let actualBalance = 0;
 
     filteredTransactions.forEach(transaction => {
-      const transactionDate = new Date(transaction.date).toISOString().split('T')[0];
-      const amount = transaction.amount;
+      // Validate date before processing
+      const date = new Date(transaction.date);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date for transaction:', transaction.id, transaction.date);
+        return; // Skip this transaction
+      }
+
+      const transactionDate = date.toISOString().split('T')[0];
+      const amount = Number(transaction.amount);
 
       // Saldo do dia (transações de hoje)
       if (transactionDate === todayStr) {
@@ -294,7 +311,32 @@ export default function Transactions() {
 
   const handleAddTransaction = async (transactionData: any) => {
     try {
-      const newTransaction = await transactionsService.createTransaction(transactionData);
+      console.log('Dados recebidos do modal:', transactionData);
+      console.log('Data recebida:', transactionData.date);
+      console.log('Tipo da data:', typeof transactionData.date);
+
+      // Converter os dados para o formato esperado pela API
+      const apiData = {
+        ...transactionData,
+        date: new Date(transactionData.date), // Converter string para Date
+        // Os tipos TransactionType e TransactionStatus já estão corretos
+      };
+
+      console.log('Dados sendo enviados para a API:', apiData);
+      console.log('Data convertida:', apiData.date);
+      console.log('Data é válida?', !isNaN(apiData.date.getTime()));
+      console.log('CategoryId:', apiData.categoryId);
+      console.log('AccountId:', apiData.accountId);
+
+      const response = await transactionsService.createTransaction(apiData);
+
+      console.log('Resposta da API:', response);
+      console.log('Tipo da resposta:', typeof response);
+      console.log('Propriedades da resposta:', Object.keys(response || {}));
+
+      // Extrair apenas o objeto transaction da resposta
+      const newTransaction = response.transaction || response;
+      console.log('Transação extraída:', newTransaction);
 
       // Atualizar a lista de transações
       setTransactions(prev => [newTransaction, ...prev]);
@@ -306,6 +348,9 @@ export default function Transactions() {
 
     } catch (error: any) {
       console.error("Erro ao adicionar transação:", error);
+      console.error("Erro response:", error.response);
+      console.error("Erro message:", error.message);
+      console.error("Erro status:", error.status);
       throw new Error(error.message || "Erro ao adicionar transação");
     }
   };
@@ -363,7 +408,6 @@ export default function Transactions() {
       }
 
       setOpenDropdowns({});
-      setShowBulkStatusDropdown(false);
       setStatusDropdowns({});
     };
 
@@ -401,11 +445,26 @@ export default function Transactions() {
     }));
   };
 
+  // Função para fechar todos os dropdowns
+  const closeAllDropdowns = () => {
+    setStatusDropdowns({});
+    setOpenDropdowns({});
+  };
+
+  // Função para alternar dropdown de status individual
   const toggleStatusDropdown = (transactionId: number) => {
-    setStatusDropdowns(prev => ({
-      ...prev,
-      [transactionId]: !prev[transactionId]
-    }));
+    const isCurrentlyOpen = statusDropdowns[transactionId];
+
+    // Fechar todos os outros dropdowns primeiro
+    setOpenDropdowns({});
+
+    // Se o dropdown atual estava fechado, abrir apenas ele
+    if (!isCurrentlyOpen) {
+      setStatusDropdowns({ [transactionId]: true });
+    } else {
+      // Se estava aberto, fechar todos
+      setStatusDropdowns({});
+    }
   };
 
   const updateTransaction = (transactionId: number, field: 'category' | 'status', value: string) => {
@@ -588,31 +647,6 @@ export default function Transactions() {
     }
   };
 
-  // Função para alterar status de múltiplas transações
-  const updateSelectedTransactionsStatus = (newStatus: string) => {
-    const statusOption = statusOptions.find(option => option.value === newStatus);
-
-    setTransactions(prevTransactions =>
-      prevTransactions.map(transaction => {
-        if (selectedRows.includes(transaction.id)) {
-          return {
-            ...transaction,
-            status: newStatus,
-            statusType: statusOption?.type || 'neutral'
-          };
-        }
-        return transaction;
-      })
-    );
-
-    // Mostrar mensagem de sucesso
-    setShowSuccessMessage(true);
-    setTimeout(() => setShowSuccessMessage(false), 3000);
-
-    // Limpar seleção após atualização
-    setSelectedRows([]);
-    setSelectAll(false);
-  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', {
@@ -916,6 +950,127 @@ export default function Transactions() {
     }
   };
 
+  const generateTransactionPDF = (transaction: Transaction, account?: Account, category?: Category) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const formatCurrency = (amount: number) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(amount);
+    };
+
+    const formatDate = (date: Date) => {
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(date));
+    };
+
+    const getTransactionTypeLabel = (type: TransactionType) => {
+      const labels = {
+        INCOME: "Receita",
+        EXPENSE: "Despesa",
+        TRANSFER: "Transferência"
+      };
+      return labels[type] || type;
+    };
+
+    const getTransactionStatusLabel = (status: TransactionStatus) => {
+      const labels = {
+        PENDING: "Pendente",
+        COMPLETED: "Concluída",
+        CANCELLED: "Cancelada",
+        FAILED: "Falhou"
+      };
+      return labels[status] || status;
+    };
+
+    const amountText = `${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${formatCurrency(Number(transaction.amount))}`;
+    const typeColor = transaction.type === "EXPENSE" ? "#dc2626" : transaction.type === "INCOME" ? "#059669" : "#3b82f6";
+    const statusColor = transaction.status === "COMPLETED" ? "#059669" : transaction.status === "PENDING" ? "#f59e0b" : "#6b7280";
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Comprovante de Transação</title>
+          <meta charset="utf-8">
+          <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f8fafc; color: #1e293b; }
+            .container { max-width: 800px; margin: 0 auto; background: white; min-height: 100vh; padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+            .header { text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { color: #1e293b; font-size: 28px; margin: 0 0 10px 0; font-weight: 700; }
+            .header .date { color: #64748b; font-size: 14px; }
+            .transaction-card { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+            .transaction-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+            .transaction-icon { width: 60px; height: 60px; background: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+            .transaction-info h2 { font-size: 24px; margin: 0 0 10px 0; color: #1e293b; }
+            .transaction-meta { display: flex; gap: 20px; align-items: center; }
+            .transaction-type { background: #e2e8f0; color: #475569; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+            .transaction-status { color: ${statusColor}; font-weight: 600; font-size: 14px; }
+            .transaction-amount { font-size: 32px; font-weight: 700; color: ${typeColor}; text-align: right; }
+            .details-section { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+            .details-section h3 { color: #1e293b; font-size: 18px; margin: 0 0 20px 0; font-weight: 600; }
+            .detail-row { display: flex; margin-bottom: 15px; align-items: flex-start; }
+            .detail-label { font-weight: 600; color: #374151; min-width: 120px; margin-right: 20px; }
+            .detail-value { color: #1e293b; flex: 1; }
+            .footer { text-align: center; padding-top: 30px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px; }
+            .footer .system-info { margin-bottom: 10px; }
+            .footer .transaction-id { font-weight: 600; }
+            @media print { body { background: white; } .container { box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Comprovante de Transação</h1>
+              <div class="date">Gerado em: ${formatDate(new Date())}</div>
+            </div>
+            <div class="transaction-card">
+              <div class="transaction-header">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                  <div class="transaction-icon">${transaction.type === "EXPENSE" ? "↓" : transaction.type === "INCOME" ? "↑" : "↔"}</div>
+                  <div class="transaction-info">
+                    <h2>${transaction.description}</h2>
+                    <div class="transaction-meta">
+                      <span class="transaction-type">${getTransactionTypeLabel(transaction.type)}</span>
+                      <span class="transaction-status">${getTransactionStatusLabel(transaction.status)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="transaction-amount">${amountText}</div>
+              </div>
+            </div>
+            <div class="details-section">
+              <h3>Detalhes da Transação</h3>
+              <div class="detail-row">
+                <div class="detail-label">Data e Hora:</div>
+                <div class="detail-value">${formatDate(transaction.date)}</div>
+              </div>
+              ${account ? `<div class="detail-row"><div class="detail-label">Conta:</div><div class="detail-value">${account.name}${account.description ? ` (${account.description})` : ''}</div></div>` : ''}
+              ${category ? `<div class="detail-row"><div class="detail-label">Categoria:</div><div class="detail-value">${category.name}</div></div>` : ''}
+              ${transaction.notes ? `<div class="detail-row"><div class="detail-label">Observações:</div><div class="detail-value">${transaction.notes}</div></div>` : ''}
+            </div>
+            <div class="footer">
+              <div class="system-info">Este documento foi gerado automaticamente pelo sistema Grex Finances</div>
+              <div class="transaction-id">ID da Transação: ${transaction.id}</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+  };
+
   const printData = () => {
     if (selectedRows.length === 0) {
       alert("Selecione pelo menos uma transação para imprimir");
@@ -924,55 +1079,134 @@ export default function Transactions() {
 
     const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
 
-    // Criar uma nova janela para impressão
+    // Converter dados mockados para o formato da Transaction
+    const transactionsForPDF = selectedTransactions.map(t => ({
+      id: t.id.toString(),
+      userId: "1",
+      accountId: "1",
+      categoryId: "1",
+      description: t.description,
+      amount: parseFloat(t.value.replace("R$ ", "").replace(",", ".")),
+      type: t.type === "Receita" ? "INCOME" : "EXPENSE" as TransactionType,
+      status: t.status === "CONCLUÍDA" ? "COMPLETED" : "PENDING" as TransactionStatus,
+      date: new Date(),
+      notes: "",
+      receipt: null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }));
+
+    // Gerar PDF para múltiplas transações
     const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const printContent = `
-        <html>
-          <head>
-            <title>Lançamentos Selecionados - ${formatDate(currentDate)}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #f2f2f2; }
-              .header { text-align: center; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
+    if (!printWindow) return;
+
+    const formatCurrency = (amount: number) => {
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }).format(amount);
+    };
+
+    const formatDate = (date: Date) => {
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date(date));
+    };
+
+    const getTransactionTypeLabel = (type: TransactionType) => {
+      const labels = {
+        INCOME: "Receita",
+        EXPENSE: "Despesa",
+        TRANSFER: "Transferência"
+      };
+      return labels[type] || type;
+    };
+
+    const getTransactionStatusLabel = (status: TransactionStatus) => {
+      const labels = {
+        PENDING: "Pendente",
+        COMPLETED: "Concluída",
+        CANCELLED: "Cancelada",
+        FAILED: "Falhou"
+      };
+      return labels[status] || status;
+    };
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Relatório de Transações</title>
+          <meta charset="utf-8">
+          <style>
+            @page { size: A4; margin: 20mm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f8fafc; color: #1e293b; }
+            .container { max-width: 800px; margin: 0 auto; background: white; min-height: 100vh; padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+            .header { text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { color: #1e293b; font-size: 28px; margin: 0 0 10px 0; font-weight: 700; }
+            .header .date { color: #64748b; font-size: 14px; }
+            .summary { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center; }
+            .summary h3 { margin: 0 0 10px 0; color: #1e293b; }
+            .transactions-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+            .transactions-table th { background: #3b82f6; color: white; padding: 15px 10px; text-align: left; font-weight: 600; }
+            .transactions-table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+            .transactions-table tr:nth-child(even) { background: #f8fafc; }
+            .amount { text-align: right; font-weight: 600; }
+            .amount.income { color: #059669; }
+            .amount.expense { color: #dc2626; }
+            .footer { text-align: center; padding-top: 30px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px; }
+            @media print { body { background: white; } .container { box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="container">
             <div class="header">
-              <h1>Lançamentos Selecionados - ${formatDate(currentDate)}</h1>
-              <p>Total: ${selectedTransactions.length} lançamentos selecionados</p>
+              <h1>Relatório de Transações</h1>
+              <div class="date">Gerado em: ${formatDate(new Date())}</div>
             </div>
-            <table>
+            <div class="summary">
+              <h3>Resumo</h3>
+              <p>Total de transações: ${transactionsForPDF.length}</p>
+            </div>
+            <table class="transactions-table">
               <thead>
                 <tr>
-                  <th>Tipo</th>
+                  <th>Data</th>
                   <th>Descrição</th>
-                  <th>Categoria</th>
+                  <th>Tipo</th>
                   <th>Valor</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                ${selectedTransactions.map(transaction => `
+                ${transactionsForPDF.map(transaction => `
                   <tr>
-                    <td></td>
+                    <td>${formatDate(transaction.date)}</td>
                     <td>${transaction.description}</td>
-                    <td>${transaction.category}</td>
-                    <td>${transaction.value}</td>
-                    <td>${transaction.status}</td>
+                    <td>${getTransactionTypeLabel(transaction.type)}</td>
+                    <td class="amount ${transaction.type === 'INCOME' ? 'income' : 'expense'}">
+                      ${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${formatCurrency(Number(transaction.amount))}
+                    </td>
+                    <td>${getTransactionStatusLabel(transaction.status)}</td>
                   </tr>
                 `).join('')}
               </tbody>
             </table>
-          </body>
-        </html>
-      `;
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
+            <div class="footer">
+              <div>Este documento foi gerado automaticamente pelo sistema Grex Finances</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
   };
 
   return (
@@ -1177,38 +1411,6 @@ export default function Transactions() {
                   <Printer size={16} />
                   Imprimir Selecionados
                 </button>
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <button
-                    className={styles.actionButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowBulkStatusDropdown(!showBulkStatusDropdown);
-                    }}
-                  >
-                    <Upload size={16} />
-                    Alterar Status
-                    <ChevronDown size={14} style={{ marginLeft: '4px' }} />
-                  </button>
-
-                  {showBulkStatusDropdown && (
-                    <div className={styles.dropdown} style={{ top: '100%', left: '0', minWidth: '120px' }}>
-                      {statusOptions.map((option) => (
-                        <div
-                          key={option.value}
-                          className={styles.dropdownItem}
-                          onClick={() => {
-                            updateSelectedTransactionsStatus(option.value);
-                            setShowBulkStatusDropdown(false);
-                          }}
-                        >
-                          <span className={`${styles.statusTag} ${styles[option.type]}`}>
-                            {option.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           )}
@@ -1286,9 +1488,9 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody>
-                {getSortedTransactions().map((transaction) => (
+                {getSortedTransactions().map((transaction, index) => (
                   <tr
-                    key={transaction.id}
+                    key={transaction.id || `transaction-${index}`}
                     className={`${styles.tableRow} ${selectedRow === transaction.id ? styles.selected : ''} ${isRowSelected(transaction.id) ? styles.rowSelected : ''}`}
                     onClick={(e) => handleRowClick(transaction.id, e)}
                   >
@@ -1319,11 +1521,11 @@ export default function Transactions() {
                       </div>
                     </td>
                     <td className={styles.tableCell}>
-                      <span className={`${styles.value} ${transaction.amount >= 0 ? styles.positive : styles.negative}`}>
+                      <span className={`${styles.value} ${Number(transaction.amount) >= 0 ? styles.positive : styles.negative}`}>
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'BRL'
-                        }).format(Math.abs(transaction.amount))}
+                        }).format(Math.abs(Number(transaction.amount)))}
                       </span>
                     </td>
                     <td className={styles.tableCell}>
@@ -1333,6 +1535,7 @@ export default function Transactions() {
                         </span>
                         <div className={`${styles.statusDropdownContainer} statusDropdownContainer`}>
                           <button
+                            ref={getStatusButtonRef(transaction.id)}
                             className={`${styles.statusDropdownButton} statusDropdownButton`}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1350,6 +1553,7 @@ export default function Transactions() {
                                   className={`${styles.dropdownItem} dropdownItem`}
                                   onClick={() => {
                                     updateTransaction(transaction.id, 'status', option.value);
+                                    closeAllDropdowns();
                                   }}
                                 >
                                   <span className={`${styles.statusTag} ${styles[option.type]}`}>
@@ -1460,8 +1664,27 @@ export default function Transactions() {
           onDuplicate={handleDuplicateTransaction}
           onShare={handleShareTransaction}
           onPrint={() => {
-            // Implementar funcionalidade de impressão
-            window.print();
+            // Gerar PDF estilizado da transação
+            generateTransactionPDF(selectedTransaction, {
+              id: "1",
+              userId: "1",
+              name: "Conta Principal",
+              type: "CHECKING",
+              balance: 0,
+              description: "Conta Corrente - Banco não informado",
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }, {
+              id: "1",
+              name: "Alimentação",
+              type: "EXPENSE",
+              color: "#dc2626",
+              icon: "🍽️",
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
           }}
           onExport={() => {
             // Implementar funcionalidade de exportação

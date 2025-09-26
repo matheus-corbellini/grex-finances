@@ -482,11 +482,26 @@ export default function Accounts() {
     }
   };
 
-  const handleAddAccount = async (accountData: CreateAccountDto) => {
+  const handleAddAccount = async (accountData: any) => {
     try {
+      console.log('Dados recebidos do modal:', accountData);
+
+      // Converter os dados para o formato esperado pela API
+      const apiData: CreateAccountDto = {
+        name: accountData.name,
+        type: accountData.type, // Usar o tipo diretamente como esperado pelo backend
+        bankName: accountData.bankName || undefined,
+        accountNumber: accountData.accountNumber || undefined,
+        agency: accountData.agency || undefined,
+        initialBalance: accountData.initialBalance,
+        description: accountData.description || undefined,
+        currency: 'BRL'
+      };
+
+      console.log('Dados sendo enviados para a API:', apiData);
 
       // Chamar API para criar conta
-      const newAccount = await accountsService.createAccount(accountData);
+      const newAccount = await accountsService.createAccount(apiData);
 
       // Atualizar a lista de contas
       setAccounts(prev => [...prev, newAccount]);

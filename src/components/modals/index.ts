@@ -23,5 +23,6 @@ export { AccountDetailsModal } from './AccountDetailsModal';
 export { AddAccountModal } from './AddAccountModal';
 export { default as EditTransactionModal } from './EditTransactionModal';
 export { default as ImportTransactionsModal } from './ImportTransactionsModal';
+export { default as ExportTransactionsModal } from './ExportTransactionsModal';
 export { default as EditAccountModal } from './EditAccountModal';
 export { default as AccountActionModal } from './AccountActionModal';

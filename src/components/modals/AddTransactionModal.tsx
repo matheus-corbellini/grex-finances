@@ -5,6 +5,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import CurrencyInput from '../ui/CurrencyInput';
 import styles from './AddTransactionModal.module.css';
+import { TransactionType, TransactionStatus } from '../../../shared/types/transaction.types';
 
 interface Account {
     id: string;
@@ -27,11 +28,11 @@ interface Category {
 interface TransactionFormData {
     description: string;
     amount: number;
-    type: 'income' | 'expense';
+    type: TransactionType;
     categoryId: string;
     accountId: string;
     date: string;
-    status: 'completed' | 'pending';
+    status: TransactionStatus;
     notes?: string;
 }
 
@@ -53,11 +54,11 @@ export default function AddTransactionModal({
     const [formData, setFormData] = useState<TransactionFormData>({
         description: '',
         amount: 0,
-        type: 'expense',
+        type: TransactionType.EXPENSE,
         categoryId: '',
         accountId: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'completed',
+        status: TransactionStatus.COMPLETED,
         notes: ''
     });
 
@@ -65,9 +66,14 @@ export default function AddTransactionModal({
     const [isLoading, setIsLoading] = useState(false);
 
     // Filtrar categorias baseado no tipo de transação
-    const filteredCategories = categories.filter(cat =>
-        cat.type === formData.type || cat.type === 'both'
-    );
+    const filteredCategories = categories.filter(cat => {
+        // Converter o tipo da categoria para o formato do enum se necessário
+        const categoryType = cat.type === 'income' ? TransactionType.INCOME :
+            cat.type === 'expense' ? TransactionType.EXPENSE :
+                cat.type;
+
+        return categoryType === formData.type || cat.type === 'both';
+    });
 
     const handleInputChange = (field: string, value: string | number) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -112,6 +118,8 @@ export default function AddTransactionModal({
             return;
         }
 
+        console.log('Dados do formulário antes de enviar:', formData);
+
         setIsLoading(true);
         try {
             await onSubmit(formData);
@@ -119,11 +127,11 @@ export default function AddTransactionModal({
             setFormData({
                 description: '',
                 amount: 0,
-                type: 'expense',
+                type: TransactionType.EXPENSE,
                 categoryId: '',
                 accountId: '',
                 date: new Date().toISOString().split('T')[0],
-                status: 'completed',
+                status: TransactionStatus.COMPLETED,
                 notes: ''
             });
             onClose();
@@ -171,16 +179,16 @@ export default function AddTransactionModal({
                             <div className={styles.typeButtons}>
                                 <button
                                     type="button"
-                                    className={`${styles.typeButton} ${formData.type === 'expense' ? styles.active : ''}`}
-                                    onClick={() => handleInputChange('type', 'expense')}
+                                    className={`${styles.typeButton} ${formData.type === TransactionType.EXPENSE ? styles.active : ''}`}
+                                    onClick={() => handleInputChange('type', TransactionType.EXPENSE)}
                                 >
                                     <CreditCard size={16} />
                                     Despesa
                                 </button>
                                 <button
                                     type="button"
-                                    className={`${styles.typeButton} ${formData.type === 'income' ? styles.active : ''}`}
-                                    onClick={() => handleInputChange('type', 'income')}
+                                    className={`${styles.typeButton} ${formData.type === TransactionType.INCOME ? styles.active : ''}`}
+                                    onClick={() => handleInputChange('type', TransactionType.INCOME)}
                                 >
                                     <DollarSign size={16} />
                                     Receita
@@ -277,8 +285,8 @@ export default function AddTransactionModal({
                                 onChange={(value) => handleInputChange('status', value)}
                                 placeholder="Selecione o status"
                             >
-                                <option value="completed">Concluída</option>
-                                <option value="pending">Pendente</option>
+                                <option value={TransactionStatus.COMPLETED}>Concluída</option>
+                                <option value={TransactionStatus.PENDING}>Pendente</option>
                             </Select>
                         </div>
 

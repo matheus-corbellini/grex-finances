@@ -2,9 +2,10 @@
 
 .transactionsContainer {
   padding: 32px;
-  background-color: #F9FAFB;
+  background-color: #e5f0fb;
   min-height: 100vh;
   width: 100%;
+  overflow: visible;
 }
 
 /* Controls Bar */
@@ -14,6 +15,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding: 16px 0;
+  overflow: visible;
 }
 
 .leftControls {
@@ -68,7 +70,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 1000;
+  z-index: 9999;
   background: white;
   border: 1px solid #D1D5DB;
   border-radius: 8px;
@@ -155,6 +157,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  overflow: visible;
 }
 
 .dateNavigation {
@@ -191,6 +194,7 @@
 .actionButtons {
   display: flex;
   gap: 8px;
+  overflow: visible;
 }
 
 .actionButton {
@@ -231,7 +235,7 @@
   background-color: #FFFFFF;
   border-radius: 8px;
   border: 1px solid #E5E7EB;
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: 24px;
 }
 
@@ -289,8 +293,8 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-m);
-  background-color: var(--color-primary-100);
-  border-bottom: 1px solid var(--color-primary-200);
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .selectedCount {
@@ -303,6 +307,7 @@
 /* Table */
 .tableContainer {
   overflow-x: auto;
+  overflow-y: visible;
 }
 
 .transactionsTable {
@@ -448,6 +453,7 @@
   overflow: hidden;
   min-width: 120px;
   justify-content: center;
+  z-index: 1;
 }
 
 .actionButton::before {
@@ -500,6 +506,13 @@
 .statusDropdownContainer {
   position: relative;
   display: inline-block;
+  z-index: 9999;
+  overflow: visible;
+}
+
+/* Garantir que dropdowns de status apareçam acima de tudo */
+.statusDropdownContainer * {
+  overflow: visible !important;
 }
 
 .statusDropdownButton {
@@ -526,14 +539,14 @@
 }
 
 .statusDropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed !important;
+  top: auto !important;
+  right: auto !important;
   background-color: #FFFFFF;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 99999 !important;
   min-width: 120px;
   margin-top: 4px;
   padding: 4px;
@@ -558,17 +571,37 @@
 
 /* Dropdown */
 .dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
   background-color: var(--color-base-white);
   border: 1px solid var(--color-neutrals-200);
   border-radius: var(--radius-m);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 99999 !important;
   min-width: 150px;
   max-height: 200px;
   overflow-y: auto;
+}
+
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+  z-index: 9999;
+  overflow: visible;
+}
+
+/* Garantir que dropdowns apareçam acima de tudo */
+.dropdownContainer * {
+  overflow: visible !important;
+}
+
+/* Forçar dropdowns a aparecerem acima de todos os containers */
+.dropdownContainer .dropdown,
+.statusDropdownContainer .statusDropdown {
+  position: fixed !important;
+  z-index: 99999 !important;
+  overflow: visible !important;
 }
 
 .dropdownItem {

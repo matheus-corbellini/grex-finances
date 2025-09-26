@@ -2,6 +2,8 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #e5f0fb;
+  min-height: 100vh;
 }
 
 /* Header */

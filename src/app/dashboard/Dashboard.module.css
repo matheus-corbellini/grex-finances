@@ -1,6 +1,6 @@
 /* Container principal */
 .container {
-  background: #f1f5f9;
+  background: #e5f0fb;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
 
 /* Header com navegação de período */
 .header {
-  background: #f1f5f9;
+  background: #e5f0fb;
   padding: 16px 20px;
   display: flex;
   justify-content: space-between;
@@ -108,7 +108,7 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-  background: #f1f5f9;
+  background: #e5f0fb;
 }
 
 .grid {

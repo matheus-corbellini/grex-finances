@@ -2,12 +2,13 @@
 .mainContainer {
   min-height: 100vh;
   display: flex;
-  background-color: #f3f4f6;
+  background-color: #e5f0fb;
   padding-left: 280px;
   transition: padding-left 0.3s ease;
   width: 100vw;
   margin-left: -280px;
   padding-right: 0;
+  overflow: visible;
 }
 
 .mainContainer.sidebarClosed {
@@ -37,13 +38,14 @@
   min-height: 100vh;
   width: 100%;
   margin-left: 280px;
+  overflow: visible;
 }
 
 /* Main Content */
 .mainContent {
   flex: 1;
-  background-color: #f3f4f6;
-  overflow-y: auto;
+  background-color: #e5f0fb;
+  overflow-y: visible;
   min-width: 0;
   width: calc(100vw - 280px);
   height: calc(100vh - 97px);

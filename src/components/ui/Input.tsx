@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, forwardRef, useId } from "react";
+import React, { useState, useEffect, forwardRef, useId } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
 export interface InputProps {
-  type?: "text" | "email" | "password" | "number" | "file";
+  type?: "text" | "email" | "password" | "number" | "file" | "date";
   variant?: "default" | "withButton" | "withLabel" | "withHelpText";
   size?: "sm" | "md" | "lg";
   placeholder?: string;
@@ -60,6 +60,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const [isFocused, setIsFocused] = useState(false);
     const [inputValue, setInputValue] = useState(value);
     const uniqueId = useId();
+
+    // Update inputValue when value prop changes
+    useEffect(() => {
+      setInputValue(value);
+    }, [value]);
 
     // Generate unique ID if not provided
     const inputId = id || `input-${uniqueId}`;

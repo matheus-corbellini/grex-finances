@@ -120,13 +120,30 @@ class TransactionsService extends BaseApiService {
 
   async importTransactions(
     file: File,
-    accountId: string
-  ): Promise<{ imported: number; errors: any[] }> {
+    accountId: string,
+    options?: any
+  ): Promise<{
+    totalProcessed: number;
+    successCount: number;
+    errorCount: number;
+    duplicateCount: number;
+    errors: Array<{
+      row: number;
+      field: string;
+      message: string;
+      data: any;
+    }>;
+    importedTransactions: any[];
+  }> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("accountId", accountId);
 
-    return this.post<{ imported: number; errors: any[] }>(
+    if (options) {
+      formData.append("options", JSON.stringify(options));
+    }
+
+    return this.post(
       "/transactions/import",
       formData,
       {
@@ -137,12 +154,53 @@ class TransactionsService extends BaseApiService {
     );
   }
 
-  async exportTransactions(filter?: TransactionFilter): Promise<Blob> {
-    const response = await this.api.get("/transactions/export", {
-      params: filter,
+  async exportTransactionsCsv(filter?: TransactionFilter, options?: any): Promise<void> {
+    const params = { ...filter, ...options };
+    const response = await this.api.get("/transactions/export/csv", {
+      params,
       responseType: "blob",
     });
-    return response.data;
+
+    this.downloadFile(response.data, `transacoes_${new Date().toISOString().split('T')[0]}.csv`);
+  }
+
+  async exportTransactionsPdf(filter?: TransactionFilter, options?: any): Promise<void> {
+    const params = { ...filter, ...options };
+    const response = await this.api.get("/transactions/export/pdf", {
+      params,
+      responseType: "blob",
+    });
+
+    this.downloadFile(response.data, `transacoes_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+  async exportTransactionsExcel(filter?: TransactionFilter, options?: any): Promise<void> {
+    const params = { ...filter, ...options };
+    const response = await this.api.get("/transactions/export/excel", {
+      params,
+      responseType: "blob",
+    });
+
+    this.downloadFile(response.data, `transacoes_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+
+  async downloadImportTemplate(): Promise<void> {
+    const response = await this.api.get("/transactions/import/template", {
+      responseType: "blob",
+    });
+
+    this.downloadFile(response.data, "template-importacao-transacoes.csv");
+  }
+
+  private downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 }
 

@@ -24,8 +24,9 @@
 .mainContent {
   flex: 1;
   padding: 0;
-  background-color: var(--color-base-white);
+  background-color: #e5f0fb;
   overflow-x: auto;
+  overflow-y: visible;
   width: 100%;
   max-width: 100%;
 }

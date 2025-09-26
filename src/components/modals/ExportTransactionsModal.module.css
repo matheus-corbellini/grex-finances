@@ -1,0 +1,295 @@
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.modalBody {
+  padding: 0 24px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px 0;
+}
+
+.formatGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.formatOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.formatOption:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.formatOption.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.formatIcon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.formatOption.selected .formatIcon {
+  color: #3b82f6;
+}
+
+.formatInfo {
+  flex: 1;
+}
+
+.formatLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 4px 0;
+}
+
+.formatDescription {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.templateOption {
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+  text-align: center;
+}
+
+.templateOption:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.templateOption.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.templateLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.templateDescription {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.dateInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dateSeparator {
+  font-size: 14px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.accountSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+.accountSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.optionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+}
+
+.checkboxText {
+  font-size: 14px;
+  color: #374151;
+}
+
+.filenameGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filenameInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.filenameInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px 24px 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .modalContent {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+  }
+  
+  .modalHeader {
+    padding: 16px 16px 0 16px;
+  }
+  
+  .modalBody {
+    padding: 0 16px;
+  }
+  
+  .modalActions {
+    padding: 16px 16px 16px 16px;
+    flex-direction: column-reverse;
+  }
+  
+  .formatGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .templateGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .filtersGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dateRange {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dateSeparator {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .templateGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -16,8 +16,17 @@ interface ImportTransactionsModalProps {
 }
 
 interface ImportResult {
-    imported: number;
-    errors: any[];
+    totalProcessed: number;
+    successCount: number;
+    errorCount: number;
+    duplicateCount: number;
+    errors: Array<{
+        row: number;
+        field: string;
+        message: string;
+        data: any;
+    }>;
+    importedTransactions: any[];
 }
 
 export default function ImportTransactionsModal({
@@ -97,8 +106,12 @@ export default function ImportTransactionsModal({
         } catch (error: any) {
             console.error('Erro ao importar transações:', error);
             setImportResult({
-                imported: 0,
-                errors: [{ message: error.message || 'Erro ao importar arquivo' }]
+                totalProcessed: 0,
+                successCount: 0,
+                errorCount: 1,
+                duplicateCount: 0,
+                errors: [{ row: 0, field: 'general', message: error.message || 'Erro ao importar arquivo', data: null }],
+                importedTransactions: []
             });
         } finally {
             setIsImporting(false);
@@ -113,24 +126,13 @@ export default function ImportTransactionsModal({
         onClose();
     };
 
-    const downloadTemplate = () => {
-        // Criar template CSV
-        const csvContent = [
-            'Data,Descrição,Valor,Tipo,Categoria,Observações',
-            '2024-01-15,Salário,+5000.00,income,Salário,Salário mensal',
-            '2024-01-16,Supermercado,-150.50,expense,Alimentação,Compras do mês',
-            '2024-01-17,Transferência,-500.00,transfer,Transferência,Transferência para poupança'
-        ].join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'template_transacoes.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const downloadTemplate = async () => {
+        try {
+            await transactionsService.downloadImportTemplate();
+        } catch (error) {
+            console.error('Erro ao baixar template:', error);
+            alert('Erro ao baixar template. Tente novamente.');
+        }
     };
 
     return (
@@ -239,11 +241,31 @@ export default function ImportTransactionsModal({
                         <div className={styles.section}>
                             <h3 className={styles.sectionTitle}>Resultado da Importação</h3>
                             <div className={styles.resultContainer}>
-                                <div className={styles.resultItem}>
-                                    <CheckCircle size={20} className={styles.successIcon} />
-                                    <span className={styles.resultText}>
-                                        {importResult.imported} transações importadas com sucesso
-                                    </span>
+                                <div className={styles.resultStats}>
+                                    <div className={styles.statItem}>
+                                        <CheckCircle size={20} className={styles.successIcon} />
+                                        <span className={styles.resultText}>
+                                            {importResult.successCount} importadas com sucesso
+                                        </span>
+                                    </div>
+
+                                    {importResult.duplicateCount > 0 && (
+                                        <div className={styles.statItem}>
+                                            <AlertCircle size={20} className={styles.warningIcon} />
+                                            <span className={styles.resultText}>
+                                                {importResult.duplicateCount} duplicadas (ignoradas)
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {importResult.errorCount > 0 && (
+                                        <div className={styles.statItem}>
+                                            <AlertCircle size={20} className={styles.errorIcon} />
+                                            <span className={styles.resultText}>
+                                                {importResult.errorCount} com erro
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {importResult.errors.length > 0 && (
@@ -251,12 +273,15 @@ export default function ImportTransactionsModal({
                                         <AlertCircle size={20} className={styles.errorIcon} />
                                         <div className={styles.errorContent}>
                                             <p className={styles.errorTitle}>
-                                                {importResult.errors.length} erro(s) encontrado(s):
+                                                Detalhes dos erros:
                                             </p>
                                             <ul className={styles.errorList}>
                                                 {importResult.errors.map((error, index) => (
                                                     <li key={index} className={styles.errorItem}>
-                                                        {error.message || error}
+                                                        <strong>Linha {error.row}:</strong> {error.message}
+                                                        {error.field !== 'general' && (
+                                                            <span className={styles.errorField}> (Campo: {error.field})</span>
+                                                        )}
                                                     </li>
                                                 ))}
                                             </ul>
