@@ -12,7 +12,8 @@ export default new DataSource({
         __dirname + "/1700000000000-CreateAccountsTables{.ts,.js}",
         __dirname + "/1700000000001-CreateUsersTables{.ts,.js}",
         __dirname + "/1700000000002-CreateCategoriesTables{.ts,.js}",
-        __dirname + "/1700000000003-CreateRecurringTransactionsTable{.ts,.js}"
+        __dirname + "/1700000000003-CreateRecurringTransactionsTable{.ts,.js}",
+        __dirname + "/1758898239273-CreateTransactionsTable{.ts,.js}"
     ],
     synchronize: false,
     logging: true,

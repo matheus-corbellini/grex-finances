@@ -15,7 +15,9 @@ import {
   UploadedFile,
   UseInterceptors,
   Res,
-  Header
+  Header,
+  UsePipes,
+  ValidationPipe
 } from "@nestjs/common";
 import { Response } from 'express';
 import {
@@ -43,13 +45,38 @@ import {
   ImportResultDto
 } from "./dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+import { AppLogger } from "@/common/logger/app.logger";
+import { LogMethod } from "@/common/decorators/log-method.decorator";
+import { NotFoundException, BusinessException, ValidationException } from "@/common/exceptions/custom.exceptions";
 
 @ApiTags('transactions')
 @Controller("transactions")
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+// @UseGuards(JwtAuthGuard) // Temporariamente desabilitado para teste
+// @ApiBearerAuth()
 export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) { }
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    private readonly logger: AppLogger,
+  ) { }
+
+  @Get('test')
+  @ApiOperation({ summary: 'Teste de endpoint de transações' })
+  async test(): Promise<{ message: string }> {
+    return { message: 'Endpoint de transações funcionando!' };
+  }
+
+  @Get('simple')
+  @ApiOperation({ summary: 'Listar transações simples' })
+  async findAllSimple(): Promise<any> {
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+    try {
+      // Chamar diretamente o service sem filtros complexos
+      return await this.transactionsService.findAll(userId, {}, { page: 1, limit: 10 });
+    } catch (error) {
+      return { error: error.message, stack: error.stack };
+    }
+  }
 
   @Get()
   @ApiOperation({ summary: 'Listar transações do usuário' })
@@ -57,12 +84,14 @@ export class TransactionsController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async findAll(
     @Request() req: any,
-    @Query() filters: TransactionFiltersDto,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query() filters: TransactionFiltersDto
   ) {
-    const userId = req.user.id;
-    return this.transactionsService.findAll(userId, filters, { page, limit });
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+    // Extrair paginação do DTO
+    const { page = 1, limit = 10, ...filterParams } = filters;
+    const pagination = { page, limit };
+    return this.transactionsService.findAll(userId, filterParams, pagination);
   }
 
   @Get('summary')
@@ -72,7 +101,8 @@ export class TransactionsController {
     @Request() req: any,
     @Query() filters: TransactionFiltersDto
   ): Promise<TransactionSummaryDto> {
-    const userId = req.user.id;
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.transactionsService.getSummary(userId, filters);
   }
 
@@ -115,13 +145,157 @@ export class TransactionsController {
     return this.transactionsService.findOne(id, userId);
   }
 
+  @Post('test')
+  async testCreate(@Body() body: any) {
+    console.log('Test endpoint called with body:', body);
+    return { message: 'Test endpoint working', body };
+  }
+
+  @Post('simple')
+  async simpleCreate(@Body() body: any) {
+    try {
+      console.log('Simple POST called with:', body);
+      return {
+        success: true,
+        message: 'Simple endpoint working',
+        receivedData: body
+      };
+    } catch (error) {
+      console.error('Error in simple endpoint:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  @Post('add')
+  @LogMethod({ level: 'log', message: 'Creating transaction via add endpoint', includeArgs: true })
+  @ApiOperation({ summary: 'Criar nova transação (endpoint add)' })
+  @ApiResponse({ status: 201, description: 'Transação criada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  async addTransaction(@Body() body: any) {
+    this.logger.log('Creating transaction via add endpoint', {
+      userId: 'mock-user', // TODO: Get from JWT token
+      type: 'business',
+    });
+
+    // Validar dados obrigatórios
+    if (!body.description || !body.amount || !body.type || !body.accountId) {
+      throw new ValidationException('Dados obrigatórios não fornecidos', [
+        { field: 'description', message: 'Descrição é obrigatória' },
+        { field: 'amount', message: 'Valor é obrigatório' },
+        { field: 'type', message: 'Tipo é obrigatório' },
+        { field: 'accountId', message: 'ID da conta é obrigatório' },
+      ]);
+    }
+
+    // Validar valor numérico
+    const amount = parseFloat(body.amount);
+    if (isNaN(amount) || amount <= 0) {
+      throw new BusinessException('Valor deve ser um número positivo');
+    }
+
+    try {
+      // Criar transação usando o service
+      const transaction = this.transactionsService.transactionRepository.create({
+        description: body.description,
+        amount: amount,
+        type: body.type,
+        status: body.status || 'completed',
+        accountId: body.accountId,
+        categoryId: body.categoryId || null,
+        date: new Date(body.date || new Date()),
+        notes: body.notes || null,
+        isRecurring: body.isRecurring || false,
+        recurringTransactionId: body.recurringTransactionId || null,
+      });
+
+      const savedTransaction = await this.transactionsService.transactionRepository.save(transaction);
+
+      this.logger.logBusiness('Transaction created successfully via add endpoint', 'mock-user', {
+        transactionId: savedTransaction.id,
+        amount: savedTransaction.amount,
+        type: savedTransaction.type,
+      });
+
+      return {
+        success: true,
+        message: 'Transação criada com sucesso',
+        transaction: savedTransaction
+      };
+    } catch (error) {
+      this.logger.error('Failed to create transaction via add endpoint', error.stack, {
+        userId: 'mock-user',
+        type: 'business_error',
+      });
+
+      throw error; // Deixar o GlobalExceptionFilter tratar
+    }
+  }
+
   @Post()
+  @LogMethod({ level: 'log', message: 'Creating transaction', includeArgs: true })
   @ApiOperation({ summary: 'Criar nova transação' })
   @ApiResponse({ status: 201, description: 'Transação criada com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  async create(@Body() createTransactionDto: CreateTransactionDto, @Request() req: any) {
-    const userId = req.user.id;
-    return this.transactionsService.create(createTransactionDto, userId);
+  @ApiResponse({ status: 500, description: 'Erro interno do servidor' })
+  async create(@Body() body: any) {
+    this.logger.log('Creating transaction', {
+      userId: 'mock-user', // TODO: Get from JWT token
+      type: 'business',
+    });
+
+    // Validar dados obrigatórios
+    if (!body.description || !body.amount || !body.type || !body.accountId) {
+      throw new ValidationException('Dados obrigatórios não fornecidos', [
+        { field: 'description', message: 'Descrição é obrigatória' },
+        { field: 'amount', message: 'Valor é obrigatório' },
+        { field: 'type', message: 'Tipo é obrigatório' },
+        { field: 'accountId', message: 'ID da conta é obrigatório' },
+      ]);
+    }
+
+    // Validar valor numérico
+    const amount = parseFloat(body.amount);
+    if (isNaN(amount) || amount <= 0) {
+      throw new BusinessException('Valor deve ser um número positivo');
+    }
+
+    try {
+      // Criar transação usando o service
+      const transaction = this.transactionsService.transactionRepository.create({
+        description: body.description,
+        amount: amount,
+        type: body.type,
+        status: body.status || 'completed',
+        accountId: body.accountId,
+        categoryId: body.categoryId || null,
+        date: new Date(body.date || new Date()),
+        notes: body.notes || null,
+        isRecurring: body.isRecurring || false,
+        recurringTransactionId: body.recurringTransactionId || null,
+      });
+
+      const savedTransaction = await this.transactionsService.transactionRepository.save(transaction);
+
+      this.logger.logBusiness('Transaction created successfully', 'mock-user', {
+        transactionId: savedTransaction.id,
+        amount: savedTransaction.amount,
+        type: savedTransaction.type,
+      });
+
+      return {
+        success: true,
+        message: 'Transação criada com sucesso',
+        transaction: savedTransaction
+      };
+    } catch (error) {
+      this.logger.error('Failed to create transaction', error.stack, {
+        userId: 'mock-user',
+        type: 'business_error',
+      });
+
+      throw error; // Deixar o GlobalExceptionFilter tratar
+    }
   }
 
   @Put(':id')

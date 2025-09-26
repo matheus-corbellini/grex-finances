@@ -68,10 +68,10 @@ export class RecurringTransaction {
   })
   frequency: RecurringFrequency;
 
-  @Column({ type: "datetime" })
+  @Column({ type: "timestamp" })
   startDate: Date;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   endDate?: Date;
 
   @Column({
@@ -99,10 +99,10 @@ export class RecurringTransaction {
   @Column({ type: "simple-json", nullable: true })
   customFrequency?: CustomFrequencyConfig;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   lastExecutedAt?: Date;
 
-  @Column({ type: "datetime", nullable: true })
+  @Column({ type: "timestamp", nullable: true })
   nextExecutionDate?: Date;
 
   @Column({ default: 0 })

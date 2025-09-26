@@ -45,7 +45,7 @@ export class Transaction {
   @Column({ nullable: true })
   categoryId?: string;
 
-  @Column('datetime')
+  @Column('timestamp')
   date: Date;
 
   @Column('text', { nullable: true })

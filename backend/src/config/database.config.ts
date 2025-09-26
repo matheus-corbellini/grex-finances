@@ -1,9 +1,14 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export const databaseConfig: TypeOrmModuleOptions = {
-  type: 'sqlite',
-  database: 'grex_finances.db',
+  type: 'postgres',
+  host: 'localhost',
+  port: 5432,
+  username: 'postgres',
+  password: '031004',
+  database: 'grex',
   autoLoadEntities: true,
   synchronize: false, // Usar migrações em vez de synchronize
-  logging: process.env.NODE_ENV === 'development',
+  logging: true,
+  ssl: false,
 };

@@ -66,12 +66,18 @@ export class AccountsService {
   }
 
   async create(createAccountDto: CreateAccountDto, userId: string): Promise<Account> {
+    console.log('Serviço: Criando conta com dados:', createAccountDto);
+    console.log('Serviço: Tipo de conta:', createAccountDto.type);
+
     // Buscar tipo de conta
     const accountType = await this.accountTypeRepository.findOne({
       where: { category: createAccountDto.type }
     });
 
+    console.log('Serviço: Tipo encontrado:', accountType);
+
     if (!accountType) {
+      console.log('Serviço: Tipo de conta não encontrado para:', createAccountDto.type);
       throw new BadRequestException('Tipo de conta inválido');
     }
 

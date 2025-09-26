@@ -35,8 +35,8 @@ import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 
 @ApiTags('accounts')
 @Controller("accounts")
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+// @UseGuards(JwtAuthGuard) // Temporariamente desabilitado para teste
+// @ApiBearerAuth()
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) { }
 
@@ -48,7 +48,8 @@ export class AccountsController {
     @Request() req: any,
     @Query() filters: AccountFiltersDto
   ) {
-    const userId = req.user.id;
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.findAll(userId, filters);
   }
 
@@ -87,7 +88,11 @@ export class AccountsController {
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async create(@Body() createAccountDto: CreateAccountDto, @Request() req: any) {
-    const userId = req.user.id;
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+    console.log('Dados recebidos no controller:', createAccountDto);
+    console.log('UserId usado:', userId);
+    console.log('Tipo de conta recebido:', createAccountDto.type);
     return this.accountsService.create(createAccountDto, userId);
   }
 

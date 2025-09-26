@@ -1,4 +1,5 @@
 import { IsOptional, IsString, IsNumber, IsEnum, IsDateString, IsBoolean } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionTypeEnum, TransactionStatusEnum } from './create-transaction.dto';
 
@@ -52,4 +53,16 @@ export class TransactionFiltersDto {
     @IsOptional()
     @IsBoolean()
     isRecurring?: boolean;
+
+    @ApiProperty({ description: 'Página', required: false, default: 1 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    page?: number;
+
+    @ApiProperty({ description: 'Limite de itens por página', required: false, default: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    limit?: number;
 }

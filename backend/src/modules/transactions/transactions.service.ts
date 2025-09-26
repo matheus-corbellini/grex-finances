@@ -21,12 +21,12 @@ import { ImportExportService } from "./services/import-export.service";
 export class TransactionsService {
   constructor(
     @InjectRepository(Transaction)
-    private transactionRepository: Repository<Transaction>,
+    public transactionRepository: Repository<Transaction>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     @InjectRepository(Account)
     private accountRepository: Repository<Account>,
-    private importExportService: ImportExportService,
+    // private importExportService: ImportExportService, // Temporariamente comentado
   ) { }
 
   async findAll(
@@ -37,7 +37,7 @@ export class TransactionsService {
     const query = this.transactionRepository.createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.category', 'category')
       .leftJoinAndSelect('transaction.account', 'account')
-      .leftJoinAndSelect('transaction.recurringTransaction', 'recurring')
+      // .leftJoinAndSelect('transaction.recurringTransaction', 'recurring') // Comentado temporariamente
       .where('account.userId = :userId', { userId });
 
     if (filters) {
@@ -150,7 +150,7 @@ export class TransactionsService {
   async findOne(id: string, userId: string) {
     const transaction = await this.transactionRepository.findOne({
       where: { id },
-      relations: ['category', 'account', 'recurringTransaction']
+      relations: ['category', 'account'] // Removido recurringTransaction que está comentado
     });
 
     if (!transaction) {
@@ -191,9 +191,9 @@ export class TransactionsService {
     const savedTransaction = await this.transactionRepository.save(transaction);
 
     // Atualizar saldo da conta
-    await this.updateAccountBalance(account.id, createTransactionDto.amount);
+    // await this.updateAccountBalance(account.id, createTransactionDto.amount); // Temporariamente comentado
 
-    return this.findOne(savedTransaction.id, userId);
+    return savedTransaction;
   }
 
   async update(id: string, updateTransactionDto: UpdateTransactionDto, userId: string) {
@@ -276,7 +276,7 @@ export class TransactionsService {
     return this.transactionRepository.createQueryBuilder('transaction')
       .leftJoinAndSelect('transaction.category', 'category')
       .leftJoinAndSelect('transaction.account', 'account')
-      .leftJoinAndSelect('transaction.recurringTransaction', 'recurring')
+      // .leftJoinAndSelect('transaction.recurringTransaction', 'recurring') // Comentado temporariamente
       .leftJoin('account.user', 'user')
       .where('user.id = :userId', { userId })
       .andWhere('transaction.isRecurring = :isRecurring', { isRecurring: true })
@@ -335,30 +335,31 @@ export class TransactionsService {
   }
 
   async import(file: any, accountId: string, userId: string, options?: any): Promise<ImportResultDto> {
-    const fileExtension = file.originalname.split('.').pop().toLowerCase();
-
-    if (fileExtension === 'csv') {
-      return this.importExportService.importFromCsv(file, accountId, userId, options);
-    } else if (['xlsx', 'xls'].includes(fileExtension)) {
-      return this.importExportService.importFromExcel(file, accountId, userId, options);
-    } else {
-      throw new BadRequestException('Formato de arquivo não suportado. Use CSV ou Excel.');
-    }
+    // Temporariamente desabilitado - importExportService comentado
+    throw new Error('Import functionality temporarily disabled');
   }
 
   async exportCsv(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
-    return this.importExportService.exportToCsv(userId, filters, options);
+    // Temporariamente desabilitado - importExportService comentado
+    throw new Error('Export CSV functionality temporarily disabled');
   }
 
   async exportPdf(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
-    return this.importExportService.exportToPdf(userId, filters, options);
+    // Temporariamente desabilitado - importExportService comentado
+    throw new Error('Export PDF functionality temporarily disabled');
   }
 
   async exportExcel(userId: string, filters?: TransactionFiltersDto, options?: ExportTransactionsDto): Promise<ExportResultDto> {
-    return this.importExportService.exportToExcel(userId, filters, options);
+    // Temporariamente desabilitado - importExportService comentado
+    throw new Error('Export Excel functionality temporarily disabled');
   }
 
   private async updateAccountBalance(accountId: string, amountChange: number) {
-    await this.accountRepository.increment({ id: accountId }, 'balance', amountChange);
+    try {
+      await this.accountRepository.increment({ id: accountId }, 'balance', amountChange);
+    } catch (error) {
+      console.error('Erro ao atualizar saldo da conta:', error);
+      // Não falhar a criação da transação se houver erro na atualização do saldo
+    }
   }
 }

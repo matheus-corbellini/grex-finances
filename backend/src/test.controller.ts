@@ -7,3 +7,4 @@ export class TestController {
         return { message: 'Test endpoint funcionando!' };
     }
 }
+
