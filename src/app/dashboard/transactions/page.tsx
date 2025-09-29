@@ -26,6 +26,7 @@ import accountsService from "../../../services/api/accounts.service";
 // PDF functionality moved inline to avoid build issues
 import { Transaction, TransactionType, TransactionStatus } from "../../../shared/types/transaction.types";
 import { Account } from "../../../shared/types/account.types";
+import { safeErrorLog } from "../../../utils/error-logger";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -347,10 +348,7 @@ export default function Transactions() {
       setTimeout(() => setShowSuccessMessage(false), 3000);
 
     } catch (error: any) {
-      console.error("Erro ao adicionar transação:", error);
-      console.error("Erro response:", error.response);
-      console.error("Erro message:", error.message);
-      console.error("Erro status:", error.status);
+      safeErrorLog("Erro ao adicionar transação:", error);
       throw new Error(error.message || "Erro ao adicionar transação");
     }
   };

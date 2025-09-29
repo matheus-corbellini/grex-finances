@@ -9,6 +9,7 @@ import { Icon } from "../../../components/ui/Icon";
 import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
 import accountsService, { CreateAccountDto, Account as ApiAccount } from "../../../services/api/accounts.service";
 import styles from "./Accounts.module.css";
+import { safeErrorLog } from "../../../utils/error-logger";
 
 interface Account {
   id: number;
@@ -171,7 +172,7 @@ export default function Accounts() {
     let filtered = [...accounts];
 
     if (filters.type) {
-      filtered = filtered.filter(account => account.type.category === filters.type);
+      filtered = filtered.filter(account => account.type?.category === filters.type);
     }
 
     if (filters.status) {
@@ -225,26 +226,27 @@ export default function Accounts() {
 
   const getMaxValue = (graphData: { value: number }[]) => {
     if (!graphData || graphData.length === 0) return 1;
-    const values = graphData.map(d => d.value).filter(v => !isNaN(v) && isFinite(v));
+    const values = graphData.map(d => parseFloat(d.value?.toString() || '0')).filter(v => !isNaN(v) && isFinite(v) && v > 0);
     if (values.length === 0) return 1;
     return Math.max(...values);
   };
 
   const generateLinePath = (data: any[], maxValue: number) => {
-    if (!data || data.length === 0 || maxValue <= 0) {
+    if (!data || data.length === 0 || maxValue <= 0 || !isFinite(maxValue)) {
       return 'M 0,80 L 200,80';
     }
 
     const points = data.map((point, index) => {
       const x = (index / (data.length - 1)) * 200;
-      const y = 80 - (point.value / maxValue) * 80;
+      const value = parseFloat(point.value?.toString() || '0');
+      const y = 80 - (value / maxValue) * 80;
       return `${x},${y}`;
     });
     return `M ${points.join(' L ')}`;
   };
 
   const generateAreaPath = (data: any[], maxValue: number) => {
-    if (!data || data.length === 0 || maxValue <= 0) {
+    if (!data || data.length === 0 || maxValue <= 0 || !isFinite(maxValue)) {
       return 'M 0,80 L 200,80 L 0,80 Z';
     }
 
@@ -510,9 +512,7 @@ export default function Accounts() {
       alert("Conta adicionada com sucesso!");
 
     } catch (error: any) {
-      console.error("Erro detalhado ao criar conta:", error);
-      console.error("Erro response:", error.response);
-      console.error("Erro message:", error.message);
+      safeErrorLog("Erro detalhado ao criar conta:", error);
       alert(`Erro ao adicionar conta: ${error.message}`);
       throw new Error(error.message || "Erro ao adicionar conta");
     }
@@ -690,11 +690,11 @@ export default function Accounts() {
                 const graphData = historyData.length > 0
                   ? historyData.map(item => ({
                     date: item.date,
-                    value: item.balance / 1000 // Normalizar para exibição
+                    value: parseFloat(item.balance.toString()) / 1000 // Normalizar para exibição
                   }))
                   : [
                     // Se não há dados históricos, mostrar apenas o saldo atual
-                    { date: "Atual", value: account.balance / 1000 }
+                    { date: "Atual", value: parseFloat(account.balance.toString()) / 1000 }
                   ];
                 const maxValue = getMaxValue(graphData);
 
@@ -708,7 +708,7 @@ export default function Accounts() {
                         </div>
                         <div className={styles.bankDetails}>
                           <h3 className={styles.bankName}>{account.name}</h3>
-                          <p className={styles.accountType}>({account.type.name})</p>
+                          <p className={styles.accountType}>({account.type?.name || `Tipo ${account.typeId}`})</p>
                         </div>
                       </div>
                     </div>
@@ -769,7 +769,8 @@ export default function Accounts() {
                           <div className={styles.graphPoints}>
                             {graphData.map((point, index) => {
                               const x = graphData.length > 1 ? (index / (graphData.length - 1)) * 100 : 50;
-                              const y = maxValue > 0 ? 100 - (point.value / maxValue) * 100 : 50;
+                              const value = parseFloat(point.value?.toString() || '0');
+                              const y = maxValue > 0 && isFinite(maxValue) ? 100 - (value / maxValue) * 100 : 50;
 
                               return (
                                 <div

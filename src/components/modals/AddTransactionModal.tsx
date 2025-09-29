@@ -10,9 +10,9 @@ import { TransactionType, TransactionStatus } from '../../../shared/types/transa
 interface Account {
     id: string;
     name: string;
-    type: {
-        name: string;
-        category: string;
+    type?: {
+        name?: string;
+        category?: string;
     };
     balance: number;
 }
@@ -257,7 +257,7 @@ export default function AddTransactionModal({
                             >
                                 {accounts.map(account => (
                                     <option key={account.id} value={account.id}>
-                                        {account.name} ({account.type.name})
+                                        {account.name} ({account.type?.name || account.type?.category || 'Conta'})
                                     </option>
                                 ))}
                             </Select>
