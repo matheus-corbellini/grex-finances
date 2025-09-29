@@ -9,7 +9,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   database: process.env.DB_NAME || 'neondb',
   autoLoadEntities: true,
   synchronize: false, // Desabilitado para evitar migrações automáticas
-  logging: true,
+  logging: process.env.NODE_ENV === 'development',
   ssl: {
     rejectUnauthorized: false
   },
