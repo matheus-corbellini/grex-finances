@@ -21,7 +21,7 @@ async function bootstrap() {
   app.useLogger(appLogger);
 
   // Enable CORS for frontend communication
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
+  const allowedOrigins = process.env.NODE_ENV === 'production'
     ? ['https://grexfinances.netlify.app', 'https://grexfinances.netlify.app/'] // Domínio do Netlify
     : true; // Aceita qualquer origem durante desenvolvimento
 
