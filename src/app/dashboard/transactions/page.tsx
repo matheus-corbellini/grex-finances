@@ -24,24 +24,25 @@ import AddTransactionModal from "../../../components/modals/AddTransactionModal"
 import transactionsService from "../../../services/api/transactions.service";
 import accountsService from "../../../services/api/accounts.service";
 // PDF functionality moved inline to avoid build issues
-import { Transaction, TransactionType, TransactionStatus } from "../../../shared/types/transaction.types";
-import { Account } from "../../../shared/types/account.types";
+import { Transaction, TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
+import { Account } from "../../../../shared/types/account.types";
+import { Category } from "../../../../shared/types/category.types";
 import { safeErrorLog } from "../../../utils/error-logger";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeView, setActiveView] = useState("Mês");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRow, setSelectedRow] = useState(3); // Terceira linha selecionada como no modelo
-  const [selectedRows, setSelectedRows] = useState<number[]>([3]); // Linhas selecionadas
+  const [selectedRow, setSelectedRow] = useState<string>("3"); // Terceira linha selecionada como no modelo
+  const [selectedRows, setSelectedRows] = useState<string[]>([]); // Linhas selecionadas
   const [selectAll, setSelectAll] = useState(false); // Selecionar todos
   const [openDropdowns, setOpenDropdowns] = useState<{ [key: string]: boolean }>({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [statusDropdowns, setStatusDropdowns] = useState<{ [key: number]: boolean }>({});
-  const [statusButtonRefs, setStatusButtonRefs] = useState<{ [key: number]: React.RefObject<HTMLButtonElement> }>({});
+  const [statusDropdowns, setStatusDropdowns] = useState<{ [key: string]: boolean }>({});
+  const [statusButtonRefs, setStatusButtonRefs] = useState<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
 
   // Criar refs para os botões de status individuais
-  const getStatusButtonRef = (transactionId: number) => {
+  const getStatusButtonRef = (transactionId: string) => {
     if (!statusButtonRefs[transactionId]) {
       statusButtonRefs[transactionId] = React.createRef<HTMLButtonElement>();
     }
@@ -126,8 +127,8 @@ export default function Transactions() {
         limit: 10
       });
 
-      setTransactions(response.transactions);
-      setTotalTransactions(response.total);
+      setTransactions(response.data);
+      setTotalTransactions(response.pagination.total);
     } catch (err: any) {
       console.error("Erro ao carregar transações:", err);
       setError(err.message || "Erro ao carregar transações");
@@ -168,7 +169,7 @@ export default function Transactions() {
     // Filtro por categoria
     if (filters.category) {
       filtered = filtered.filter(transaction =>
-        transaction.category?.id === filters.category
+        transaction.categoryId === filters.category
       );
     }
 
@@ -285,8 +286,8 @@ export default function Transactions() {
           bValue = b.description.toLowerCase();
           break;
         case 'category':
-          aValue = a.category?.name?.toLowerCase() || '';
-          bValue = b.category?.name?.toLowerCase() || '';
+          aValue = a.categoryId?.toLowerCase() || '';
+          bValue = b.categoryId?.toLowerCase() || '';
           break;
         case 'amount':
           aValue = Math.abs(a.amount);
@@ -336,7 +337,7 @@ export default function Transactions() {
       console.log('Propriedades da resposta:', Object.keys(response || {}));
 
       // Extrair apenas o objeto transaction da resposta
-      const newTransaction = response.transaction || response;
+      const newTransaction = response;
       console.log('Transação extraída:', newTransaction);
 
       // Atualizar a lista de transações
@@ -450,7 +451,7 @@ export default function Transactions() {
   };
 
   // Função para alternar dropdown de status individual
-  const toggleStatusDropdown = (transactionId: number) => {
+  const toggleStatusDropdown = (transactionId: string) => {
     const isCurrentlyOpen = statusDropdowns[transactionId];
 
     // Fechar todos os outros dropdowns primeiro
@@ -465,7 +466,7 @@ export default function Transactions() {
     }
   };
 
-  const updateTransaction = (transactionId: number, field: 'category' | 'status', value: string) => {
+  const updateTransaction = (transactionId: string, field: 'category' | 'status', value: string) => {
 
     setTransactions(prevTransactions =>
       prevTransactions.map(transaction => {
@@ -475,7 +476,7 @@ export default function Transactions() {
             const statusOption = statusOptions.find(option => option.value === value);
             return {
               ...transaction,
-              status: value,
+              status: value as TransactionStatus,
               statusType: statusOption?.type || 'neutral'
             };
           } else {
@@ -520,11 +521,11 @@ export default function Transactions() {
     setSelectAll(!selectAll);
   };
 
-  const isRowSelected = (transactionId: number) => {
+  const isRowSelected = (transactionId: string) => {
     return selectedRows.includes(transactionId);
   };
 
-  const toggleRowSelection = (id: number) => {
+  const toggleRowSelection = (id: string) => {
     setSelectedRows(prev => {
       if (prev.includes(id)) {
         return prev.filter(rowId => rowId !== id);
@@ -534,7 +535,7 @@ export default function Transactions() {
     });
   };
 
-  const handleRowClick = (transactionId: number, event: React.MouseEvent) => {
+  const handleRowClick = (transactionId: string, event: React.MouseEvent) => {
     // Não fazer nada ao clicar na linha - apenas o checkbox deve selecionar
     return;
   };
@@ -626,7 +627,7 @@ export default function Transactions() {
       const shareText = `Transação: ${selectedTransaction.description}\n` +
         `Valor: R$ ${selectedTransaction.amount.toFixed(2)}\n` +
         `Data: ${new Date(selectedTransaction.date).toLocaleDateString('pt-BR')}\n` +
-        `Categoria: ${selectedTransaction.category?.name || 'N/A'}\n` +
+        `Categoria: ${selectedTransaction.categoryId || 'N/A'}\n` +
         `Status: ${selectedTransaction.status}`;
 
       // Copiar para área de transferência
@@ -672,8 +673,8 @@ export default function Transactions() {
     const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
 
     // Importar jsPDF dinamicamente
-    import('jspdf').then(({ jsPDF }) => {
-      const doc = new jsPDF();
+    import('jspdf').then((jsPDF) => {
+      const doc = new jsPDF.default();
 
       // Configurações do PDF
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -754,15 +755,15 @@ export default function Transactions() {
         const rowData = [
           '', // Tipo (vazio)
           transaction.description,
-          transaction.category,
-          transaction.value,
+          transaction.categoryId,
+          transaction.amount,
           transaction.status
         ];
 
         currentX = margin + 5;
         rowData.forEach((data, colIndex) => {
           // Truncar texto se muito longo
-          let text = data;
+          let text = String(data);
           if (colIndex === 1 && text.length > 30) {
             text = text.substring(0, 27) + '...';
           }
@@ -806,8 +807,8 @@ export default function Transactions() {
     }
 
     // Importar jsPDF dinamicamente
-    import('jspdf').then(({ jsPDF }) => {
-      const doc = new jsPDF();
+    import('jspdf').then((jsPDF) => {
+      const doc = new jsPDF.default();
 
       // Configurações do PDF
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -892,15 +893,15 @@ export default function Transactions() {
         const rowData = [
           '', // Tipo (vazio)
           transaction.description,
-          transaction.category,
-          transaction.value,
+          transaction.categoryId,
+          transaction.amount,
           transaction.status
         ];
 
         currentX = margin + 5;
         rowData.forEach((data, colIndex) => {
           // Truncar texto se muito longo
-          let text = data;
+          let text = String(data);
           if (colIndex === 1 && text.length > 30) {
             text = text.substring(0, 27) + '...';
           }
@@ -988,9 +989,9 @@ export default function Transactions() {
       return labels[status] || status;
     };
 
-    const amountText = `${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${formatCurrency(Number(transaction.amount))}`;
-    const typeColor = transaction.type === "EXPENSE" ? "#dc2626" : transaction.type === "INCOME" ? "#059669" : "#3b82f6";
-    const statusColor = transaction.status === "COMPLETED" ? "#059669" : transaction.status === "PENDING" ? "#f59e0b" : "#6b7280";
+    const amountText = `${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${formatCurrency(Number(transaction.amount))}`;
+    const typeColor = transaction.type === "expense" ? "#dc2626" : transaction.type === "income" ? "#059669" : "#3b82f6";
+    const statusColor = transaction.status === "completed" ? "#059669" : transaction.status === "pending" ? "#f59e0b" : "#6b7280";
 
     const printContent = `
       <!DOCTYPE html>
@@ -1033,7 +1034,7 @@ export default function Transactions() {
             <div class="transaction-card">
               <div class="transaction-header">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                  <div class="transaction-icon">${transaction.type === "EXPENSE" ? "↓" : transaction.type === "INCOME" ? "↑" : "↔"}</div>
+                  <div class="transaction-icon">${transaction.type === "expense" ? "↓" : transaction.type === "income" ? "↑" : "↔"}</div>
                   <div class="transaction-info">
                     <h2>${transaction.description}</h2>
                     <div class="transaction-meta">
@@ -1084,9 +1085,9 @@ export default function Transactions() {
       accountId: "1",
       categoryId: "1",
       description: t.description,
-      amount: parseFloat(t.value.replace("R$ ", "").replace(",", ".")),
-      type: t.type === "Receita" ? "INCOME" : "EXPENSE" as TransactionType,
-      status: t.status === "CONCLUÍDA" ? "COMPLETED" : "PENDING" as TransactionStatus,
+      amount: t.amount,
+      type: t.type,
+      status: t.status,
       date: new Date(),
       notes: "",
       receipt: null,
@@ -1186,8 +1187,8 @@ export default function Transactions() {
                     <td>${formatDate(transaction.date)}</td>
                     <td>${transaction.description}</td>
                     <td>${getTransactionTypeLabel(transaction.type)}</td>
-                    <td class="amount ${transaction.type === 'INCOME' ? 'income' : 'expense'}">
-                      ${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${formatCurrency(Number(transaction.amount))}
+                    <td class="amount ${transaction.type === 'income' ? 'income' : 'expense'}">
+                      ${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${formatCurrency(Number(transaction.amount))}
                     </td>
                     <td>${getTransactionStatusLabel(transaction.status)}</td>
                   </tr>
@@ -1514,7 +1515,7 @@ export default function Transactions() {
                     <td className={styles.tableCell}>
                       <div className={styles.categoryCell}>
                         <span className={styles.categoryText}>
-                          {transaction.category?.name || 'Sem categoria'}
+                          {transaction.categoryId || 'Sem categoria'}
                         </span>
                       </div>
                     </td>
@@ -1646,17 +1647,7 @@ export default function Transactions() {
             createdAt: new Date(),
             updatedAt: new Date()
           }}
-          category={selectedTransaction.category || {
-            id: "1",
-            name: "Sem categoria",
-            type: "expense" as any,
-            color: "#3b82f6",
-            icon: "tag",
-            isDefault: false,
-            order: 1,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }}
+          category={categories.find(cat => cat.id === selectedTransaction.categoryId) || null}
           onEdit={handleEditTransaction}
           onDelete={handleDeleteTransaction}
           onDuplicate={handleDuplicateTransaction}
@@ -1667,8 +1658,9 @@ export default function Transactions() {
               id: "1",
               userId: "1",
               name: "Conta Principal",
-              type: "CHECKING",
+              type: { id: "1", name: "Conta Corrente", category: "checking" as any },
               balance: 0,
+              currency: "BRL",
               description: "Conta Corrente - Banco não informado",
               isActive: true,
               createdAt: new Date(),
@@ -1676,10 +1668,11 @@ export default function Transactions() {
             }, {
               id: "1",
               name: "Alimentação",
-              type: "EXPENSE",
+              type: "expense" as any,
               color: "#dc2626",
               icon: "🍽️",
-              isActive: true,
+              isDefault: true,
+              order: 1,
               createdAt: new Date(),
               updatedAt: new Date()
             });
@@ -1689,7 +1682,7 @@ export default function Transactions() {
             const data = {
               transaction: selectedTransaction,
               account: accounts.find(acc => acc.id === selectedTransaction.accountId),
-              category: categories.find(cat => cat.id === selectedTransaction.categoryId)
+              category: selectedTransaction.categoryId
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);

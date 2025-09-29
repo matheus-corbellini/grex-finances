@@ -102,7 +102,10 @@ export default function ImportTransactionsModal({
         try {
             const result = await transactionsService.importTransactions(selectedFile, selectedAccount);
             setImportResult(result);
-            onImportComplete(result);
+            onImportComplete({
+                imported: result.successCount,
+                errors: result.errors
+            });
         } catch (error: any) {
             console.error('Erro ao importar transações:', error);
             setImportResult({
@@ -136,18 +139,8 @@ export default function ImportTransactionsModal({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="large">
+        <Modal isOpen={isOpen} onClose={handleClose} size="large" title="Importar Transações">
             <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>Importar Transações</h2>
-                    <button
-                        className={styles.closeButton}
-                        onClick={handleClose}
-                        type="button"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
 
                 <div className={styles.modalBody}>
                     {/* Seção de seleção de arquivo */}

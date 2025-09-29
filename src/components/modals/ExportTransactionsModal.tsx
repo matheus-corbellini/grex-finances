@@ -108,11 +108,8 @@ export default function ExportTransactionsModal({
     ];
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="large">
+        <Modal isOpen={isOpen} onClose={handleClose} size="large" title="Exportar Transações">
             <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>Exportar Transações</h2>
-                </div>
 
                 <div className={styles.modalBody}>
                     {/* Formato de exportação */}

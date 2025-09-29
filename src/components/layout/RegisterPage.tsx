@@ -367,7 +367,7 @@ export const RegisterPage: React.FC = () => {
                   padding: theme.getSpacing("m"),
                   backgroundColor: theme.colors.error[100],
                   border: `1px solid ${theme.colors.error[200]}`,
-                  borderRadius: theme.getRadius("md"),
+                  borderRadius: theme.getRadius("m"),
                   color: theme.colors.error[300],
                   fontSize: theme.getFontSize("sm"),
                   textAlign: "center",

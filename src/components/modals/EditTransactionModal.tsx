@@ -5,7 +5,6 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
-import { Calendar } from "../ui/Calendar";
 import { Transaction } from "../../../shared/types/transaction.types";
 import { Account } from "../../../shared/types/account.types";
 import { X, Calendar as CalendarIcon, DollarSign, Tag, FileText } from "lucide-react";
@@ -137,19 +136,8 @@ export default function EditTransactionModal({
     if (!transaction) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="large">
+        <Modal isOpen={isOpen} onClose={handleClose} size="large" title="Editar Transação">
             <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>Editar Transação</h2>
-                    <button
-                        className={styles.closeButton}
-                        onClick={handleClose}
-                        type="button"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.formGrid}>
                         {/* Descrição */}
@@ -161,7 +149,7 @@ export default function EditTransactionModal({
                             <Input
                                 type="text"
                                 value={formData.description}
-                                onChange={(e) => handleInputChange("description", e.target.value)}
+                                onChange={(value) => handleInputChange("description", value)}
                                 placeholder="Digite a descrição da transação"
                                 error={errors.description}
                                 className={styles.input}
@@ -179,7 +167,7 @@ export default function EditTransactionModal({
                                 step="0.01"
                                 min="0"
                                 value={formData.amount}
-                                onChange={(e) => handleInputChange("amount", e.target.value)}
+                                onChange={(value) => handleInputChange("amount", value)}
                                 placeholder="0,00"
                                 error={errors.amount}
                                 className={styles.input}
@@ -249,7 +237,7 @@ export default function EditTransactionModal({
                             <Input
                                 type="date"
                                 value={formData.date}
-                                onChange={(e) => handleInputChange("date", e.target.value)}
+                                onChange={(value) => handleInputChange("date", value)}
                                 error={errors.date}
                                 className={styles.input}
                             />

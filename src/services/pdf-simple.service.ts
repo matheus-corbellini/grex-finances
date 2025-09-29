@@ -1,58 +1,58 @@
-import { Transaction, TransactionType, TransactionStatus } from '../shared/types/transaction.types';
-import { Account } from '../shared/types/account.types';
-import { Category } from '../shared/types/category.types';
+import { Transaction, TransactionType, TransactionStatus } from '../../shared/types/transaction.types';
+import { Account } from '../../shared/types/account.types';
+import { Category } from '../../shared/types/category.types';
 
 export class PDFSimpleService {
-    private formatCurrency(amount: number, currency: string = "BRL") {
-        return new Intl.NumberFormat("pt-BR", {
-            style: "currency",
-            currency: currency
-        }).format(amount);
-    }
+  private formatCurrency(amount: number, currency: string = "BRL") {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: currency
+    }).format(amount);
+  }
 
-    private formatDate(date: Date) {
-        return new Intl.DateTimeFormat("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        }).format(new Date(date));
-    }
+  private formatDate(date: Date) {
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date(date));
+  }
 
-    private getTransactionTypeLabel(type: TransactionType) {
-        const labels = {
-            INCOME: "Receita",
-            EXPENSE: "Despesa",
-            TRANSFER: "Transferência"
-        };
-        return labels[type] || type;
-    }
+  private getTransactionTypeLabel(type: TransactionType) {
+    const labels = {
+      INCOME: "Receita",
+      EXPENSE: "Despesa",
+      TRANSFER: "Transferência"
+    };
+    return labels[type] || type;
+  }
 
-    private getTransactionStatusLabel(status: TransactionStatus) {
-        const labels = {
-            PENDING: "Pendente",
-            COMPLETED: "Concluída",
-            CANCELLED: "Cancelada",
-            FAILED: "Falhou"
-        };
-        return labels[status] || status;
-    }
+  private getTransactionStatusLabel(status: TransactionStatus) {
+    const labels = {
+      PENDING: "Pendente",
+      COMPLETED: "Concluída",
+      CANCELLED: "Cancelada",
+      FAILED: "Falhou"
+    };
+    return labels[status] || status;
+  }
 
-    generateTransactionPDF(
-        transaction: Transaction,
-        account?: Account,
-        category?: Category
-    ): void {
-        // Criar uma nova janela para impressão
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+  generateTransactionPDF(
+    transaction: Transaction,
+    account?: Account,
+    category?: Category
+  ): void {
+    // Criar uma nova janela para impressão
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-        const amountText = `${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${this.formatCurrency(transaction.amount)}`;
-        const typeColor = transaction.type === "EXPENSE" ? "#dc2626" : transaction.type === "INCOME" ? "#059669" : "#3b82f6";
-        const statusColor = transaction.status === "COMPLETED" ? "#059669" : transaction.status === "PENDING" ? "#f59e0b" : "#6b7280";
+    const amountText = `${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${this.formatCurrency(transaction.amount)}`;
+    const typeColor = transaction.type === "expense" ? "#dc2626" : transaction.type === "income" ? "#059669" : "#3b82f6";
+    const statusColor = transaction.status === "completed" ? "#059669" : transaction.status === "pending" ? "#f59e0b" : "#6b7280";
 
-        const printContent = `
+    const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -206,7 +206,7 @@ export class PDFSimpleService {
               <div class="transaction-header">
                 <div style="display: flex; align-items: center; gap: 20px;">
                   <div class="transaction-icon">
-                    ${transaction.type === "EXPENSE" ? "↓" : transaction.type === "INCOME" ? "↑" : "↔"}
+                    ${transaction.type === "expense" ? "↓" : transaction.type === "income" ? "↑" : "↔"}
                   </div>
                   <div class="transaction-info">
                     <h2>${transaction.description}</h2>
@@ -259,20 +259,20 @@ export class PDFSimpleService {
       </html>
     `;
 
-        printWindow.document.write(printContent);
-        printWindow.document.close();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
 
-        // Aguardar um pouco para o conteúdo carregar antes de imprimir
-        setTimeout(() => {
-            printWindow.print();
-        }, 500);
-    }
+    // Aguardar um pouco para o conteúdo carregar antes de imprimir
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  }
 
-    generateMultipleTransactionsPDF(transactions: Transaction[]): void {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+  generateMultipleTransactionsPDF(transactions: Transaction[]): void {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-        const printContent = `
+    const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -396,8 +396,8 @@ export class PDFSimpleService {
                     <td>${this.formatDate(transaction.date)}</td>
                     <td>${transaction.description}</td>
                     <td>${this.getTransactionTypeLabel(transaction.type)}</td>
-                    <td class="amount ${transaction.type === 'INCOME' ? 'income' : 'expense'}">
-                      ${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${this.formatCurrency(transaction.amount)}
+                    <td class="amount ${transaction.type === 'income' ? 'income' : 'expense'}">
+                      ${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${this.formatCurrency(transaction.amount)}
                     </td>
                     <td>${this.getTransactionStatusLabel(transaction.status)}</td>
                   </tr>
@@ -413,14 +413,14 @@ export class PDFSimpleService {
       </html>
     `;
 
-        printWindow.document.write(printContent);
-        printWindow.document.close();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
 
-        // Aguardar um pouco para o conteúdo carregar antes de imprimir
-        setTimeout(() => {
-            printWindow.print();
-        }, 500);
-    }
+    // Aguardar um pouco para o conteúdo carregar antes de imprimir
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  }
 }
 
 export const pdfSimpleService = new PDFSimpleService();

@@ -1,4 +1,5 @@
 import BaseApiService from "./base.service";
+import { Account } from "../../../shared/types/account.types";
 
 export interface AccountType {
   id: string;
@@ -9,28 +10,6 @@ export interface AccountType {
   color?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Account {
-  id: string;
-  userId: string;
-  name: string;
-  typeId: string;
-  type: AccountType;
-  balance: number;
-  currency: string;
-  isActive: boolean;
-  bankName?: string;
-  accountNumber?: string;
-  agency?: string;
-  description?: string;
-  color?: string;
-  icon?: string;
-  isArchived: boolean;
-  archivedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  isSyncing?: boolean;
 }
 
 export interface CreateAccountDto {

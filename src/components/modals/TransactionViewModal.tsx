@@ -124,9 +124,9 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const amountText = `${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${formatCurrency(transaction.amount)}`;
-        const typeColor = transaction.type === "EXPENSE" ? "#dc2626" : transaction.type === "INCOME" ? "#059669" : "#3b82f6";
-        const statusColor = transaction.status === "COMPLETED" ? "#059669" : transaction.status === "PENDING" ? "#f59e0b" : "#6b7280";
+        const amountText = `${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${formatCurrency(transaction.amount)}`;
+        const typeColor = transaction.type === "expense" ? "#dc2626" : transaction.type === "income" ? "#059669" : "#3b82f6";
+        const statusColor = transaction.status === "completed" ? "#059669" : transaction.status === "pending" ? "#f59e0b" : "#6b7280";
 
         const printContent = `
           <!DOCTYPE html>
@@ -282,7 +282,7 @@ export const TransactionViewModal: React.FC<TransactionViewModalProps> = ({
                   <div class="transaction-header">
                     <div style="display: flex; align-items: center; gap: 20px;">
                       <div class="transaction-icon">
-                        ${transaction.type === "EXPENSE" ? "↓" : transaction.type === "INCOME" ? "↑" : "↔"}
+                        ${transaction.type === "expense" ? "↓" : transaction.type === "income" ? "↑" : "↔"}
                       </div>
                       <div class="transaction-info">
                         <h2>${transaction.description}</h2>

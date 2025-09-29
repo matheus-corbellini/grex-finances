@@ -5,7 +5,7 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
-import { Account } from "../../services/api/accounts.service";
+import { Account } from "../../../shared/types/account.types";
 import { X, RefreshCw, CheckCircle, AlertTriangle, TrendingUp, Calculator, Eye, Settings } from "lucide-react";
 import styles from "./AccountActionModal.module.css";
 
@@ -192,7 +192,7 @@ export default function AccountActionModal({
     if (!account || !config) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="large">
+        <Modal isOpen={isOpen} onClose={handleClose} size="large" title={config.title}>
             <div className={styles.modalContent}>
                 <div className={styles.modalHeader}>
                     <div className={styles.headerContent}>
@@ -265,7 +265,7 @@ export default function AccountActionModal({
                                         <Input
                                             type={field.type}
                                             value={formData[field.name] || ''}
-                                            onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                            onChange={(value) => handleInputChange(field.name, value)}
                                             placeholder={`Digite ${field.label.toLowerCase()}`}
                                             error={errors[field.name]}
                                             className={styles.input}

@@ -7,21 +7,10 @@ import { BankIconComponent } from "../../../components/ui/BankIcons";
 import { AccountDetailsModal, AddAccountModal, EditAccountModal, AccountActionModal } from "../../../components/modals";
 import { Icon } from "../../../components/ui/Icon";
 import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
-import accountsService, { CreateAccountDto, Account as ApiAccount } from "../../../services/api/accounts.service";
+import accountsService, { CreateAccountDto } from "../../../services/api/accounts.service";
+import { Account } from "../../../../shared/types/account.types";
 import styles from "./Accounts.module.css";
 import { safeErrorLog } from "../../../utils/error-logger";
-
-interface Account {
-  id: number;
-  bankName: string;
-  bankLogo: string;
-  accountType: string;
-  balance: string;
-  actionLink: string;
-  actionButton: string;
-  graphData: { date: string; value: number }[];
-  trend: 'up' | 'down';
-}
 
 export default function Accounts() {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 6, 1)); // Julho 2024
@@ -29,10 +18,10 @@ export default function Accounts() {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showEditAccountModal, setShowEditAccountModal] = useState(false);
   const [showAccountActionModal, setShowAccountActionModal] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<ApiAccount | null>(null);
-  const [editingAccount, setEditingAccount] = useState<ApiAccount | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [currentAction, setCurrentAction] = useState<string>('');
-  const [accounts, setAccounts] = useState<ApiAccount[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'filters'>('month');
@@ -45,7 +34,8 @@ export default function Accounts() {
     minBalance: '',
     maxBalance: ''
   });
-  const [filteredAccounts, setFilteredAccounts] = useState<ApiAccount[]>([]);
+  const [filteredAccounts, setFilteredAccounts] = useState<Account[]>([]);
+  const [syncingAccounts, setSyncingAccounts] = useState<Set<string>>(new Set());
 
   // Carregar histórico de saldos para uma conta
   const loadBalanceHistory = async (accountId: string) => {
@@ -177,11 +167,11 @@ export default function Accounts() {
 
     if (filters.status) {
       if (filters.status === 'active') {
-        filtered = filtered.filter(account => account.isActive && !account.isArchived);
+        filtered = filtered.filter(account => account.isActive);
       } else if (filters.status === 'inactive') {
         filtered = filtered.filter(account => !account.isActive);
       } else if (filters.status === 'archived') {
-        filtered = filtered.filter(account => account.isArchived);
+        filtered = filtered.filter(account => !account.isActive);
       }
     }
 
@@ -258,7 +248,7 @@ export default function Accounts() {
     return `${linePath} L ${lastX},${bottomY} L ${firstX},${bottomY} Z`;
   };
 
-  const handleViewAccount = (account: ApiAccount) => {
+  const handleViewAccount = (account: Account) => {
     setSelectedAccount(account);
     setShowAccountDetailsModal(true);
   };
@@ -375,7 +365,7 @@ export default function Accounts() {
     }
   };
 
-  const handleAccountAction = (account: ApiAccount, action: string) => {
+  const handleAccountAction = (account: Account, action: string) => {
     setSelectedAccount(account);
     setCurrentAction(action);
     setShowAccountActionModal(true);
@@ -449,20 +439,17 @@ export default function Accounts() {
     // Aqui você pode chamar uma API específica para fechamento
   };
 
-  const handleSyncAccount = async (account: ApiAccount) => {
+  const handleSyncAccount = async (account: Account) => {
     try {
       // Mostrar loading
-      const originalAccounts = [...accounts];
-      setAccounts(prev => prev.map(acc =>
-        acc.id === account.id ? { ...acc, isSyncing: true } : acc
-      ));
+      setSyncingAccounts(prev => new Set(prev).add(account.id));
 
       // Chamar API de sincronização
       const syncedAccount = await accountsService.syncAccount(account.id);
 
       // Atualizar conta com dados sincronizados
       setAccounts(prev => prev.map(acc =>
-        acc.id === account.id ? { ...syncedAccount, isSyncing: false } : acc
+        acc.id === account.id ? syncedAccount : acc
       ));
 
       // Recarregar histórico e transações
@@ -471,14 +458,23 @@ export default function Accounts() {
         loadRecentTransactions(account.id)
       ]);
 
+      // Remover loading
+      setSyncingAccounts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(account.id);
+        return newSet;
+      });
+
       alert("Conta sincronizada com sucesso!");
     } catch (error: any) {
       console.error("Erro ao sincronizar conta:", error);
 
-      // Reverter estado de loading
-      setAccounts(prev => prev.map(acc =>
-        acc.id === account.id ? { ...acc, isSyncing: false } : acc
-      ));
+      // Remover loading em caso de erro
+      setSyncingAccounts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(account.id);
+        return newSet;
+      });
 
       alert("Erro ao sincronizar conta: " + error.message);
     }
@@ -708,7 +704,7 @@ export default function Accounts() {
                         </div>
                         <div className={styles.bankDetails}>
                           <h3 className={styles.bankName}>{account.name}</h3>
-                          <p className={styles.accountType}>({account.type?.name || `Tipo ${account.typeId}`})</p>
+                          <p className={styles.accountType}>({account.type?.name || `Tipo ${account.type}`})</p>
                         </div>
                       </div>
                     </div>
@@ -732,9 +728,9 @@ export default function Accounts() {
                       <button
                         className={styles.actionButton}
                         onClick={() => handleSyncAccount(account)}
-                        disabled={account.isSyncing}
+                        disabled={syncingAccounts.has(account.id)}
                       >
-                        {account.isSyncing ? 'Sincronizando...' : 'Sincronizar'}
+                        {syncingAccounts.has(account.id) ? 'Sincronizando...' : 'Sincronizar'}
                       </button>
                     </div>
 

@@ -1,6 +1,6 @@
-import { Transaction, TransactionType, TransactionStatus } from '../shared/types/transaction.types';
-import { Account } from '../shared/types/account.types';
-import { Category } from '../shared/types/category.types';
+import { Transaction, TransactionType, TransactionStatus } from '../../shared/types/transaction.types';
+import { Account } from '../../shared/types/account.types';
+import { Category } from '../../shared/types/category.types';
 
 export class PDFService {
     private formatCurrency(amount: number, currency: string = "BRL") {
@@ -63,7 +63,7 @@ export class PDFService {
         account?: Account,
         category?: Category
     ): Promise<void> {
-        const { jsPDF } = await import('jspdf');
+        const jsPDF = (await import('jspdf')).default;
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -105,7 +105,7 @@ export class PDFService {
         doc.setFontSize(16);
         doc.setTextColor(primaryColor);
         doc.setFont("helvetica", "bold");
-        doc.text(transaction.type === "EXPENSE" ? "↓" : transaction.type === "INCOME" ? "↑" : "↔", margin + 15, yPosition + 20);
+        doc.text(transaction.type === "expense" ? "↓" : transaction.type === "income" ? "↑" : "↔", margin + 15, yPosition + 20);
 
         // Descrição da transação
         doc.setFontSize(18);
@@ -117,7 +117,7 @@ export class PDFService {
         doc.setFontSize(24);
         doc.setTextColor(primaryColor);
         doc.setFont("helvetica", "bold");
-        const amountText = `${transaction.type === "EXPENSE" ? "-" : transaction.type === "INCOME" ? "+" : ""}${this.formatCurrency(transaction.amount)}`;
+        const amountText = `${transaction.type === "expense" ? "-" : transaction.type === "income" ? "+" : ""}${this.formatCurrency(transaction.amount)}`;
         doc.text(amountText, pageWidth - margin - doc.getTextWidth(amountText) - 10, yPosition + 20);
 
         // Tipo e Status
@@ -209,7 +209,7 @@ export class PDFService {
     }
 
     async generateMultipleTransactionsPDF(transactions: Transaction[]): Promise<void> {
-        const { jsPDF } = await import('jspdf');
+        const jsPDF = (await import('jspdf')).default;
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();

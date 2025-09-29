@@ -5,7 +5,7 @@ import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
-import { Account } from "../../services/api/accounts.service";
+import { Account } from "../../../shared/types/account.types";
 import { X, Building2, CreditCard, PiggyBank, Wallet, TrendingUp } from "lucide-react";
 import styles from "./EditAccountModal.module.css";
 
@@ -66,7 +66,7 @@ export default function EditAccountModal({
                 type: account.type?.category || "checking",
                 bankName: account.bankName || "",
                 accountNumber: account.accountNumber || "",
-                agency: account.agency || "",
+                agency: "",
                 balance: account.balance?.toString() || "0",
                 description: account.description || "",
                 color: account.color || "#3b82f6",
@@ -150,7 +150,7 @@ export default function EditAccountModal({
     if (!account) return null;
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} size="large">
+        <Modal isOpen={isOpen} onClose={handleClose} size="large" title="Editar Conta">
             <div className={styles.modalContent}>
                 <div className={styles.modalHeader}>
                     <h2 className={styles.modalTitle}>Editar Conta</h2>
@@ -174,7 +174,7 @@ export default function EditAccountModal({
                             <Input
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) => handleInputChange("name", e.target.value)}
+                                onChange={(value) => handleInputChange("name", value)}
                                 placeholder="Ex: Conta Principal"
                                 error={errors.name}
                                 className={styles.input}
@@ -224,7 +224,7 @@ export default function EditAccountModal({
                             <Input
                                 type="text"
                                 value={formData.agency}
-                                onChange={(e) => handleInputChange("agency", e.target.value)}
+                                onChange={(value) => handleInputChange("agency", value)}
                                 placeholder="Ex: 1234"
                                 className={styles.input}
                             />
@@ -236,7 +236,7 @@ export default function EditAccountModal({
                             <Input
                                 type="text"
                                 value={formData.accountNumber}
-                                onChange={(e) => handleInputChange("accountNumber", e.target.value)}
+                                onChange={(value) => handleInputChange("accountNumber", value)}
                                 placeholder="Ex: 12345-6"
                                 className={styles.input}
                             />
@@ -249,7 +249,7 @@ export default function EditAccountModal({
                                 type="number"
                                 step="0.01"
                                 value={formData.balance}
-                                onChange={(e) => handleInputChange("balance", e.target.value)}
+                                onChange={(value) => handleInputChange("balance", value)}
                                 placeholder="0,00"
                                 error={errors.balance}
                                 className={styles.input}

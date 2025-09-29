@@ -23,6 +23,8 @@ export interface InputProps {
   style?: React.CSSProperties;
   id?: string;
   name?: string;
+  step?: string;
+  min?: string;
   onChange?: (value: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -50,6 +52,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       style,
       id,
       name,
+      step,
+      min,
       onChange,
       onFocus,
       onBlur,
@@ -269,6 +273,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               id={inputId}
               name={name || inputId}
               type="file"
+              step={step}
+              min={min}
               style={{
                 ...inputStyles,
                 display: "none",
@@ -343,6 +349,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 id={inputId}
                 name={name || inputId}
                 type={type}
+                step={step}
+                min={min}
                 placeholder={placeholder}
                 value={inputValue}
                 style={inputStyles}
@@ -408,6 +416,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             name={name || inputId}
             type={type}
+            step={step}
+            min={min}
             placeholder={placeholder}
             value={inputValue}
             style={inputStyles}
