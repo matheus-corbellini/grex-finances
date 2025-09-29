@@ -21,10 +21,10 @@ async function bootstrap() {
   app.useLogger(appLogger);
 
   // Enable CORS for frontend communication
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
+  const allowedOrigins = process.env.NODE_ENV === 'production'
     ? ['https://your-netlify-domain.netlify.app', 'https://your-netlify-domain.netlify.app/'] // Substitua pelo domínio do Netlify
     : true; // Aceita qualquer origem durante desenvolvimento
-  
+
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
