@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./Sidebar.module.css";
 import { ReportsDropdown } from "./ReportsDropdown";
 import { NotificationsDropdown } from "./NotificationsDropdown";
@@ -32,6 +33,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Memoize pathname comparisons to prevent unnecessary re-renders
@@ -64,10 +66,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     setShowLogoutModal(true);
   };
 
-  const handleLogoutConfirm = () => {
-    console.log("Logout confirmed");
-    setShowLogoutModal(false);
-    router.push("/login");
+  const handleLogoutConfirm = async () => {
+    try {
+      await logout();
+      setShowLogoutModal(false);
+      router.push("/login");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      setShowLogoutModal(false);
+    }
   };
 
   const handleLogoutCancel = () => {

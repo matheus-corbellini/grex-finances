@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User } from "../../shared/types";
-import firebaseAuthService from "../services/firebase-auth.service";
 
 interface AuthContextType {
     user: User | null;
@@ -26,39 +25,43 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
+    // Simular um usuário logado automaticamente
     useEffect(() => {
-        let unsubscribe: (() => void) | undefined;
-
-        try {
-            unsubscribe = firebaseAuthService.onAuthStateChanged((user) => {
-                setUser(user);
-                setLoading(false);
-            });
-        } catch (error) {
-            console.error('Error setting up auth state listener:', error);
-            setLoading(false);
-        }
-
-        return () => {
-            if (unsubscribe) {
-                try {
-                    unsubscribe();
-                } catch (error) {
-                    console.error('Error unsubscribing from auth state:', error);
-                }
-            }
+        // Criar um usuário mock para simular login automático
+        const mockUser: User = {
+            id: "mock-user-id",
+            email: "usuario@exemplo.com",
+            firstName: "Usuário",
+            lastName: "Exemplo",
+            isActive: true,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         };
+        
+        // Simular um pequeno delay de carregamento
+        setTimeout(() => {
+            setUser(mockUser);
+            setLoading(false);
+        }, 500);
     }, []);
 
     const login = async (email: string, password: string): Promise<void> => {
-        try {
-            const userData = await firebaseAuthService.login({ email, password });
-            setUser(userData);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular login sem validação real
+        const mockUser: User = {
+            id: "mock-user-id",
+            email: email,
+            firstName: "Usuário",
+            lastName: "Exemplo",
+            isActive: true,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        
+        setUser(mockUser);
     };
 
     const register = async (userData: {
@@ -67,63 +70,70 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         firstName: string;
         lastName: string;
     }): Promise<void> => {
-        try {
-            const newUser = await firebaseAuthService.register(userData);
-            setUser(newUser);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular registro sem validação real
+        const mockUser: User = {
+            id: "mock-user-id",
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            isActive: true,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        
+        setUser(mockUser);
     };
 
     const loginWithGoogle = async (): Promise<void> => {
-        try {
-            const userData = await firebaseAuthService.loginWithGoogle();
-            setUser(userData);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular login com Google
+        const mockUser: User = {
+            id: "mock-google-user-id",
+            email: "usuario@gmail.com",
+            firstName: "Google",
+            lastName: "User",
+            isActive: true,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        
+        setUser(mockUser);
     };
 
     const loginWithFacebook = async (): Promise<void> => {
-        try {
-            const userData = await firebaseAuthService.loginWithFacebook();
-            setUser(userData);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular login com Facebook
+        const mockUser: User = {
+            id: "mock-facebook-user-id",
+            email: "usuario@facebook.com",
+            firstName: "Facebook",
+            lastName: "User",
+            isActive: true,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+        
+        setUser(mockUser);
     };
 
     const logout = async (): Promise<void> => {
-        try {
-            await firebaseAuthService.logout();
-            setUser(null);
-        } catch (error: any) {
-            throw error;
-        }
+        setUser(null);
     };
 
     const forgotPassword = async (email: string): Promise<void> => {
-        try {
-            await firebaseAuthService.forgotPassword(email);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular envio de email de recuperação
+        console.log(`Email de recuperação enviado para: ${email}`);
     };
 
     const changePassword = async (newPassword: string): Promise<void> => {
-        try {
-            await firebaseAuthService.changePassword(newPassword);
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular mudança de senha
+        console.log("Senha alterada com sucesso");
     };
 
     const resendVerificationEmail = async (): Promise<void> => {
-        try {
-            await firebaseAuthService.resendVerificationEmail();
-        } catch (error: any) {
-            throw error;
-        }
+        // Simular reenvio de email de verificação
+        console.log("Email de verificação reenviado");
     };
 
     const value: AuthContextType = {
