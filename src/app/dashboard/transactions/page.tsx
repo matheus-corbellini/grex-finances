@@ -127,8 +127,8 @@ export default function Transactions() {
         limit: 10
       });
 
-      setTransactions(response.data);
-      setTotalTransactions(response.pagination.total);
+      setTransactions(response.data || []);
+      setTotalTransactions(response.pagination?.total || 0);
     } catch (err: any) {
       console.error("Erro ao carregar transações:", err);
       setError(err.message || "Erro ao carregar transações");
@@ -140,24 +140,26 @@ export default function Transactions() {
   const loadCategories = async () => {
     try {
       const categoriesData = await transactionsService.getCategories();
-      setCategories(categoriesData);
+      setCategories(categoriesData || []);
     } catch (err) {
       console.error("❌ Erro ao carregar categorias:", err);
+      setCategories([]);
     }
   };
 
   const loadAccounts = async () => {
     try {
       const accountsData = await accountsService.getAccounts();
-      setAccounts(accountsData);
+      setAccounts(accountsData || []);
     } catch (err) {
       console.error("❌ Erro ao carregar contas:", err);
+      setAccounts([]);
     }
   };
 
   // Função para aplicar filtros
   const applyFilters = () => {
-    let filtered = [...transactions];
+    let filtered = [...(transactions || [])];
 
     // Filtro por busca (descrição)
     if (filters.search) {
@@ -228,7 +230,7 @@ export default function Transactions() {
     let expectedBalance = 0;
     let actualBalance = 0;
 
-    filteredTransactions.forEach(transaction => {
+    (filteredTransactions || []).forEach(transaction => {
       // Validate date before processing
       const date = new Date(transaction.date);
       if (isNaN(date.getTime())) {
@@ -274,9 +276,9 @@ export default function Transactions() {
 
   // Aplicar ordenação às transações filtradas
   const getSortedTransactions = () => {
-    if (!sortField) return filteredTransactions;
+    if (!sortField) return filteredTransactions || [];
 
-    return [...filteredTransactions].sort((a, b) => {
+    return [...(filteredTransactions || [])].sort((a, b) => {
       let aValue: any;
       let bValue: any;
 
@@ -516,7 +518,7 @@ export default function Transactions() {
     if (selectAll) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(filteredTransactions.map(t => t.id));
+      setSelectedRows((filteredTransactions || []).map(t => t.id));
     }
     setSelectAll(!selectAll);
   };
@@ -670,7 +672,7 @@ export default function Transactions() {
       return;
     }
 
-    const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
+    const selectedTransactions = (filteredTransactions || []).filter(t => selectedRows.includes(t.id));
 
     // Importar jsPDF dinamicamente
     import('jspdf').then((jsPDF) => {
@@ -873,7 +875,7 @@ export default function Transactions() {
       doc.setFontSize(9);
       let currentY = tableStartY + 15;
 
-      const selectedTransactions = transactions.filter(transaction =>
+      const selectedTransactions = (transactions || []).filter(transaction =>
         selectedRows.includes(transaction.id)
       );
 
@@ -1076,7 +1078,7 @@ export default function Transactions() {
       return;
     }
 
-    const selectedTransactions = filteredTransactions.filter(t => selectedRows.includes(t.id));
+    const selectedTransactions = (filteredTransactions || []).filter(t => selectedRows.includes(t.id));
 
     // Converter dados mockados para o formato da Transaction
     const transactionsForPDF = selectedTransactions.map(t => ({
@@ -1256,7 +1258,7 @@ export default function Transactions() {
                       onChange={(e) => updateFilter('category', e.target.value)}
                     >
                       <option value="">Todas as categorias</option>
-                      {categories.map(category => (
+                      {(categories || []).map(category => (
                         <option key={category.id} value={category.id}>
                           {category.name}
                         </option>
@@ -1647,7 +1649,7 @@ export default function Transactions() {
             createdAt: new Date(),
             updatedAt: new Date()
           }}
-          category={categories.find(cat => cat.id === selectedTransaction.categoryId) || null}
+          category={(categories || []).find(cat => cat.id === selectedTransaction.categoryId) || null}
           onEdit={handleEditTransaction}
           onDelete={handleDeleteTransaction}
           onDuplicate={handleDuplicateTransaction}
@@ -1681,7 +1683,7 @@ export default function Transactions() {
             // Implementar funcionalidade de exportação
             const data = {
               transaction: selectedTransaction,
-              account: accounts.find(acc => acc.id === selectedTransaction.accountId),
+              account: (accounts || []).find(acc => acc.id === selectedTransaction.accountId),
               category: selectedTransaction.categoryId
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

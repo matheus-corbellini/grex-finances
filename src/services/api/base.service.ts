@@ -80,8 +80,8 @@ class BaseApiService {
 
   protected async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.api.get<any>(url, config);
-    // Se a resposta tem estrutura { data: ... }, extrair data, senão retornar diretamente
-    return response.data.data !== undefined ? response.data.data : response.data;
+    // Return the response data directly - let individual services handle structure transformation
+    return response.data;
   }
 
   protected async post<T>(
@@ -90,7 +90,7 @@ class BaseApiService {
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.api.post<any>(url, data, config);
-    return response.data.data !== undefined ? response.data.data : response.data;
+    return response.data;
   }
 
   protected async put<T>(
@@ -99,7 +99,7 @@ class BaseApiService {
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.api.put<any>(url, data, config);
-    return response.data.data !== undefined ? response.data.data : response.data;
+    return response.data;
   }
 
   protected async patch<T>(
@@ -108,7 +108,7 @@ class BaseApiService {
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.api.patch<any>(url, data, config);
-    return response.data.data !== undefined ? response.data.data : response.data;
+    return response.data;
   }
 
   protected async delete<T>(
@@ -116,7 +116,7 @@ class BaseApiService {
     config?: AxiosRequestConfig
   ): Promise<T> {
     const response = await this.api.delete<any>(url, config);
-    return response.data.data !== undefined ? response.data.data : response.data;
+    return response.data;
   }
 
   protected async getPaginated<T>(

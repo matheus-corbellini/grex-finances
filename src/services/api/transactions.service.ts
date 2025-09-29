@@ -22,7 +22,20 @@ class TransactionsService extends BaseApiService {
       limit: options?.limit || 10
     };
 
-    return this.get<PaginatedResponse<Transaction>>("/transactions", { params });
+    const response = await this.get<any>("/transactions", { params });
+    
+    // Transform the mock server response to match expected PaginatedResponse structure
+    return {
+      data: response.transactions || response.data || [],
+      pagination: {
+        page: response.page || 1,
+        limit: response.limit || 10,
+        total: response.total || 0,
+        totalPages: response.totalPages || 0,
+        hasNext: (response.page || 1) < (response.totalPages || 0),
+        hasPrev: (response.page || 1) > 1
+      }
+    };
   }
 
   async getTransaction(id: string): Promise<Transaction> {
