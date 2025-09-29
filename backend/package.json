@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "nest start, node dist/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -27,7 +27,12 @@
     "docker:dev:down": "docker-compose -f docker-compose.dev.yml down",
     "docker:dev:logs": "docker-compose -f docker-compose.dev.yml logs -f",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:show": "typeorm-ts-node-commonjs migration:show -d src/migrations/migration.config.ts"
+    "migration:show": "typeorm-ts-node-commonjs migration:show -d src/migrations/migration.config.ts",
+    "migration:run:postgres": "typeorm-ts-node-commonjs migration:run -d src/migrations/postgres-migration.config.ts",
+    "migration:generate:postgres": "typeorm-ts-node-commonjs migration:generate -d src/migrations/postgres-migration.config.ts",
+    "deploy:prod": "docker-compose -f docker-compose.prod.yml up --build -d",
+    "deploy:down": "docker-compose -f docker-compose.prod.yml down",
+    "deploy:logs": "docker-compose -f docker-compose.prod.yml logs -f"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -47,6 +52,7 @@
     "class-validator": "^0.14.0",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "html-pdf-node": "^1.0.8",
     "jspdf": "^3.0.3",

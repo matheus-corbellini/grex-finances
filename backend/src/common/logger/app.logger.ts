@@ -81,7 +81,7 @@ export class AppLogger implements LoggerService {
         const color = colors[level] || '';
 
         // Formato legível para desenvolvimento
-        const contextStr = context ? ` ${JSON.stringify(context, null, 2)}` : '';
+        const contextStr = context ? ` ${this.safeStringify(context)}` : '';
 
         console.log(
             `${color}[${timestamp}] ${level.toUpperCase()}: ${message}${contextStr}${reset}`
@@ -129,5 +129,45 @@ export class AppLogger implements LoggerService {
             duration,
             type: 'performance',
         });
+    }
+
+    private safeStringify(obj: any): string {
+        try {
+            return JSON.stringify(obj, null, 2);
+        } catch (error) {
+            // Se houver erro de serialização circular, usar uma versão simplificada
+            const safeObj = this.removeCircularReferences(obj);
+            return JSON.stringify(safeObj, null, 2);
+        }
+    }
+
+    private removeCircularReferences(obj: any, seen = new WeakSet()): any {
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+
+        if (seen.has(obj)) {
+            return '[Circular Reference]';
+        }
+
+        seen.add(obj);
+
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.removeCircularReferences(item, seen));
+        }
+
+        const result: any = {};
+        for (const key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                // Pular propriedades que podem causar problemas de serialização
+                if (key === 'socket' || key === 'parser' || key === 'req' || key === 'res') {
+                    result[key] = '[Object]';
+                } else {
+                    result[key] = this.removeCircularReferences(obj[key], seen);
+                }
+            }
+        }
+
+        return result;
     }
 }

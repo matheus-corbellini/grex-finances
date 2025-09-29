@@ -27,35 +27,17 @@ export class AccountsService {
   ) { }
 
   async findAll(userId: string, filters?: AccountFiltersDto): Promise<Account[]> {
-    const query = this.accountRepository.createQueryBuilder('account')
-      .leftJoinAndSelect('account.type', 'type')
-      .where('account.userId = :userId', { userId });
+    // Query sem relações para debug
+    const accounts = await this.accountRepository.find({
+      where: { userId }
+    });
 
-    if (filters) {
-      if (filters.type) {
-        query.andWhere('account.typeId = (SELECT id FROM account_types WHERE category = :type)', { type: filters.type });
-      }
-      if (filters.bankName) {
-        query.andWhere('account.bankName LIKE :bankName', { bankName: `%${filters.bankName}%` });
-      }
-      if (filters.isActive !== undefined) {
-        query.andWhere('account.isActive = :isActive', { isActive: filters.isActive });
-      }
-      if (filters.isArchived !== undefined) {
-        query.andWhere('account.isArchived = :isArchived', { isArchived: filters.isArchived });
-      }
-      if (filters.search) {
-        query.andWhere('account.name LIKE :search', { search: `%${filters.search}%` });
-      }
-    }
-
-    return query.getMany();
+    return accounts;
   }
 
   async findOne(id: string, userId: string): Promise<Account> {
     const account = await this.accountRepository.findOne({
-      where: { id, userId },
-      relations: ['type']
+      where: { id, userId }
     });
 
     if (!account) {
@@ -177,26 +159,14 @@ export class AccountsService {
     }>;
   }> {
     // Verificar se a conta pertence ao usuário
-    await this.findOne(id, userId);
+    const account = await this.findOne(id, userId);
 
-    const query = this.balanceHistoryRepository.createQueryBuilder('history')
-      .where('history.accountId = :accountId', { accountId: id })
-      .orderBy('history.createdAt', 'ASC');
-
-    if (filters?.startDate) {
-      query.andWhere('history.createdAt >= :startDate', { startDate: filters.startDate });
-    }
-    if (filters?.endDate) {
-      query.andWhere('history.createdAt <= :endDate', { endDate: filters.endDate });
-    }
-
-    const history = await query.getMany();
-
+    // Por enquanto, retornar apenas o saldo atual da conta
     return {
-      history: history.map(h => ({
-        date: h.createdAt.toISOString(),
-        balance: parseFloat(h.newBalance.toString())
-      }))
+      history: [{
+        date: new Date().toISOString(),
+        balance: parseFloat(account.balance.toString())
+      }]
     };
   }
 

@@ -8,7 +8,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: '031004',
   database: 'grex',
   autoLoadEntities: true,
-  synchronize: false, // Usar migrações em vez de synchronize
+  synchronize: false, // Desabilitado para evitar migrações automáticas
   logging: true,
   ssl: false,
 };

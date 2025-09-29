@@ -220,7 +220,21 @@ export class TransactionsController {
       return {
         success: true,
         message: 'Transação criada com sucesso',
-        transaction: savedTransaction
+        transaction: {
+          id: savedTransaction.id,
+          description: savedTransaction.description,
+          amount: savedTransaction.amount,
+          type: savedTransaction.type,
+          status: savedTransaction.status,
+          accountId: savedTransaction.accountId,
+          categoryId: savedTransaction.categoryId,
+          date: savedTransaction.date,
+          notes: savedTransaction.notes,
+          isRecurring: savedTransaction.isRecurring,
+          recurringTransactionId: savedTransaction.recurringTransactionId,
+          createdAt: savedTransaction.createdAt,
+          updatedAt: savedTransaction.updatedAt
+        }
       };
     } catch (error) {
       this.logger.error('Failed to create transaction via add endpoint', error.stack, {
@@ -286,7 +300,21 @@ export class TransactionsController {
       return {
         success: true,
         message: 'Transação criada com sucesso',
-        transaction: savedTransaction
+        transaction: {
+          id: savedTransaction.id,
+          description: savedTransaction.description,
+          amount: savedTransaction.amount,
+          type: savedTransaction.type,
+          status: savedTransaction.status,
+          accountId: savedTransaction.accountId,
+          categoryId: savedTransaction.categoryId,
+          date: savedTransaction.date,
+          notes: savedTransaction.notes,
+          isRecurring: savedTransaction.isRecurring,
+          recurringTransactionId: savedTransaction.recurringTransactionId,
+          createdAt: savedTransaction.createdAt,
+          updatedAt: savedTransaction.updatedAt
+        }
       };
     } catch (error) {
       this.logger.error('Failed to create transaction', error.stack, {

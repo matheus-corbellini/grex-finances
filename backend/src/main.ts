@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -6,6 +7,9 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { MethodLoggingInterceptor } from './common/interceptors/method-logging.interceptor';
 import { AppLogger } from './common/logger/app.logger';
+
+// Carregar variáveis de ambiente
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,7 +22,7 @@ async function bootstrap() {
 
   // Enable CORS for frontend communication
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: true, // Aceita qualquer origem durante desenvolvimento
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],

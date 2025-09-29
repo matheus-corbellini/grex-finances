@@ -35,8 +35,10 @@ export class TransactionsService {
     pagination?: { page: number; limit: number }
   ) {
     const query = this.transactionRepository.createQueryBuilder('transaction')
-      .leftJoinAndSelect('transaction.category', 'category')
-      .leftJoinAndSelect('transaction.account', 'account')
+      .leftJoin('transaction.category', 'category')
+      .leftJoin('transaction.account', 'account')
+      .addSelect(['category.id', 'category.name', 'category.type', 'category.icon', 'category.color'])
+      .addSelect(['account.id', 'account.name', 'account.balance', 'account.typeId'])
       // .leftJoinAndSelect('transaction.recurringTransaction', 'recurring') // Comentado temporariamente
       .where('account.userId = :userId', { userId });
 

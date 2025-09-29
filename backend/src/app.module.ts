@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
@@ -24,6 +24,7 @@ import { MethodLoggingInterceptor } from "./common/interceptors/method-logging.i
 // import { ReportsModule } from "./modules/reports/reports.module";
 // import { GoalsModule } from "./modules/goals/goals.module";
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
