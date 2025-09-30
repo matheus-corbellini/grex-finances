@@ -180,72 +180,76 @@ export const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({
                             </div>
                             <div className={styles.accountDetails}>
                                 <h2 className={styles.accountTitle}>{account.name}</h2>
-                                <div className={styles.accountMeta}>
-                                    <span className={styles.accountType}>
-                                        {accountType?.name || "Tipo não definido"}
-                                    </span>
-                                    <span className={styles.accountCategory}>
-                                        {accountType && getAccountCategoryLabel(accountType.category)}
-                                    </span>
-                                    <span className={styles.accountStatus}>
-                                        {getStatusIcon(account.isActive)}
-                                        {account.isActive ? "Ativa" : "Inativa"}
-                                    </span>
+                                <div className={styles.accountBalance}>
+                                    <div className={styles.balanceAmount}>
+                                        {formatCurrency(account.balance, account.currency)}
+                                    </div>
+                                    {balanceHistory.length >= 2 && (
+                                        <div className={`${styles.balanceChange} ${balanceChange.change >= 0 ? styles.balanceChangePositive : styles.balanceChangeNegative
+                                            }`}>
+                                            {balanceChange.change >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                                            {formatCurrency(Math.abs(balanceChange.change))} ({balanceChange.percentage.toFixed(1)}%)
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        <div className={styles.accountBalance}>
-                            <div className={styles.balanceAmount}>
-                                {formatCurrency(account.balance, account.currency)}
-                            </div>
-                            {balanceHistory.length >= 2 && (
-                                <div className={`${styles.balanceChange} ${balanceChange.change >= 0 ? styles.balanceChangePositive : styles.balanceChangeNegative
-                                    }`}>
-                                    {balanceChange.change >= 0 ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                                    {formatCurrency(Math.abs(balanceChange.change))} ({balanceChange.percentage.toFixed(1)}%)
-                                </div>
-                            )}
+                        <div className={styles.actions}>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={onShare}
+                                disabled={isLoading}
+                            >
+                                <Share2 size={16} />
+                                Compartilhar
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={onExport}
+                                disabled={isLoading}
+                            >
+                                <Download size={16} />
+                                Exportar
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={onEdit}
+                                disabled={isLoading}
+                            >
+                                <Edit size={16} />
+                                Editar
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={onDelete}
+                                disabled={isLoading}
+                            >
+                                <Trash2 size={16} />
+                                Excluir
+                            </Button>
                         </div>
-                    </div>
 
-                    <div className={styles.actions}>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onShare}
-                            disabled={isLoading}
-                        >
-                            <Share2 size={16} />
-                            Compartilhar
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onExport}
-                            disabled={isLoading}
-                        >
-                            <Download size={16} />
-                            Exportar
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={onEdit}
-                            disabled={isLoading}
-                        >
-                            <Edit size={16} />
-                            Editar
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={onDelete}
-                            disabled={isLoading}
-                        >
-                            <Trash2 size={16} />
-                            Excluir
-                        </Button>
+                        <div className={styles.accountMeta}>
+                            <div className={styles.accountMetaRow}>
+                                <span className={styles.accountType}>
+                                    {accountType?.name || "Conta Bancária"}
+                                </span>
+                                <span className={styles.accountStatus}>
+                                    {getStatusIcon(account.isActive)}
+                                    {account.isActive ? "Ativa" : "Inativa"}
+                                </span>
+                            </div>
+                            <div className={styles.accountMetaSecondary}>
+                                <span className={styles.accountCategory}>
+                                    {accountType ? getAccountCategoryLabel(accountType.category) : "Conta Corrente"}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

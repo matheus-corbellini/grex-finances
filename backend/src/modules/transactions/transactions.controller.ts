@@ -398,7 +398,7 @@ export class TransactionsController {
     @Request() req: any,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
-    @Res() res: Response
+    @Res() res: any
   ) {
     const userId = req.user.id;
     const result = await this.transactionsService.exportCsv(userId, filters, options);
@@ -417,7 +417,7 @@ export class TransactionsController {
     @Request() req: any,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
-    @Res() res: Response
+    @Res() res: any
   ) {
     const userId = req.user.id;
     const result = await this.transactionsService.exportPdf(userId, filters, options);
@@ -436,7 +436,7 @@ export class TransactionsController {
     @Request() req: any,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
-    @Res() res: Response
+    @Res() res: any
   ) {
     const userId = req.user.id;
     const result = await this.transactionsService.exportExcel(userId, filters, options);
@@ -451,7 +451,7 @@ export class TransactionsController {
   @Get('import/template')
   @ApiOperation({ summary: 'Baixar template de importação CSV' })
   @Header('Content-Type', 'text/csv')
-  async downloadImportTemplate(@Res() res: Response) {
+  async downloadImportTemplate(@Res() res: any) {
     const templatePath = path.join(__dirname, 'templates', 'import-template.csv');
 
     if (!fs.existsSync(templatePath)) {

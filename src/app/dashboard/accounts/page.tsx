@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Plus, TrendingUp, TrendingDown, Eye } from "
 import { BankIconComponent } from "../../../components/ui/BankIcons";
 import { AccountDetailsModal, AddAccountModal, EditAccountModal, AccountActionModal } from "../../../components/modals";
 import { Icon } from "../../../components/ui/Icon";
+import { BankAccountCard } from "../../../components/ui/BankAccountCard";
 import { TransactionType, TransactionStatus } from "../../../../shared/types/transaction.types";
 import accountsService, { CreateAccountDto } from "../../../services/api/accounts.service";
 import { Account } from "../../../../shared/types/account.types";
@@ -38,7 +39,7 @@ export default function Accounts() {
   const [syncingAccounts, setSyncingAccounts] = useState<Set<string>>(new Set());
 
   // Carregar histórico de saldos para uma conta
-  const loadBalanceHistory = async (accountId: string) => {
+  const loadBalanceHistory = async (accountId: string, isMounted: boolean = true) => {
     try {
       const history = await accountsService.getBalanceHistory(accountId, {
         startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString(),
@@ -46,22 +47,26 @@ export default function Accounts() {
         period: viewMode === 'week' ? 'daily' : 'daily'
       });
 
-      setBalanceHistory(prev => ({
-        ...prev,
-        [accountId]: history.history || []
-      }));
+      if (isMounted) {
+        setBalanceHistory(prev => ({
+          ...prev,
+          [accountId]: history.history || []
+        }));
+      }
     } catch (err: any) {
       console.error("Erro ao carregar histórico de saldos:", err);
       // Em caso de erro, não usar dados mockados - deixar vazio
-      setBalanceHistory(prev => ({
-        ...prev,
-        [accountId]: []
-      }));
+      if (isMounted) {
+        setBalanceHistory(prev => ({
+          ...prev,
+          [accountId]: []
+        }));
+      }
     }
   };
 
   // Carregar transações recentes para uma conta
-  const loadRecentTransactions = async (accountId: string) => {
+  const loadRecentTransactions = async (accountId: string, isMounted: boolean = true) => {
     try {
       const transactions = await accountsService.getAccountTransactions(accountId, {
         page: 1,
@@ -70,45 +75,65 @@ export default function Accounts() {
         endDate: new Date().toISOString()
       });
 
-      setRecentTransactions(prev => ({
-        ...prev,
-        [accountId]: transactions.transactions || []
-      }));
+      if (isMounted) {
+        setRecentTransactions(prev => ({
+          ...prev,
+          [accountId]: transactions.transactions || []
+        }));
+      }
     } catch (err: any) {
       console.error("Erro ao carregar transações:", err);
       // Em caso de erro, não usar dados mockados - deixar vazio
-      setRecentTransactions(prev => ({
-        ...prev,
-        [accountId]: []
-      }));
+      if (isMounted) {
+        setRecentTransactions(prev => ({
+          ...prev,
+          [accountId]: []
+        }));
+      }
     }
   };
 
   // Carregar contas da API
   useEffect(() => {
+    let isMounted = true;
+
     const loadAccounts = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        const accountsData = await accountsService.getAccounts();
-        setAccounts(accountsData);
+        if (isMounted) {
+          setIsLoading(true);
+          setError(null);
+        }
 
-        // Carregar histórico de saldos e transações para cada conta
-        for (const account of accountsData) {
-          await Promise.all([
-            loadBalanceHistory(account.id),
-            loadRecentTransactions(account.id)
-          ]);
+        const accountsData = await accountsService.getAccounts();
+
+        if (isMounted) {
+          setAccounts(accountsData);
+
+          // Carregar histórico de saldos e transações para cada conta
+          for (const account of accountsData) {
+            await Promise.all([
+              loadBalanceHistory(account.id, isMounted),
+              loadRecentTransactions(account.id, isMounted)
+            ]);
+          }
         }
       } catch (err: any) {
         console.error("Erro ao carregar contas:", err);
-        setError(err.message || "Erro ao carregar contas");
+        if (isMounted) {
+          setError(err.message || "Erro ao carregar contas");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadAccounts();
+
+    return () => {
+      isMounted = false;
+    };
   }, [currentDate, viewMode]);
 
   const formatDate = (date: Date) => {
@@ -216,34 +241,84 @@ export default function Accounts() {
 
   const getMaxValue = (graphData: { value: number }[]) => {
     if (!graphData || graphData.length === 0) return 1;
-    const values = graphData.map(d => parseFloat(d.value?.toString() || '0')).filter(v => !isNaN(v) && isFinite(v) && v > 0);
+
+    const values = graphData
+      .map(d => {
+        const value = parseFloat(d.value?.toString() || '0');
+        return isFinite(value) && !isNaN(value) ? value : 0;
+      })
+      .filter(v => v > 0);
+
     if (values.length === 0) return 1;
-    return Math.max(...values);
+
+    const maxValue = Math.max(...values);
+    return isFinite(maxValue) && !isNaN(maxValue) ? maxValue : 1;
   };
 
   const generateLinePath = (data: any[], maxValue: number) => {
     if (!data || data.length === 0 || maxValue <= 0 || !isFinite(maxValue)) {
-      return 'M 0,80 L 200,80';
+      return 'M 0,100 L 300,100';
     }
 
     const points = data.map((point, index) => {
-      const x = (index / (data.length - 1)) * 200;
+      const x = (index / (data.length - 1)) * 300;
       const value = parseFloat(point.value?.toString() || '0');
-      const y = 80 - (value / maxValue) * 80;
+
+      // Validar se o valor é um número válido
+      if (!isFinite(value) || isNaN(value)) {
+        return '0,100';
+      }
+
+      const y = 100 - (value / maxValue) * 100;
+
+      // Validar se y é um número válido
+      if (!isFinite(y) || isNaN(y)) {
+        return '0,100';
+      }
+
       return `${x},${y}`;
     });
-    return `M ${points.join(' L ')}`;
+
+    // Filtrar pontos válidos e garantir que temos pelo menos 2 pontos
+    const validPoints = points.filter(point => {
+      const [x, y] = point.split(',').map(Number);
+      return isFinite(x) && isFinite(y) && !isNaN(x) && !isNaN(y);
+    });
+
+    if (validPoints.length < 2) {
+      return 'M 0,100 L 300,100';
+    }
+
+    // Criar curvas suaves usando Bézier
+    let path = `M ${validPoints[0]}`;
+    for (let i = 1; i < validPoints.length; i++) {
+      const [prevX, prevY] = validPoints[i - 1].split(',').map(Number);
+      const [currX, currY] = validPoints[i].split(',').map(Number);
+
+      const controlPoint1X = prevX + (currX - prevX) / 3;
+      const controlPoint2X = prevX + 2 * (currX - prevX) / 3;
+
+      path += ` C ${controlPoint1X},${prevY} ${controlPoint2X},${currY} ${currX},${currY}`;
+    }
+
+    return path;
   };
 
   const generateAreaPath = (data: any[], maxValue: number) => {
     if (!data || data.length === 0 || maxValue <= 0 || !isFinite(maxValue)) {
-      return 'M 0,80 L 200,80 L 0,80 Z';
+      return 'M 0,100 L 300,100 L 0,100 Z';
     }
 
     const linePath = generateLinePath(data, maxValue);
+
+    // Se a linha não é válida, retornar área padrão
+    if (!linePath || linePath === 'M 0,100 L 300,100') {
+      return 'M 0,100 L 300,100 L 0,100 Z';
+    }
+
     const firstX = 0;
-    const lastX = 200;
-    const bottomY = 80;
+    const lastX = 300;
+    const bottomY = 100;
 
     return `${linePath} L ${lastX},${bottomY} L ${firstX},${bottomY} Z`;
   };
@@ -329,7 +404,12 @@ export default function Accounts() {
       link.download = `conta-${selectedAccount.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+
+      // Verificar se o elemento ainda existe antes de removê-lo
+      if (link.parentNode) {
+        document.body.removeChild(link);
+      }
+
       URL.revokeObjectURL(url);
 
       alert("Conta exportada com sucesso!");
@@ -681,116 +761,76 @@ export default function Accounts() {
               </div>
             ) : (
               (filteredAccounts.length > 0 ? filteredAccounts : accounts).map((account) => {
-                // Usar dados reais do histórico
                 const historyData = balanceHistory[account.id] || [];
-                const graphData = historyData.length > 0
-                  ? historyData.map(item => ({
-                    date: item.date,
-                    value: parseFloat(item.balance.toString()) / 1000 // Normalizar para exibição
-                  }))
-                  : [
-                    // Se não há dados históricos, mostrar apenas o saldo atual
-                    { date: "Atual", value: parseFloat(account.balance.toString()) / 1000 }
-                  ];
-                const maxValue = getMaxValue(graphData);
+
+                // Dados mockados temporários para teste
+                const mockData = [
+                  { date: "09 jan", value: 13000 },
+                  { date: "10 jan", value: 15500 },
+                  { date: "11 jan", value: 12000 },
+                  { date: "12 jan", value: 17000 },
+                  { date: "13 jan", value: 11500 },
+                  { date: "14 jan", value: 13000 },
+                  { date: "15 jan", value: 11000 },
+                ];
+
+                const chartData = historyData.length > 1
+                  ? historyData.map(item => {
+                    const balance = parseFloat(item.balance?.toString() || '0');
+                    return {
+                      date: new Date(item.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+                      value: isFinite(balance) ? balance : 0
+                    };
+                  })
+                  : mockData;
+
+                // Filtrar dados válidos
+                const validChartData = chartData.filter(d => isFinite(d.value) && !isNaN(d.value));
+
+                // Calcular domínio do eixo Y apenas se houver dados válidos
+                let yAxisDomain: [number, number] = [0, 1000];
+                let yAxisTicks: number[] = [0, 200, 400, 600, 800, 1000];
+
+                if (validChartData.length > 0) {
+                  const values = validChartData.map(d => d.value);
+                  const minValue = Math.min(...values);
+                  const maxValue = Math.max(...values);
+
+                  // Evitar divisão por zero
+                  if (maxValue !== minValue) {
+                    const padding = (maxValue - minValue) * 0.1;
+                    yAxisDomain = [minValue - padding, maxValue + padding];
+
+                    // Gerar ticks do eixo Y
+                    const step = (maxValue - minValue) / 5;
+                    yAxisTicks = [];
+                    for (let i = 0; i <= 5; i++) {
+                      const tick = minValue + (step * i);
+                      if (isFinite(tick)) {
+                        yAxisTicks.push(tick);
+                      }
+                    }
+                  } else {
+                    // Se todos os valores são iguais, criar um domínio simétrico
+                    yAxisDomain = [minValue * 0.9, minValue * 1.1];
+                    yAxisTicks = [minValue * 0.9, minValue, minValue * 1.1];
+                  }
+                }
 
                 return (
-                  <div key={account.id} className={styles.accountCard}>
-                    {/* Header do card */}
-                    <div className={styles.cardHeader}>
-                      <div className={styles.bankInfo}>
-                        <div className={styles.bankLogo}>
-                          <Icon name={account.icon || "bank-bb"} size={32} />
-                        </div>
-                        <div className={styles.bankDetails}>
-                          <h3 className={styles.bankName}>{account.name}</h3>
-                          <p className={styles.accountType}>({account.type?.name || `Tipo ${account.type}`})</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Saldo */}
-                    <div className={styles.balanceSection}>
-                      <div className={styles.balanceValue}>
-                        R$ {account.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </div>
-                    </div>
-
-                    {/* Ações */}
-                    <div className={styles.actionsSection}>
-                      <button
-                        className={styles.actionLink}
-                        onClick={() => handleViewAccount(account)}
-                      >
-                        <Eye size={14} className={styles.actionIcon} />
-                        Ver Detalhes
-                      </button>
-                      <button
-                        className={styles.actionButton}
-                        onClick={() => handleSyncAccount(account)}
-                        disabled={syncingAccounts.has(account.id)}
-                      >
-                        {syncingAccounts.has(account.id) ? 'Sincronizando...' : 'Sincronizar'}
-                      </button>
-                    </div>
-
-                    {/* Gráfico */}
-                    <div className={styles.graphSection}>
-                      <div className={styles.graphContainer}>
-                        <div className={styles.graph}>
-                          <svg className={styles.graphLine} viewBox="0 0 200 80" preserveAspectRatio="none">
-                            <defs>
-                              <linearGradient id={`areaGradient-${account.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05" />
-                              </linearGradient>
-                            </defs>
-
-                            {/* Área preenchida */}
-                            <path
-                              className={styles.graphArea}
-                              d={generateAreaPath(graphData, maxValue)}
-                              fill={`url(#areaGradient-${account.id})`}
-                            />
-
-                            {/* Linha do gráfico */}
-                            <path
-                              className={styles.graphPath}
-                              d={generateLinePath(graphData, maxValue)}
-                              fill="none"
-                            />
-                          </svg>
-
-                          {/* Pontos do gráfico */}
-                          <div className={styles.graphPoints}>
-                            {graphData.map((point, index) => {
-                              const x = graphData.length > 1 ? (index / (graphData.length - 1)) * 100 : 50;
-                              const value = parseFloat(point.value?.toString() || '0');
-                              const y = maxValue > 0 && isFinite(maxValue) ? 100 - (value / maxValue) * 100 : 50;
-
-                              return (
-                                <div
-                                  key={index}
-                                  className={styles.graphPoint}
-                                  style={{
-                                    left: `${x}%`,
-                                    top: `${y}%`
-                                  }}
-                                />
-                              );
-                            })}
-                          </div>
-                        </div>
-                        <div className={styles.graphLabels}>
-                          {graphData.map((point, index) => (
-                            <span key={index} className={styles.graphLabel}>
-                              {point.date}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <BankAccountCard
+                    key={account.id}
+                    bankName={account.name}
+                    accountType={account.type?.name || `Tipo ${account.type}`}
+                    balance={account.balance}
+                    logo={account.icon || "bank-bb"}
+                    actionLabel="Ver extrato"
+                    highlighted={false}
+                    chartData={validChartData.length > 0 ? validChartData : mockData}
+                    yAxisDomain={yAxisDomain}
+                    yAxisTicks={yAxisTicks}
+                    onViewDetails={() => handleViewAccount(account)}
+                  />
                 );
               })
             )}
@@ -807,10 +847,14 @@ export default function Accounts() {
             id: selectedAccount.id,
             userId: selectedAccount.userId,
             name: selectedAccount.name,
-            type: {
-              id: selectedAccount.type.id,
-              name: selectedAccount.type.name,
+            type: selectedAccount.type ? {
+              id: selectedAccount.type.id || '',
+              name: selectedAccount.type.name || 'Tipo não definido',
               category: selectedAccount.type.category as any
+            } : {
+              id: '',
+              name: 'Tipo não definido',
+              category: 'checking'
             },
             balance: selectedAccount.balance,
             currency: selectedAccount.currency || "BRL",
@@ -821,11 +865,11 @@ export default function Accounts() {
             updatedAt: new Date(selectedAccount.updatedAt)
           }}
           accountType={{
-            id: selectedAccount.type.id,
-            name: selectedAccount.type.name,
-            category: selectedAccount.type.category as any,
-            description: selectedAccount.type.description || "Conta bancária",
-            icon: selectedAccount.type.icon || selectedAccount.icon || "bank-bb"
+            id: selectedAccount.type?.id || '',
+            name: selectedAccount.type?.name || 'Tipo não definido',
+            category: selectedAccount.type?.category as any || 'checking',
+            description: selectedAccount.type?.description || "Conta bancária",
+            icon: selectedAccount.type?.icon || selectedAccount.icon || "bank-bb"
           }}
           recentTransactions={recentTransactions[selectedAccount.id]?.map(transaction => ({
             id: transaction.id,

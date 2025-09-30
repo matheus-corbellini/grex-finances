@@ -116,19 +116,24 @@
 
 .accountsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, 671px);
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  justify-content: center;
 }
 
 .accountCard {
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  width: 671px;
+  height: 314px;
+  transition: all 0.2s ease;
 }
 
 .accountCard:hover {
@@ -137,13 +142,18 @@
 }
 
 .cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .bankInfo {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  flex: 1;
 }
 
 .bankLogo {
@@ -153,61 +163,68 @@
   align-items: center;
   justify-content: center;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 50%;
   border: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 .bankDetails {
   flex: 1;
+  min-width: 0;
 }
 
 .bankName {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: #1e293b;
   margin: 0 0 4px 0;
   line-height: 1.3;
 }
 
 .accountType {
-  font-size: 14px;
+  font-size: 12px;
   color: #64748b;
   margin: 0;
   text-transform: capitalize;
+  line-height: 1.3;
 }
 
 .balanceSection {
   margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .balanceValue {
   font-size: 28px;
   font-weight: 700;
-  color: #059669;
+  color: #1e293b;
   margin: 0;
+  line-height: 1.2;
 }
 
 .actionsSection {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 24px;
-  gap: 12px;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .actionLink {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 4px 8px;
   background: none;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 500;
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
 }
 
 .actionLink:hover {
@@ -221,54 +238,76 @@
 }
 
 .actionButton {
-  padding: 8px 16px;
-  background: #3b82f6;
-  border: none;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
-  color: white;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
 .actionButton:hover {
-  background: #2563eb;
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.actionButton:last-child {
+  padding: 6px 8px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .graphSection {
-  margin-top: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .graphContainer {
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .graph {
   position: relative;
   width: 100%;
-  height: 80px;
-  background: #f8fafc;
-  border-radius: 6px;
-  overflow: hidden;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: visible;
+  padding: 16px;
+  flex: 1;
 }
 
 .graphLine {
   width: 100%;
   height: 100%;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .graphArea {
   fill: url(#areaGradient);
+  opacity: 1;
+  visibility: visible;
 }
 
 .graphPath {
   stroke: #3b82f6;
-  stroke-width: 2;
+  stroke-width: 2.5;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+  opacity: 1;
+  visibility: visible;
 }
 
 .graphPoints {
@@ -282,12 +321,12 @@
 
 .graphPoint {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #3b82f6;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  border: 2px solid white;
+  border: 2px solid #3b82f6;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -511,6 +550,20 @@
 }
 
 /* Responsive design */
+@media (max-width: 1024px) {
+  .accountsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 700px;
+  }
+  
+  .accountCard {
+    width: 100%;
+    max-width: 671px;
+    height: 314px;
+  }
+}
+
 @media (max-width: 768px) {
   .accountsContainer {
     padding: 16px;
@@ -530,9 +583,12 @@
   .accountsGrid {
     grid-template-columns: 1fr;
     gap: 16px;
+    max-width: 100%;
   }
 
   .accountCard {
+    width: 100%;
+    height: 320px;
     padding: 20px;
   }
 

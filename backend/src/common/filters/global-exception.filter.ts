@@ -24,8 +24,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     catch(exception: unknown, host: ArgumentsHost): void {
         const ctx = host.switchToHttp();
-        const response = ctx.getResponse<Response>();
-        const request = ctx.getRequest<Request>();
+        const response = ctx.getResponse<any>();
+        const request = ctx.getRequest<any>();
 
         const status = this.getHttpStatus(exception);
         const message = this.getErrorMessage(exception);
@@ -124,7 +124,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         return 'UnknownError';
     }
 
-    private logError(exception: unknown, request: Request, errorResponse: ErrorResponse): void {
+    private logError(exception: unknown, request: any, errorResponse: ErrorResponse): void {
         const logContext = {
             method: request.method,
             url: request.url,
