@@ -29,6 +29,7 @@ import {
   AccountFiltersDto,
   TransactionFiltersDto,
   HistoryFiltersDto,
+  HistoryPeriodEnum,
   AccountSummaryDto
 } from "./dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
@@ -44,6 +45,25 @@ export class AccountsController {
   @ApiOperation({ summary: 'Teste de endpoint de contas' })
   async test(): Promise<{ message: string }> {
     return { message: 'Endpoint de contas funcionando!' };
+  }
+
+  @Get('test-balance-history/:id')
+  @ApiOperation({ summary: 'Teste de histórico de saldos' })
+  async testBalanceHistory(@Param('id') id: string) {
+    // Mock user para teste
+    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+    const result = await this.accountsService.getBalanceHistory(id, userId, {
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date().toISOString(),
+      period: HistoryPeriodEnum.DAILY
+    });
+
+    return {
+      accountId: id,
+      dataPoints: result.history.length,
+      sampleData: result.history.slice(0, 5),
+      fullData: result.history
+    };
   }
 
   @Get()
@@ -187,14 +207,31 @@ export class AccountsController {
   @Get(':id/balance-history-test')
   @ApiOperation({ summary: 'Teste do histórico de saldo da conta' })
   async getBalanceHistoryTest(@Param('id') id: string) {
-    return {
-      message: 'Teste funcionando',
-      accountId: id,
-      history: [{
-        date: new Date().toISOString(),
-        balance: 1000
-      }]
-    };
+    try {
+      // Testar busca da conta
+      const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+      const account = await this.accountsService.findOne(id, userId);
+
+      return {
+        message: 'Teste funcionando',
+        accountId: id,
+        account: {
+          id: account.id,
+          name: account.name,
+          balance: account.balance
+        },
+        history: [{
+          date: new Date().toISOString(),
+          balance: parseFloat(account.balance.toString())
+        }]
+      };
+    } catch (error) {
+      return {
+        message: 'Erro no teste',
+        error: error.message,
+        stack: error.stack
+      };
+    }
   }
 
   @Get(':id/balance-history')

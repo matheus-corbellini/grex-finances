@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import { config } from 'dotenv';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
@@ -9,7 +9,7 @@ import { MethodLoggingInterceptor } from './common/interceptors/method-logging.i
 import { AppLogger } from './common/logger/app.logger';
 
 // Carregar variáveis de ambiente
-dotenv.config();
+config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

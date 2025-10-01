@@ -3,7 +3,6 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { TestController } from "./test.controller";
 import { databaseConfig } from "./config/database.config";
 
 // Import essential modules only
@@ -40,7 +39,7 @@ import { MethodLoggingInterceptor } from "./common/interceptors/method-logging.i
     // ReportsModule,
     // GoalsModule,
   ],
-  controllers: [AppController, TestController],
+  controllers: [AppController],
   providers: [
     AppService,
     AppLogger,

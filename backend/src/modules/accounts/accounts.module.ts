@@ -5,10 +5,11 @@ import { AccountsService } from "./accounts.service";
 import { Account } from "./entities/account.entity";
 import { AccountType } from "./entities/account-type.entity";
 import { AccountBalanceHistory } from "./entities/account-balance-history.entity";
+import { Transaction } from "../transactions/entities/transaction.entity";
 import { UsersModule } from "../users/users.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Account, AccountType, AccountBalanceHistory]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Account, AccountType, AccountBalanceHistory, Transaction]), UsersModule],
   controllers: [AccountsController],
   providers: [AccountsService],
   exports: [AccountsService],

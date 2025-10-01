@@ -30,7 +30,7 @@ import { Category } from "../../../../shared/types/category.types";
 import { safeErrorLog } from "../../../utils/error-logger";
 
 export default function Transactions() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)); // Setembro 2025
   const [activeView, setActiveView] = useState("Mês");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState<string>("3"); // Terceira linha selecionada como no modelo
@@ -113,7 +113,7 @@ export default function Transactions() {
         search: searchTerm || undefined,
         // Adicionar filtros de data baseados na view ativa
         ...(activeView === "Mês" && {
-          startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+          startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1), // Últimos 3 meses
           endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
         }),
         ...(activeView === "Semana" && {

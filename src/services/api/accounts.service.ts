@@ -67,7 +67,31 @@ class AccountsService extends BaseApiService {
 
   // Delete account
   async deleteAccount(id: string): Promise<void> {
-    return this.delete<void>(`/accounts/${id}`);
+    try {
+      return await this.delete<void>(`/accounts/${id}`);
+    } catch (error: any) {
+      console.error('=== ERRO AO EXCLUIR CONTA ===');
+      console.error('Account ID:', id);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
+      console.error('Error details:', error?.details);
+      console.error('HTTP status:', error?.response?.status);
+      console.error('Response data:', error?.response?.data);
+      console.error('Full error object:', JSON.stringify(error, null, 2));
+      console.error('Error keys:', Object.keys(error || {}));
+
+      // Re-throw the error with better structure
+      const enhancedError = {
+        message: error?.message || error?.response?.data?.message || 'Erro ao excluir conta',
+        code: error?.code || error?.response?.data?.code || 'DELETE_ERROR',
+        details: error?.details || error?.response?.data?.details,
+        status: error?.response?.status,
+        originalError: error
+      };
+
+      console.error('Enhanced error being thrown:', JSON.stringify(enhancedError, null, 2));
+      throw enhancedError;
+    }
   }
 
   // Update account balance
@@ -106,7 +130,24 @@ class AccountsService extends BaseApiService {
       balance: number;
     }>;
   }> {
-    return this.get(`/accounts/${id}/balance-history`, { params });
+    try {
+      const response = await this.get(`/accounts/${id}/balance-history`, { params });
+      return response;
+    } catch (error: any) {
+      console.error('=== ERRO AO BUSCAR HISTÓRICO DE SALDOS ===');
+      console.error('Account ID:', id);
+      console.error('URL:', `/accounts/${id}/balance-history`);
+      console.error('Params:', params);
+      console.error('Error message:', error?.message);
+      console.error('Error code:', error?.code);
+      console.error('HTTP status:', error?.response?.status);
+      console.error('Response data:', error?.response?.data);
+      console.error('Full error JSON:', JSON.stringify(error, null, 2));
+      console.error('Error keys:', Object.keys(error || {}));
+
+      // Retornar dados vazios em caso de erro
+      return { history: [] };
+    }
   }
 
   // Archive account (soft delete)

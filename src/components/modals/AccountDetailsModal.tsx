@@ -230,7 +230,7 @@ export const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({
                                 disabled={isLoading}
                             >
                                 <Trash2 size={16} />
-                                Excluir
+                                Arquivar
                             </Button>
                         </div>
 
