@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   CheckCircle,
   AlertCircle,
@@ -37,6 +37,7 @@ export const Toast: React.FC<ToastProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     // Trigger entrance animation
@@ -47,7 +48,9 @@ export const Toast: React.FC<ToastProps> = ({
   useEffect(() => {
     if (duration > 0 && type !== "loading") {
       const timer = setTimeout(() => {
-        handleClose();
+        if (isMountedRef.current) {
+          handleClose();
+        }
       }, duration);
 
       return () => clearTimeout(timer);
@@ -55,11 +58,21 @@ export const Toast: React.FC<ToastProps> = ({
   }, [duration, type]);
 
   const handleClose = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose?.();
-    }, 300); // Match CSS transition duration
+    if (isMountedRef.current) {
+      setIsExiting(true);
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          onClose?.();
+        }
+      }, 300); // Match CSS transition duration
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const getIcon = () => {
     switch (type) {

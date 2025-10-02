@@ -384,6 +384,14 @@
   color: #dc2626;
   font-size: 16px;
   margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.errorActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .retryButton {
@@ -400,6 +408,23 @@
 
 .retryButton:hover {
   background: #2563eb;
+}
+
+.helpButton {
+  padding: 10px 20px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.helpButton:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
 }
 
 .emptyState {

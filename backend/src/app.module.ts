@@ -20,7 +20,7 @@ import { MethodLoggingInterceptor } from "./common/interceptors/method-logging.i
 // Temporarily disabled modules with SQLite compatibility issues
 // import { BudgetsModule } from "./modules/budgets/budgets.module";
 // import { InvestmentsModule } from "./modules/investments/investments.module";
-// import { ReportsModule } from "./modules/reports/reports.module";
+import { ReportsModule } from "./modules/reports/reports.module";
 // import { GoalsModule } from "./modules/goals/goals.module";
 
 @Global()
@@ -36,7 +36,7 @@ import { MethodLoggingInterceptor } from "./common/interceptors/method-logging.i
     CategoriesModule,
     // BudgetsModule,
     // InvestmentsModule,
-    // ReportsModule,
+    ReportsModule,
     // GoalsModule,
   ],
   controllers: [AppController],

@@ -219,32 +219,7 @@
   flex: 1;
 }
 
-.barContainer {
-  height: 120px;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.bar {
-  width: 24px;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
-  min-height: 8px;
-}
-
-.barLabel {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.barValue {
-  font-size: 11px;
-  color: #9ca3af;
-  text-align: center;
-}
+/* Chart styles moved to shared ChartStyles.module.css */
 
 /* Card Usage */
 .cardUsageList {
@@ -483,9 +458,7 @@
     height: 150px;
   }
   
-  .barContainer {
-    height: 100px;
-  }
+  /* Chart responsive styles moved to shared ChartStyles.module.css */
   
   .bar {
     width: 20px;
@@ -594,9 +567,7 @@
     height: 120px;
   }
   
-  .barContainer {
-    height: 80px;
-  }
+  /* Chart responsive styles moved to shared ChartStyles.module.css */
   
   .bar {
     width: 16px;

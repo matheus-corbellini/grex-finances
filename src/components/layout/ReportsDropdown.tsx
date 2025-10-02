@@ -16,7 +16,6 @@ export const ReportsDropdown: React.FC<ReportsDropdownProps> = ({ isOpen }) => {
 
   // Memoize pathname comparisons to prevent unnecessary re-renders
   const isReportsActive = useMemo(() => {
-    if (typeof window === 'undefined') return false;
     try {
       return pathname.startsWith('/dashboard/reports');
     } catch (error) {

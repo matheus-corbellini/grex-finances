@@ -12,7 +12,7 @@ class BaseApiService {
   constructor() {
     this.api = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
-      timeout: 10000,
+      timeout: 15000, // Increased timeout for better reliability
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -46,6 +46,34 @@ class BaseApiService {
       async (error) => {
         if (error.response?.status === 401) {
           await this.handleUnauthorized();
+        }
+
+        // Handle connection refused errors (backend not running)
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_CONNECTION_REFUSED') {
+          const connectionError: ApiError = {
+            message: "Servidor backend não está rodando. Por favor, inicie o servidor backend primeiro.",
+            code: "BACKEND_NOT_RUNNING",
+            details: {
+              suggestion: "Execute 'npm run dev' na pasta backend ou 'docker-compose up' para iniciar o servidor",
+              url: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+            },
+            timestamp: new Date(),
+          };
+          return Promise.reject(connectionError);
+        }
+
+        // Handle network errors
+        if (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error')) {
+          const networkError: ApiError = {
+            message: "Erro de conexão com o servidor. Verifique se o backend está rodando.",
+            code: "NETWORK_ERROR",
+            details: {
+              suggestion: "Verifique se o servidor backend está rodando na porta 3001",
+              url: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+            },
+            timestamp: new Date(),
+          };
+          return Promise.reject(networkError);
         }
 
         const apiError: ApiError = {

@@ -165,7 +165,12 @@ export default function Accounts() {
       } catch (err: any) {
         console.error("Erro ao carregar contas:", err);
         if (isMounted) {
-          setError(err.message || "Erro ao carregar contas");
+          // Handle specific error types with better user messages
+          if (err.code === 'BACKEND_NOT_RUNNING' || err.code === 'NETWORK_ERROR') {
+            setError(`🚫 ${err.message}\n\n💡 ${err.details?.suggestion || 'Verifique se o servidor backend está rodando.'}`);
+          } else {
+            setError(err.message || "Erro ao carregar contas");
+          }
         }
       } finally {
         if (isMounted) {
@@ -789,13 +794,31 @@ export default function Accounts() {
 
         {error && (
           <div className={styles.errorContainer}>
-            <p className={styles.errorMessage}>{error}</p>
-            <button
-              className={styles.retryButton}
-              onClick={() => window.location.reload()}
-            >
-              Tentar novamente
-            </button>
+            <div className={styles.errorMessage}>
+              {error.split('\n').map((line, index) => (
+                <p key={index} style={{ margin: index > 0 ? '8px 0' : '0 0 8px 0' }}>
+                  {line}
+                </p>
+              ))}
+            </div>
+            <div className={styles.errorActions}>
+              <button
+                className={styles.retryButton}
+                onClick={() => window.location.reload()}
+              >
+                Tentar novamente
+              </button>
+              {error.includes('backend') && (
+                <button
+                  className={styles.helpButton}
+                  onClick={() => {
+                    alert(`Para iniciar o backend:\n\n1. Abra o terminal na pasta 'backend'\n2. Execute: npm run start:dev\n\nOu use Docker:\n1. Na pasta 'backend'\n2. Execute: docker-compose up`);
+                  }}
+                >
+                  Como iniciar o backend?
+                </button>
+              )}
+            </div>
           </div>
         )}
 

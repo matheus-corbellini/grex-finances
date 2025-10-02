@@ -1,0 +1,58 @@
+/* Estilos compartilhados para gráficos */
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 40px;
+  padding-top: 140px;
+  box-sizing: border-box;
+}
+
+.barContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar {
+  width: 60px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  min-height: 20px;
+  position: relative;
+}
+
+.entryBar {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+}
+
+.exitBar {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+}
+
+.barLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.barValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chartBars {
+    gap: 20px;
+  }
+
+  .bar {
+    width: 40px;
+  }
+}

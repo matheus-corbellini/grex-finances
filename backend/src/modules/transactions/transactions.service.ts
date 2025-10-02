@@ -25,7 +25,7 @@ export class TransactionsService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     @InjectRepository(Account)
-    private accountRepository: Repository<Account>,
+    public accountRepository: Repository<Account>,
     // private importExportService: ImportExportService, // Temporariamente comentado
   ) { }
 
@@ -192,8 +192,12 @@ export class TransactionsService {
 
     const savedTransaction = await this.transactionRepository.save(transaction);
 
-    // Atualizar saldo da conta
-    // await this.updateAccountBalance(account.id, createTransactionDto.amount); // Temporariamente comentado
+    // Atualizar saldo da conta baseado no tipo da transação
+    const balanceChange = createTransactionDto.type === 'income'
+      ? createTransactionDto.amount
+      : -createTransactionDto.amount;
+
+    await this.updateAccountBalance(account.id, balanceChange);
 
     return savedTransaction;
   }
@@ -358,9 +362,28 @@ export class TransactionsService {
 
   private async updateAccountBalance(accountId: string, amountChange: number) {
     try {
+      console.log(`💰 Atualizando saldo da conta ${accountId} com mudança de: ${amountChange}`);
+
+      // Buscar a conta primeiro para verificar se existe
+      const account = await this.accountRepository.findOne({ where: { id: accountId } });
+      if (!account) {
+        console.error(`❌ Conta ${accountId} não encontrada para atualização de saldo`);
+        return;
+      }
+
+      const oldBalance = account.balance;
       await this.accountRepository.increment({ id: accountId }, 'balance', amountChange);
+
+      // Buscar a conta atualizada para confirmar
+      const updatedAccount = await this.accountRepository.findOne({ where: { id: accountId } });
+      const newBalance = updatedAccount?.balance || oldBalance;
+
+      console.log(`✅ Saldo da conta ${account.name} atualizado: ${oldBalance} → ${newBalance} (${amountChange > 0 ? '+' : ''}${amountChange})`);
+
     } catch (error) {
-      console.error('Erro ao atualizar saldo da conta:', error);
+      console.error('❌ Erro ao atualizar saldo da conta:', error);
+      console.error('   AccountId:', accountId);
+      console.error('   AmountChange:', amountChange);
       // Não falhar a criação da transação se houver erro na atualização do saldo
     }
   }

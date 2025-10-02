@@ -291,6 +291,10 @@ export class TransactionsController {
 
       const savedTransaction = await this.transactionsService.transactionRepository.save(transaction);
 
+      // Atualizar saldo da conta baseado no tipo da transação
+      const balanceChange = body.type === 'income' ? amount : -amount;
+      await this.updateAccountBalance(body.accountId, balanceChange);
+
       this.logger.logBusiness('Transaction created successfully', 'mock-user', {
         transactionId: savedTransaction.id,
         amount: savedTransaction.amount,
@@ -466,5 +470,33 @@ export class TransactionsController {
     res.setHeader('Content-Length', Buffer.byteLength(templateContent, 'utf8').toString());
 
     res.send(templateContent);
+  }
+
+  private async updateAccountBalance(accountId: string, amountChange: number) {
+    try {
+      console.log(`💰 Atualizando saldo da conta ${accountId} com mudança de: ${amountChange}`);
+
+      // Buscar a conta primeiro para verificar se existe
+      const account = await this.transactionsService.accountRepository.findOne({ where: { id: accountId } });
+      if (!account) {
+        console.error(`❌ Conta ${accountId} não encontrada para atualização de saldo`);
+        return;
+      }
+
+      const oldBalance = account.balance;
+      await this.transactionsService.accountRepository.increment({ id: accountId }, 'balance', amountChange);
+
+      // Buscar a conta atualizada para confirmar
+      const updatedAccount = await this.transactionsService.accountRepository.findOne({ where: { id: accountId } });
+      const newBalance = updatedAccount?.balance || oldBalance;
+
+      console.log(`✅ Saldo da conta ${account.name} atualizado: ${oldBalance} → ${newBalance} (${amountChange > 0 ? '+' : ''}${amountChange})`);
+
+    } catch (error) {
+      console.error('❌ Erro ao atualizar saldo da conta:', error);
+      console.error('   AccountId:', accountId);
+      console.error('   AmountChange:', amountChange);
+      // Não falhar a criação da transação se houver erro na atualização do saldo
+    }
   }
 }

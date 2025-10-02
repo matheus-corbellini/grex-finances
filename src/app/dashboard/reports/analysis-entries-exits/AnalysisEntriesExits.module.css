@@ -194,6 +194,18 @@
   border-color: #9ca3af;
 }
 
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f9fafb;
+  color: #9ca3af;
+}
+
+.actionButton:disabled:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
 .chartSection {
   margin-bottom: 32px;
 }
@@ -211,41 +223,7 @@
   margin-bottom: 16px;
 }
 
-.chartBars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 40px;
-  height: 200px;
-  margin-bottom: 20px;
-}
-
-.barContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.bar {
-  width: 60px;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
-}
-
-.entryBar {
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-}
-
-.exitBar {
-  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-}
-
-.barLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: #374151;
-}
+/* Chart styles moved to shared ChartStyles.module.css */
 
 .chartAxis {
   position: absolute;
@@ -408,15 +386,64 @@
     justify-content: center;
   }
 
-  .chartBars {
-    gap: 20px;
-  }
-
-  .bar {
-    width: 40px;
-  }
+  /* Chart responsive styles moved to shared ChartStyles.module.css */
 
   .chartLegend {
     gap: 16px;
   }
+}
+
+/* Loading and No Data States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.loadingContainer p {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+.noDataContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 16px;
+}
+
+/* Last Generated Info */
+.lastGenerated {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* Bar values moved to shared ChartStyles.module.css */
+
+/* Positive/Negative Result Colors */
+.positive {
+  color: #10b981 !important;
+}
+
+.negative {
+  color: #ef4444 !important;
+}
+
+/* Generate Button Loading State */
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.generateButton:disabled:hover {
+  background-color: #3b82f6;
+  transform: none;
 }

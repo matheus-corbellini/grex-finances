@@ -211,35 +211,7 @@
   margin-bottom: 16px;
 }
 
-.chartBars {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 40px;
-  height: 200px;
-  margin-bottom: 20px;
-}
-
-.barContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.bar {
-  width: 60px;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
-}
-
-.entryBar {
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-}
-
-.exitBar {
-  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
-}
+/* Chart styles moved to shared ChartStyles.module.css */
 
 .barLabel {
   font-size: 12px;
@@ -408,9 +380,7 @@
     justify-content: center;
   }
 
-  .chartBars {
-    gap: 20px;
-  }
+  /* Chart responsive styles moved to shared ChartStyles.module.css */
 
   .bar {
     width: 40px;
