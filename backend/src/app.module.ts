@@ -10,6 +10,9 @@ import { UsersModule } from "./modules/users/users.module";
 import { AccountsModule } from "./modules/accounts/accounts.module";
 import { TransactionsModule } from "./modules/transactions/transactions.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
+import { ApiKeysModule } from "./modules/api-keys/api-keys.module";
+import { ContactsModule } from "./modules/contacts/contacts.module";
+import { WebhooksModule } from "./modules/webhooks/webhooks.module";
 
 // Import common services
 import { AppLogger } from "./common/logger/app.logger";
@@ -34,6 +37,9 @@ import { ReportsModule } from "./modules/reports/reports.module";
     AccountsModule,
     TransactionsModule,
     CategoriesModule,
+    ApiKeysModule,
+    ContactsModule,
+    WebhooksModule,
     // BudgetsModule,
     // InvestmentsModule,
     ReportsModule,

@@ -58,10 +58,24 @@ async function bootstrap() {
     .setDescription('API para sistema de gestão financeira')
     .setVersion('1.0')
     .addBearerAuth()
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'X-API-Key',
+        in: 'header',
+        description: 'Chave API para autenticação na API pública'
+      },
+      'ApiKey'
+    )
     .addTag('transactions', 'Operações de transações')
     .addTag('accounts', 'Operações de contas')
     .addTag('categories', 'Operações de categorias')
     .addTag('users', 'Operações de usuários')
+    .addTag('API Keys', 'Gestão de chaves API')
+    .addTag('Contacts', 'Gestão de contatos')
+    .addTag('Public API - Contacts', 'API pública para contatos')
+    .addTag('Public API - Transactions', 'API pública para transações')
+    .addTag('Webhooks', 'Gestão de webhooks')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

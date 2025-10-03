@@ -167,6 +167,18 @@ export class TransactionsService {
     return transaction;
   }
 
+  async findByExternalId(userId: string, externalId: string) {
+    return this.transactionRepository.findOne({
+      where: { externalId },
+      relations: ['category', 'account']
+    }).then(transaction => {
+      if (transaction && transaction.account.userId !== userId) {
+        return null; // Não retornar transação de outro usuário
+      }
+      return transaction;
+    });
+  }
+
   async create(createTransactionDto: CreateTransactionDto, userId: string) {
     // Verificar se a conta pertence ao usuário
     const account = await this.accountRepository.findOne({
@@ -188,6 +200,7 @@ export class TransactionsService {
       notes: createTransactionDto.notes,
       isRecurring: createTransactionDto.isRecurring || false,
       recurringTransactionId: createTransactionDto.recurringTransactionId,
+      externalId: createTransactionDto.externalId,
     });
 
     const savedTransaction = await this.transactionRepository.save(transaction);

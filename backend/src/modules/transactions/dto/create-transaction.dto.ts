@@ -25,4 +25,5 @@ export class CreateTransactionDto {
     notes?: string;
     isRecurring?: boolean;
     recurringTransactionId?: string;
+    externalId?: string; // ID externo para integração
 }

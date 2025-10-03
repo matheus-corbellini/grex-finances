@@ -57,6 +57,9 @@ export class Transaction {
   @Column({ nullable: true })
   recurringTransactionId?: string;
 
+  @Column({ nullable: true })
+  externalId?: string; // ID externo para integração
+
   @CreateDateColumn()
   createdAt: Date;
 

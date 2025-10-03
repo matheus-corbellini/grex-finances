@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { TransactionsController } from './transactions.controller';
+import { PublicTransactionsController } from './public-transactions.controller';
 import { RecurringTransactionsController } from './recurring-transactions.controller';
 import { TransactionsService } from './transactions.service';
 import { RecurringTransactionsService } from './services/recurring-transactions.service';
@@ -17,7 +18,7 @@ import { Account } from '../accounts/entities/account.entity';
     TypeOrmModule.forFeature([Transaction, RecurringTransaction, Category, Account]),
     // ScheduleModule.forRoot()
   ],
-  controllers: [TransactionsController, RecurringTransactionsController],
+  controllers: [TransactionsController, PublicTransactionsController, RecurringTransactionsController],
   providers: [
     TransactionsService,
     RecurringTransactionsService,
