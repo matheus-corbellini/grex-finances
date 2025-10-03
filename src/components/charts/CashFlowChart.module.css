@@ -1,0 +1,227 @@
+.chartContainer {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.noDataMessage {
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+}
+
+.chart {
+  position: relative;
+  height: 400px;
+  display: flex;
+}
+
+.yAxis {
+  width: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-right: 1px solid #e5e7eb;
+}
+
+.yLabel {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: right;
+  padding-right: 8px;
+  font-weight: 500;
+}
+
+.chartArea {
+  flex: 1;
+  position: relative;
+  margin-left: 16px;
+}
+
+.gridLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.gridLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.gridLine:nth-child(1) { top: 0%; }
+.gridLine:nth-child(2) { top: 25%; }
+.gridLine:nth-child(3) { top: 50%; }
+.gridLine:nth-child(4) { top: 75%; }
+.gridLine:nth-child(5) { top: 100%; }
+
+.barsContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.barGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  height: 100%;
+}
+
+.barStack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  height: 100%;
+  width: 40px;
+  position: relative;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+  min-height: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1px;
+  position: relative;
+}
+
+.entryBar {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+}
+
+.exitBar {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+}
+
+.balanceLine {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.monthLabel {
+  position: absolute;
+  bottom: -30px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+}
+
+.balanceValue {
+  position: absolute;
+  bottom: -50px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #374151;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.balanceLineChart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.entryDot {
+  background: #10b981;
+}
+
+.exitDot {
+  background: #ef4444;
+}
+
+.balanceDot {
+  background: #3b82f6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chart {
+    height: 300px;
+  }
+  
+  .yAxis {
+    width: 80px;
+  }
+  
+  .yLabel {
+    font-size: 10px;
+  }
+  
+  .barStack {
+    width: 30px;
+  }
+  
+  .monthLabel {
+    font-size: 10px;
+    bottom: -25px;
+  }
+  
+  .balanceValue {
+    font-size: 9px;
+    bottom: -40px;
+  }
+  
+  .legend {
+    gap: 16px;
+  }
+  
+  .legendItem {
+    font-size: 12px;
+  }
+}

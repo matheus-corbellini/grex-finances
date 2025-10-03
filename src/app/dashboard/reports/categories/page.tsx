@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { ClientOnly } from "../../../../components/layout/ClientOnly";
 import styles from "./Categories.module.css";
@@ -9,6 +9,37 @@ import {
     Printer,
     ChevronDown
 } from "lucide-react";
+import reportsService from "../../../../services/api/reports.service";
+
+interface CategoryData {
+    categoryId: string;
+    categoryName: string;
+    type: string;
+    total: number;
+    transactionCount: number;
+    color?: string;
+}
+
+interface CategoryReportData {
+    summary: {
+        totalIncome: number;
+        totalExpenses: number;
+        transactionCount: number;
+    };
+    incomeByCategory: CategoryData[];
+    expenseByCategory: CategoryData[];
+    dateRange: {
+        startDate: string;
+        endDate: string;
+    };
+    filters: {
+        period: string;
+        regime: string;
+        considerUnpaid: boolean;
+        categoryId?: string;
+        accountId?: string;
+    };
+}
 
 export default function Categories() {
     const [category, setCategory] = useState("Todas");
@@ -16,15 +47,56 @@ export default function Categories() {
     const [regime1, setRegime1] = useState("Caixa");
     const [regime2, setRegime2] = useState("Todas");
     const [considerUnpaid, setConsiderUnpaid] = useState(false);
+    const [data, setData] = useState<CategoryReportData | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const categories = [
-        { name: "Dízimos e Ofertas", percentage: "74%", value: "R$250,00", color: "green" },
-        { name: "Rendimentos", percentage: "74%", value: "R$-250,00", color: "green" },
-        { name: "Encontro com Deus", percentage: "74%", value: "R$-250,00", color: "green" },
-        { name: "Lanchonete", percentage: "74%", value: "R$-250,00", color: "red" },
-        { name: "Livraria", percentage: "74%", value: "R$-250,00", color: "dark-red" },
-        { name: "Outros", percentage: "74%", value: "R$-250,00", color: "light-red" }
-    ];
+    const loadData = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const startDate = new Date(2024, 5, 1).toISOString(); // Junho de 2024
+            const endDate = new Date(2024, 5, 30).toISOString();
+
+            const filters = {
+                startDate,
+                endDate,
+                period: 'monthly',
+                regime: regime1.toLowerCase() === 'caixa' ? 'cash' : 'accrual',
+                considerUnpaid,
+                categoryId: category !== 'Todas' ? category : undefined,
+                accountId: regime2 !== 'Todas' ? regime2 : undefined
+            };
+
+            const result = await reportsService.getCategoryAnalysis(filters);
+            setData(result);
+        } catch (err) {
+            setError('Erro ao carregar dados do relatório');
+            console.error('Erro ao carregar relatório por categorias:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
+    }, [category, period, regime1, regime2, considerUnpaid]);
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(value);
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('pt-BR');
+    };
+
+    const calculatePercentage = (value: number, total: number) => {
+        return total > 0 ? ((value / total) * 100).toFixed(0) : '0';
+    };
 
     return (
         <DashboardLayout>
@@ -117,8 +189,8 @@ export default function Categories() {
                                 </label>
                             </div>
 
-                            <button className={styles.generateButton}>
-                                Gerar relatório
+                            <button className={styles.generateButton} onClick={loadData} disabled={loading}>
+                                {loading ? 'Carregando...' : 'Gerar relatório'}
                             </button>
                         </div>
                     </div>
@@ -129,7 +201,7 @@ export default function Categories() {
                             <div className={styles.reportTitle}>
                                 <h2>Relatório de entradas e saídas por categoria</h2>
                                 <p className={styles.reportDescription}>
-                                    De 20/09/2024 à 12/10/2024 | Visão Mensal | Conta Todas
+                                    {data ? `${formatDate(data.dateRange.startDate)} à ${formatDate(data.dateRange.endDate)} | Visão Mensal | Conta ${regime2}` : 'Carregando...'}
                                 </p>
                             </div>
                             <div className={styles.reportActions}>
@@ -143,6 +215,18 @@ export default function Categories() {
                                 </button>
                             </div>
                         </div>
+
+                        {error && (
+                            <div className={styles.errorMessage}>
+                                {error}
+                            </div>
+                        )}
+
+                        {loading && (
+                            <div className={styles.loadingMessage}>
+                                Carregando dados do relatório...
+                            </div>
+                        )}
 
                         {/* Charts Section */}
                         <div className={styles.chartsSection}>
@@ -176,37 +260,56 @@ export default function Categories() {
                         </div>
 
                         {/* Categories Table */}
-                        <div className={styles.tableSection}>
-                            <table className={styles.categoriesTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Cor</th>
-                                        <th>Categoria</th>
-                                        <th>Percentual</th>
-                                        <th>Valor</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {categories.map((item, index) => (
-                                        <tr key={index}>
-                                            <td>
-                                                <div className={`${styles.colorDot} ${styles[item.color]}`}></div>
-                                            </td>
-                                            <td>
-                                                <div className={styles.categoryName}>
-                                                    {item.name}
-                                                    {index === categories.length - 1 && (
-                                                        <input type="checkbox" className={styles.checkbox} />
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className={styles.percentage}>{item.percentage}</td>
-                                            <td className={styles.value}>{item.value}</td>
+                        {data && (
+                            <div className={styles.tableSection}>
+                                <table className={styles.categoriesTable}>
+                                    <thead>
+                                        <tr>
+                                            <th>Cor</th>
+                                            <th>Categoria</th>
+                                            <th>Tipo</th>
+                                            <th>Percentual</th>
+                                            <th>Valor</th>
+                                            <th>Transações</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody>
+                                        {[...data.incomeByCategory, ...data.expenseByCategory].map((item, index) => (
+                                            <tr key={`${item.categoryId}-${item.type}`}>
+                                                <td>
+                                                    <div
+                                                        className={styles.colorDot}
+                                                        style={{ backgroundColor: item.color || '#6b7280' }}
+                                                    ></div>
+                                                </td>
+                                                <td>
+                                                    <div className={styles.categoryName}>
+                                                        {item.categoryName}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span className={item.type === 'income' ? styles.incomeType : styles.expenseType}>
+                                                        {item.type === 'income' ? 'Entrada' : 'Saída'}
+                                                    </span>
+                                                </td>
+                                                <td className={styles.percentage}>
+                                                    {item.type === 'income'
+                                                        ? `${calculatePercentage(item.total, data.summary.totalIncome)}%`
+                                                        : `${calculatePercentage(item.total, data.summary.totalExpenses)}%`
+                                                    }
+                                                </td>
+                                                <td className={styles.value}>
+                                                    {formatCurrency(item.total)}
+                                                </td>
+                                                <td className={styles.transactionCount}>
+                                                    {item.transactionCount}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 </div>
             </ClientOnly>

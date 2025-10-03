@@ -1,0 +1,212 @@
+.chartContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.noDataMessage {
+  text-align: center;
+  color: #6b7280;
+  font-size: 16px;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+}
+
+.chart {
+  position: relative;
+  height: 400px;
+  display: flex;
+}
+
+.yAxisBars {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-right: 1px solid #f1f5f9;
+}
+
+
+.yLabel {
+  font-size: 11px;
+  color: #64748b;
+  text-align: right;
+  padding-right: 8px;
+  font-weight: 400;
+}
+
+.chartArea {
+  flex: 1;
+  position: relative;
+  margin-left: 16px;
+}
+
+.barsContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.barGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  height: 100%;
+}
+
+.barPair {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  height: 100%;
+  position: relative;
+  justify-content: center;
+}
+
+.bar {
+  width: 24px;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.3s ease;
+  min-height: 8px;
+  position: relative;
+}
+
+.incomeBar {
+  background: #22c55e;
+  opacity: 0.9;
+}
+
+.expenseBar {
+  background: #ef4444;
+  opacity: 0.9;
+}
+
+.balanceDot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  z-index: 10;
+}
+
+.monthLabel {
+  position: absolute;
+  bottom: -25px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  text-align: center;
+}
+
+.valuesContainer {
+  position: absolute;
+  bottom: -60px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+}
+
+
+.balanceValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3b82f6;
+  text-align: center;
+  white-space: nowrap;
+}
+
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.incomeDot {
+  background: #22c55e;
+}
+
+.expenseDot {
+  background: #ef4444;
+}
+
+.balanceDot {
+  background: #3b82f6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chart {
+    height: 400px;
+  }
+  
+  .yAxisBars,
+  .yAxisBalance {
+    width: 80px;
+  }
+  
+  .yLabel {
+    font-size: 10px;
+  }
+  
+  .bar {
+    width: 16px;
+  }
+  
+  .monthLabel {
+    font-size: 10px;
+    bottom: -25px;
+  }
+  
+  .valuesContainer {
+    bottom: -70px;
+  }
+  
+  .incomeValue,
+  .expenseValue,
+  .balanceValue {
+    font-size: 9px;
+  }
+  
+  .legend {
+    gap: 16px;
+  }
+  
+  .legendItem {
+    font-size: 12px;
+  }
+}

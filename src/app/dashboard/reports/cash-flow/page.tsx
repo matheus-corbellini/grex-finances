@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { ClientOnly } from "../../../../components/layout/ClientOnly";
 import styles from "./CashFlow.module.css";
@@ -9,11 +9,82 @@ import {
   Printer,
   ChevronDown
 } from "lucide-react";
+import reportsService from "../../../../services/api/reports.service";
+import CashFlowChartFixed from "../../../../components/charts/CashFlowChartFixed";
+
+interface CashFlowData {
+  summary: {
+    totalBalance: number;
+    totalIncome: number;
+    totalExpenses: number;
+    transactionCount: number;
+  };
+  cashFlowData: { [key: string]: { income: number; expenses: number; net: number; balance: number } };
+  dateRange: {
+    startDate: string;
+    endDate: string;
+  };
+  filters: {
+    period: string;
+    regime: string;
+    considerUnpaid: boolean;
+  };
+}
 
 export default function CashFlow() {
   const [period, setPeriod] = useState("2024");
   const [view, setView] = useState("Mensal");
   const [type, setType] = useState("Realizado");
+  const [data, setData] = useState<CashFlowData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const startDate = new Date(parseInt(period), 0, 1).toISOString();
+      const endDate = new Date(parseInt(period), 11, 31).toISOString();
+
+      const filters = {
+        startDate,
+        endDate,
+        period: view.toLowerCase() === 'mensal' ? 'monthly' : view.toLowerCase() === 'semanal' ? 'weekly' : 'daily',
+        regime: type.toLowerCase() === 'realizado' ? 'cash' : 'accrual',
+        considerUnpaid: type.toLowerCase() === 'comparativo'
+      };
+
+      const result = await reportsService.getCashFlowReport(filters);
+      setData(result);
+    } catch (err) {
+      setError('Erro ao carregar dados do relatório');
+      console.error('Erro ao carregar relatório de fluxo de caixa:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [period, view, type]);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const getMonthName = (periodKey: string) => {
+    const [year, month] = periodKey.split('-');
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    return monthNames[parseInt(month) - 1];
+  };
 
   return (
     <DashboardLayout>
@@ -77,8 +148,8 @@ export default function CashFlow() {
                 </div>
               </div>
 
-              <button className={styles.generateButton}>
-                Gerar relatório
+              <button className={styles.generateButton} onClick={loadData} disabled={loading}>
+                {loading ? 'Carregando...' : 'Gerar relatório'}
               </button>
             </div>
           </div>
@@ -87,9 +158,9 @@ export default function CashFlow() {
           <div className={styles.reportSection}>
             <div className={styles.reportHeader}>
               <div className={styles.reportTitle}>
-                <h2>Relatório de fluxo de caixa realizado</h2>
+                <h2>Relatório de fluxo de caixa {type.toLowerCase()}</h2>
                 <p className={styles.reportDescription}>
-                  De 20/09/2024 à 12/10/2024 | Visão Mensal
+                  {data ? `${formatDate(data.dateRange.startDate)} à ${formatDate(data.dateRange.endDate)} | Visão ${view}` : 'Carregando...'}
                 </p>
               </div>
               <div className={styles.reportActions}>
@@ -104,126 +175,74 @@ export default function CashFlow() {
               </div>
             </div>
 
-            {/* Chart Section */}
-            <div className={styles.chartSection}>
-              <div className={styles.chartContainer}>
-                <div className={styles.chart}>
-                  <div className={styles.chartContent}>
-                    {/* Stacked Bar Chart */}
-                    <div className={styles.barsContainer}>
-                      {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out'].map((month, index) => (
-                        <div key={month} className={styles.monthContainer}>
-                          <div className={styles.barStack}>
-                            <div
-                              className={`${styles.bar} ${styles.entryBar}`}
-                              style={{ height: `${Math.random() * 60 + 20}%` }}
-                            ></div>
-                            <div
-                              className={`${styles.bar} ${styles.exitBar}`}
-                              style={{ height: `${Math.random() * 40 + 10}%` }}
-                            ></div>
-                          </div>
-                          <div className={styles.monthLabel}>{month}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Line Chart for Balance */}
-                    <div className={styles.lineContainer}>
-                      <div className={styles.lineChart}>
-                        <div className={styles.linePath}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={styles.chartAxis}>
-                    <div className={styles.yAxis}>
-                      <div className={styles.yLabel}>R$-250,00</div>
-                      <div className={styles.yLabel}>R$-200,00</div>
-                      <div className={styles.yLabel}>R$-150,00</div>
-                      <div className={styles.yLabel}>R$-100,00</div>
-                      <div className={styles.yLabel}>R$-50,00</div>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.chartLegend}>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendDot} ${styles.entryDot}`}></div>
-                    <span>Entrada realizada</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendDot} ${styles.exitDot}`}></div>
-                    <span>Saída realizada</span>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={`${styles.legendDot} ${styles.balanceDot}`}></div>
-                    <span>Saldo realizado</span>
-                  </div>
-                </div>
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
               </div>
-            </div>
+            )}
+
+            {loading && (
+              <div className={styles.loadingMessage}>
+                Carregando dados do relatório...
+              </div>
+            )}
+
+            {/* Chart Section */}
+            {data && (
+              <div className={styles.chartSection}>
+                <CashFlowChartFixed data={data.cashFlowData} type={type} />
+              </div>
+            )}
 
             {/* Data Table */}
-            <div className={styles.tableSection}>
-              <table className={styles.dataTable}>
-                <thead>
-                  <tr>
-                    <th>Período</th>
-                    <th>Jan de 2024 AH</th>
-                    <th>Fev de 2024 AH</th>
-                    <th>Mar de 2024 AH</th>
-                    <th>Abr de 2024 AH</th>
-                    <th>Mai de 2024 AH</th>
-                    <th>Jun de 2024 AH</th>
-                    <th>Jul de 2024 AH</th>
-                    <th>Ago de 2024 AH</th>
-                    <th>Set de 2024 AH</th>
-                    <th>Out de 2024 AH</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Total de saldos</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                  </tr>
-                  <tr>
-                    <td>Saldo anterior</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                  </tr>
-                  <tr>
-                    <td>Saldo inicial</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td>R$-250,00 32%</td>
-                    <td className={styles.highlightedValue}>R$250,00</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            {data && (
+              <div className={styles.tableSection}>
+                <table className={styles.dataTable}>
+                  <thead>
+                    <tr>
+                      <th>Período</th>
+                      {Object.keys(data.cashFlowData).map((periodKey) => (
+                        <th key={periodKey}>{getMonthName(periodKey)} de {period}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total de saldos</td>
+                      {Object.values(data.cashFlowData).map((periodData, index) => (
+                        <td key={index}>
+                          {formatCurrency(periodData.balance)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Entradas</td>
+                      {Object.values(data.cashFlowData).map((periodData, index) => (
+                        <td key={index}>
+                          {formatCurrency(periodData.income)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Saídas</td>
+                      {Object.values(data.cashFlowData).map((periodData, index) => (
+                        <td key={index}>
+                          {formatCurrency(periodData.expenses)}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td>Saldo líquido</td>
+                      {Object.values(data.cashFlowData).map((periodData, index) => (
+                        <td key={index} className={periodData.net >= 0 ? styles.positiveValue : styles.negativeValue}>
+                          {formatCurrency(periodData.net)}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </ClientOnly>
