@@ -28,6 +28,7 @@ import { Transaction, TransactionType, TransactionStatus } from "../../../../sha
 import { Account } from "../../../../shared/types/account.types";
 import { Category } from "../../../../shared/types/category.types";
 import { safeErrorLog } from "../../../utils/error-logger";
+import { useAuthRedirect } from "../../../hooks/useAuthRedirect";
 
 export default function Transactions() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)); // Setembro 2025
@@ -40,6 +41,9 @@ export default function Transactions() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [statusDropdowns, setStatusDropdowns] = useState<{ [key: string]: boolean }>({});
   const [statusButtonRefs, setStatusButtonRefs] = useState<{ [key: string]: React.RefObject<HTMLButtonElement> }>({});
+
+  // Usar o hook de redirecionamento de autenticação
+  useAuthRedirect();
 
   // Criar refs para os botões de status individuais
   const getStatusButtonRef = (transactionId: string) => {
@@ -94,6 +98,7 @@ export default function Transactions() {
     loadAccounts();
   }, [currentPage, searchTerm, activeView, currentDate]);
 
+
   // Aplicar filtros quando mudarem
   useEffect(() => {
     applyFilters();
@@ -131,6 +136,15 @@ export default function Transactions() {
       setTotalTransactions(response.pagination?.total || 0);
     } catch (err: any) {
       console.error("Erro ao carregar transações:", err);
+
+      // Se for erro de autenticação, não mostrar erro na UI
+      // O evento auth:unauthorized já foi disparado
+      if (err.code === 'UNKNOWN_ERROR' && err.message?.includes('401')) {
+        console.log("🔐 Erro 401 detectado - evento de autenticação já foi disparado");
+        return;
+      }
+
+      // Para outros erros, mostrar na UI
       setError(err.message || "Erro ao carregar transações");
     } finally {
       setIsLoading(false);

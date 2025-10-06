@@ -12,10 +12,12 @@ import { Transaction } from './entities/transaction.entity';
 import { RecurringTransaction } from './entities/recurring-transaction.entity';
 import { Category } from '../categories/entities/category.entity';
 import { Account } from '../accounts/entities/account.entity';
+import { ApiKeysModule } from '../api-keys/api-keys.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction, RecurringTransaction, Category, Account]),
+    ApiKeysModule,
     // ScheduleModule.forRoot()
   ],
   controllers: [TransactionsController, PublicTransactionsController, RecurringTransactionsController],

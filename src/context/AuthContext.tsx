@@ -40,7 +40,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        
+
+        // Gerar um token JWT válido para desenvolvimento
+        const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrLXVzZXItaWQiLCJlbWFpbCI6InVzdWFyaW9AZXhlbXBsby5jb20iLCJmaXJzdE5hbWUiOiJVc3XDoXJpbyIsImxhc3ROYW1lIjoiRXhlbXBsbyIsImlhdCI6MTc1OTc2NDUxNSwiZXhwIjoxNzU5ODUwOTE1fQ.AM96yx9LaUqDkdCZCT-Z-lLCO8NncIsZ_aqxRs7J9n4";
+
+        // Armazenar o token no localStorage
+        if (typeof window !== "undefined") {
+            localStorage.setItem("accessToken", mockToken);
+        }
+
         // Simular um pequeno delay de carregamento
         setTimeout(() => {
             setUser(mockUser);
@@ -60,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        
+
         setUser(mockUser);
     };
 
@@ -81,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        
+
         setUser(mockUser);
     };
 
@@ -97,7 +105,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        
+
         setUser(mockUser);
     };
 
@@ -113,11 +121,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
-        
+
         setUser(mockUser);
     };
 
     const logout = async (): Promise<void> => {
+        // Limpar o token do localStorage
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+        }
         setUser(null);
     };
 

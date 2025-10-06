@@ -1,0 +1,53 @@
+# Configuração de Ambientes para GitHub Actions
+# Este arquivo define as configurações de ambiente para CI/CD
+
+# Ambiente de Staging
+staging:
+  name: "Staging Environment"
+  description: "Ambiente de staging para testes e validação"
+  protection_rules:
+    required_reviewers: 1
+    wait_timer: 0
+  environment_variables:
+    NODE_ENV: "staging"
+    DB_HOST: "staging-db-host.amazonaws.com"
+    DB_NAME: "grex_finances_staging"
+    FRONTEND_URL: "https://staging.grex-finances.com"
+    NEXT_PUBLIC_API_URL: "https://api-staging.grex-finances.com"
+    SENTRY_ENVIRONMENT: "staging"
+    LOG_LEVEL: "info"
+  secrets:
+    DB_PASSWORD: "staging_db_password"
+    JWT_SECRET: "staging_jwt_secret"
+    SENTRY_DSN: "staging_sentry_dsn"
+    REDIS_PASSWORD: "staging_redis_password"
+    AWS_ACCESS_KEY_ID: "staging_aws_access_key"
+    AWS_SECRET_ACCESS_KEY: "staging_aws_secret_key"
+    STRIPE_SECRET_KEY: "staging_stripe_secret_key"
+    FIREBASE_API_KEY: "staging_firebase_api_key"
+
+# Ambiente de Produção
+production:
+  name: "Production Environment"
+  description: "Ambiente de produção"
+  protection_rules:
+    required_reviewers: 2
+    wait_timer: 300  # 5 minutos
+  environment_variables:
+    NODE_ENV: "production"
+    DB_HOST: "production-db-host.amazonaws.com"
+    DB_NAME: "grex_finances_production"
+    FRONTEND_URL: "https://grex-finances.com"
+    NEXT_PUBLIC_API_URL: "https://api.grex-finances.com"
+    SENTRY_ENVIRONMENT: "production"
+    LOG_LEVEL: "warn"
+  secrets:
+    DB_PASSWORD: "production_db_password"
+    JWT_SECRET: "production_jwt_secret"
+    SENTRY_DSN: "production_sentry_dsn"
+    REDIS_PASSWORD: "production_redis_password"
+    AWS_ACCESS_KEY_ID: "production_aws_access_key"
+    AWS_SECRET_ACCESS_KEY: "production_aws_secret_key"
+    STRIPE_SECRET_KEY: "production_stripe_secret_key"
+    FIREBASE_API_KEY: "production_firebase_api_key"
+    SLACK_WEBHOOK_URL: "production_slack_webhook_url"

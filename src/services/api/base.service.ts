@@ -28,6 +28,13 @@ class BaseApiService {
     this.api.interceptors.request.use(
       (config) => {
         const token = this.getAuthToken();
+        console.log("📤 Fazendo requisição:", {
+          url: config.url,
+          method: config.method,
+          hasToken: !!token,
+          tokenPreview: token ? `${token.substring(0, 20)}...` : 'N/A'
+        });
+
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -44,7 +51,17 @@ class BaseApiService {
         return response;
       },
       async (error) => {
+        console.log("🚨 Erro na API:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.response?.data,
+          message: error.message
+        });
+
         if (error.response?.status === 401) {
+          console.log("🔐 Erro 401 detectado - chamando handleUnauthorized");
           await this.handleUnauthorized();
         }
 
@@ -100,9 +117,18 @@ class BaseApiService {
 
   private async handleUnauthorized() {
     if (typeof window !== "undefined") {
+      console.log("🔐 Token inválido ou expirado. Limpando tokens...");
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
+
+      // Não redirecionar automaticamente - deixar que os componentes tratem o erro
+      console.error("❌ Erro de autenticação: Token inválido ou expirado");
+
+      // Em vez de redirecionar, vamos disparar um evento customizado
+      // que os componentes podem escutar para decidir o que fazer
+      window.dispatchEvent(new CustomEvent('auth:unauthorized', {
+        detail: { message: 'Sessão expirada. Faça login novamente.' }
+      }));
     }
   }
 

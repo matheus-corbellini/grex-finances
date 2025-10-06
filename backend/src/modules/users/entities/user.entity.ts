@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
+import { UserRole } from "./user-role.entity";
+import { Subscription } from "../../billing/entities/subscription.entity";
 
 @Entity("users")
 export class User {
@@ -22,6 +24,36 @@ export class User {
 
   @Column({ default: false })
   emailVerified: boolean;
+
+  @Column({ nullable: true })
+  phone: string;
+
+  @Column({ nullable: true })
+  avatar: string;
+
+  @Column({ nullable: true })
+  lastLoginAt: Date;
+
+  @Column({ nullable: true })
+  emailVerificationToken: string;
+
+  @Column({ nullable: true })
+  passwordResetToken: string;
+
+  @Column({ nullable: true })
+  passwordResetExpires: Date;
+
+  @Column({ default: 0 })
+  loginAttempts: number;
+
+  @Column({ nullable: true })
+  lockedUntil: Date;
+
+  @OneToMany(() => UserRole, userRole => userRole.user)
+  userRoles: UserRole[];
+
+  @OneToMany(() => Subscription, subscription => subscription.user)
+  subscriptions: Subscription[];
 
   @CreateDateColumn()
   createdAt: Date;

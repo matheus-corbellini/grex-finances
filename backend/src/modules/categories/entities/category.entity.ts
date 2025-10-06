@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Subcategory } from "./subcategory.entity";
+import { CategoryType } from "../dto/category.dto";
 
 @Entity("categories")
 export class Category {
@@ -20,8 +21,8 @@ export class Category {
   @Column({ nullable: true })
   description?: string;
 
-  @Column({ type: "varchar" })
-  type: string;
+  @Column({ type: "enum", enum: CategoryType })
+  type: CategoryType;
 
   @Column({ nullable: true })
   icon?: string;
@@ -31,6 +32,9 @@ export class Category {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ default: false })
+  isDefault: boolean;
 
   @OneToMany(() => Subcategory, subcategory => subcategory.category)
   subcategories: Subcategory[];

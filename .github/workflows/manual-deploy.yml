@@ -1,0 +1,140 @@
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      skip_tests:
+        description: 'Skip running tests'
+        required: false
+        default: false
+        type: boolean
+      backup_database:
+        description: 'Backup database before deploy'
+        required: false
+        default: true
+        type: boolean
+      run_migrations:
+        description: 'Run database migrations'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=${{ github.event.inputs.environment }}-${{ github.sha }}
+          type=raw,value=${{ github.event.inputs.environment }}-latest
+    
+    - name: Run Tests
+      if: ${{ !github.event.inputs.skip_tests }}
+      run: |
+        echo "Running tests..."
+        # Aqui você adicionaria os comandos de teste
+        echo "Tests completed successfully!"
+    
+    - name: Build and push Backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile.prod
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Backup Database
+      if: ${{ github.event.inputs.backup_database }}
+      run: |
+        echo "Backing up database..."
+        # Aqui você adicionaria os comandos de backup
+        echo "Database backup completed!"
+    
+    - name: Deploy to ${{ github.event.inputs.environment }}
+      run: |
+        echo "🚀 Deploying to ${{ github.event.inputs.environment }} environment..."
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Skip tests: ${{ github.event.inputs.skip_tests }}"
+        echo "Backup database: ${{ github.event.inputs.backup_database }}"
+        echo "Run migrations: ${{ github.event.inputs.run_migrations }}"
+        
+        # Aqui você adicionaria os comandos específicos para deploy
+        # Exemplo para AWS ECS, Kubernetes, ou outros serviços
+        
+        echo "✅ Deploy to ${{ github.event.inputs.environment }} completed!"
+    
+    - name: Run Database Migrations
+      if: ${{ github.event.inputs.run_migrations }}
+      run: |
+        echo "Running database migrations..."
+        # Aqui você adicionaria os comandos de migração
+        echo "Database migrations completed!"
+    
+    - name: Health Check
+      run: |
+        echo "Performing health check..."
+        # Aqui você adicionaria os comandos de health check
+        echo "Health check passed!"
+    
+    - name: Notify Deployment Success
+      if: success()
+      run: |
+        echo "📢 Deployment to ${{ github.event.inputs.environment }} successful!"
+        # Aqui você pode adicionar notificações via Slack, Discord, etc.
+        # curl -X POST -H 'Content-type: application/json' \
+        #      --data '{"text":"✅ Grex Finances deployed to ${{ github.event.inputs.environment }} successfully!"}' \
+        #      ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+    - name: Notify Deployment Failure
+      if: failure()
+      run: |
+        echo "❌ Deployment to ${{ github.event.inputs.environment }} failed!"
+        # curl -X POST -H 'Content-type: application/json' \
+        #      --data '{"text":"❌ Grex Finances deployment to ${{ github.event.inputs.environment }} failed!"}' \
+        #      ${{ secrets.SLACK_WEBHOOK_URL }}

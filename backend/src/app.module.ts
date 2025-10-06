@@ -13,6 +13,9 @@ import { CategoriesModule } from "./modules/categories/categories.module";
 import { ApiKeysModule } from "./modules/api-keys/api-keys.module";
 import { ContactsModule } from "./modules/contacts/contacts.module";
 import { WebhooksModule } from "./modules/webhooks/webhooks.module";
+import { OrganizationsModule } from "./modules/organizations/organizations.module";
+import { BillingModule } from "./modules/billing/billing.module";
+import { CreditCardsModule } from "./modules/credit-cards/credit-cards.module";
 
 // Import common services
 import { AppLogger } from "./common/logger/app.logger";
@@ -23,6 +26,7 @@ import { MethodLoggingInterceptor } from "./common/interceptors/method-logging.i
 // Temporarily disabled modules with SQLite compatibility issues
 // import { BudgetsModule } from "./modules/budgets/budgets.module";
 // import { InvestmentsModule } from "./modules/investments/investments.module";
+import { AuthModule } from "./common/auth/auth.module";
 import { ReportsModule } from "./modules/reports/reports.module";
 // import { GoalsModule } from "./modules/goals/goals.module";
 
@@ -33,6 +37,7 @@ import { ReportsModule } from "./modules/reports/reports.module";
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(databaseConfig),
+    AuthModule,
     UsersModule,
     AccountsModule,
     TransactionsModule,
@@ -40,6 +45,9 @@ import { ReportsModule } from "./modules/reports/reports.module";
     ApiKeysModule,
     ContactsModule,
     WebhooksModule,
+    OrganizationsModule,
+    BillingModule,
+    CreditCardsModule,
     // BudgetsModule,
     // InvestmentsModule,
     ReportsModule,

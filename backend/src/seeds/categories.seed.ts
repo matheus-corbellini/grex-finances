@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Category } from "../modules/categories/entities/category.entity";
 import { Subcategory } from "../modules/categories/entities/subcategory.entity";
+import { CategoryType } from "../modules/categories/dto/category.dto";
 
 export async function seedCategories(dataSource: DataSource): Promise<void> {
     const categoryRepository = dataSource.getRepository(Category);
@@ -10,7 +11,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
     const incomeCategories = [
         {
             name: "Salário",
-            type: "income",
+            type: CategoryType.INCOME,
             color: "#10b981",
             icon: "briefcase",
             description: "Salário e remunerações",
@@ -18,7 +19,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Freelance",
-            type: "income",
+            type: CategoryType.INCOME,
             color: "#3b82f6",
             icon: "laptop",
             description: "Trabalhos freelancer",
@@ -26,7 +27,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Investimentos",
-            type: "income",
+            type: CategoryType.INCOME,
             color: "#8b5cf6",
             icon: "trending-up",
             description: "Rendimentos de investimentos",
@@ -34,7 +35,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Outros",
-            type: "income",
+            type: CategoryType.INCOME,
             color: "#6b7280",
             icon: "plus",
             description: "Outras receitas",
@@ -46,7 +47,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
     const expenseCategories = [
         {
             name: "Alimentação",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#ef4444",
             icon: "utensils",
             description: "Gastos com alimentação",
@@ -54,7 +55,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Transporte",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#f59e0b",
             icon: "car",
             description: "Gastos com transporte",
@@ -62,7 +63,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Moradia",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#8b5cf6",
             icon: "home",
             description: "Gastos com moradia",
@@ -70,7 +71,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Saúde",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#ec4899",
             icon: "heart",
             description: "Gastos com saúde",
@@ -78,7 +79,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Educação",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#06b6d4",
             icon: "book",
             description: "Gastos com educação",
@@ -86,7 +87,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Lazer",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#84cc16",
             icon: "gamepad-2",
             description: "Gastos com lazer",
@@ -94,7 +95,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
         },
         {
             name: "Outros",
-            type: "expense",
+            type: CategoryType.EXPENSE,
             color: "#6b7280",
             icon: "minus",
             description: "Outras despesas",
@@ -134,7 +135,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
 
     // Criar subcategorias para algumas categorias principais
     const alimentacaoCategory = await categoryRepository.findOne({
-        where: { name: "Alimentação", type: "expense" }
+        where: { name: "Alimentação", type: CategoryType.EXPENSE }
     });
 
     if (alimentacaoCategory) {
@@ -162,7 +163,7 @@ export async function seedCategories(dataSource: DataSource): Promise<void> {
     }
 
     const transporteCategory = await categoryRepository.findOne({
-        where: { name: "Transporte", type: "expense" }
+        where: { name: "Transporte", type: CategoryType.EXPENSE }
     });
 
     if (transporteCategory) {

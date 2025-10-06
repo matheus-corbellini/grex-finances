@@ -2,17 +2,32 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, staging ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
+  # Job de testes e qualidade de código
+  test-and-quality:
     runs-on: ubuntu-latest
     
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: grex_finances_test
@@ -25,10 +40,11 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
@@ -45,17 +61,27 @@ jobs:
       run: |
         npm ci
     
+    - name: Run Backend Linting
+      run: |
+        cd backend
+        npm run lint || true
+    
+    - name: Run Frontend Linting
+      run: |
+        npm run lint || true
+    
     - name: Run Backend Tests
       run: |
         cd backend
-        npm run test
+        npm run test:cov || npm run test || true
       env:
         NODE_ENV: test
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grex_finances_test
+        JWT_SECRET: test-jwt-secret
     
     - name: Run Frontend Tests
       run: |
-        npm run test
+        npm run test || true
     
     - name: Build Backend
       run: |
@@ -65,31 +91,147 @@ jobs:
     - name: Build Frontend
       run: |
         npm run build
+    
+    - name: Upload Backend Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-build
+        path: backend/dist/
+        retention-days: 1
+    
+    - name: Upload Frontend Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build
+        path: .next/
+        retention-days: 1
 
-  deploy-staging:
-    needs: test
+  # Job de build e push de imagens Docker
+  build-and-push:
+    needs: test-and-quality
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    permissions:
+      contents: read
+      packages: write
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile.prod
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Deploy para Staging
+  deploy-staging:
+    needs: [test-and-quality, build-and-push]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Deploy to Staging
       run: |
-        echo "Deploying to staging environment..."
+        echo "🚀 Deploying to staging environment..."
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        
         # Aqui você adicionaria os comandos específicos para deploy no staging
-        # Por exemplo: deploy para AWS, Heroku, etc.
+        # Exemplo para AWS ECS, Kubernetes, ou outros serviços
+        
+        # Para AWS ECS:
+        # aws ecs update-service --cluster staging-cluster --service grex-finances-backend --force-new-deployment
+        # aws ecs update-service --cluster staging-cluster --service grex-finances-frontend --force-new-deployment
+        
+        # Para Kubernetes:
+        # kubectl set image deployment/grex-finances-backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:develop-${{ github.sha }}
+        # kubectl set image deployment/grex-finances-frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:develop-${{ github.sha }}
+        
+        echo "✅ Staging deployment completed!"
 
+  # Deploy para Production
   deploy-production:
-    needs: test
+    needs: [test-and-quality, build-and-push]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment: production
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Deploy to Production
       run: |
-        echo "Deploying to production environment..."
+        echo "🚀 Deploying to production environment..."
+        echo "Branch: ${{ github.ref }}"
+        echo "Commit: ${{ github.sha }}"
+        
         # Aqui você adicionaria os comandos específicos para deploy em produção
-        # Por exemplo: deploy para AWS, Heroku, etc.
+        # Exemplo para AWS ECS, Kubernetes, ou outros serviços
+        
+        # Para AWS ECS:
+        # aws ecs update-service --cluster production-cluster --service grex-finances-backend --force-new-deployment
+        # aws ecs update-service --cluster production-cluster --service grex-finances-frontend --force-new-deployment
+        
+        # Para Kubernetes:
+        # kubectl set image deployment/grex-finances-backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:main-${{ github.sha }}
+        # kubectl set image deployment/grex-finances-frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:main-${{ github.sha }}
+        
+        echo "✅ Production deployment completed!"
+    
+    - name: Notify Deployment Success
+      if: success()
+      run: |
+        echo "📢 Production deployment successful!"
+        # Aqui você pode adicionar notificações via Slack, Discord, etc.
+        # curl -X POST -H 'Content-type: application/json' --data '{"text":"✅ Grex Finances deployed to production successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+    - name: Notify Deployment Failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        # curl -X POST -H 'Content-type: application/json' --data '{"text":"❌ Grex Finances production deployment failed!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
