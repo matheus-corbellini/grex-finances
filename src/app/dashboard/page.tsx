@@ -1,69 +1,101 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import styles from "./Dashboard.module.css";
 import {
-  MoreVertical,
-  TrendingUp,
-  TrendingDown,
-  CreditCard,
-  DollarSign,
-  ArrowLeft,
-  ArrowRight,
   ChevronDown,
-  Filter,
-  Eye
-} from "lucide-react";
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+} from "lucide-react"
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ComposedChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts"
 import { TransactionViewModal, AccountDetailsModal } from "../../components/modals";
-import { Icon } from "../../components/ui/Icon";
 import { CategoryType } from "../../../shared/types/category.types";
 import { TransactionType } from "../../../shared/types/transaction.types";
-
-const accounts = [
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" },
-  { name: "Caixa Lanchonete", type: "Conta corrente", balance: "R$24.542,00", initials: "CN" }
-];
-
-const creditCards = [
-  { name: "Cartão de Crédito", balance: "R$52.589,00", initials: "CN" },
-  { name: "Cartão de Crédito", balance: "R$52.589,00", initials: "CN" }
-];
-
-const topExpenses = [
-  { name: "Despesas Instituto", amount: "R$-3.000,00", percentage: "45%" },
-  { name: "Lorem Ipsum sit amet", amount: "R$-3.000,00", percentage: "45%" },
-  { name: "Despesas Instituto", amount: "R$-3.000,00", percentage: "45%" },
-  { name: "Lorem Ipsum sit amet", amount: "R$-3.000,00", percentage: "45%" },
-  { name: "Despesas Instituto", amount: "R$-3.000,00", percentage: "45%" }
-];
-
-const monthlyBalance = {
-  income: "R$24.542,00",
-  expense: "R$24.542,00",
-  result: "R$24.542,00"
-};
-
-const cashFlowData = [
-  { date: "09 jan", income: 1200, expense: 800 },
-  { date: "09 jan", income: 1500, expense: 900 },
-  { date: "09 jan", income: 1800, expense: 1100 },
-  { date: "09 jan", income: 1300, expense: 700 },
-  { date: "09 jan", income: 1600, expense: 1000 },
-  { date: "09 jan", income: 1400, expense: 850 },
-  { date: "09 jan", income: 1700, expense: 950 },
-  { date: "09 jan", income: 1900, expense: 0 }
-];
+import dashboardService, { DashboardData, CashFlowData, TopExpense, BillsSummary, CreditCardSummary } from "../../services/api/dashboard.service";
 
 export default function Dashboard() {
   const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [selectedAccount, setSelectedAccount] = useState<any>(null);
+
+  // Estados para dados do dashboard
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPeriod, setCurrentPeriod] = useState<'week' | 'month'>('month');
+
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await dashboardService.getDashboardData(currentPeriod);
+      setDashboardData(data);
+    } catch (err) {
+      console.error('Erro ao carregar dados do dashboard:', err);
+      setError('Erro ao carregar dados do dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPeriod]);
+
+  // Carregar dados do dashboard
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  // Função para formatar valores monetários
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  // Função para formatar valores nos gráficos (versão compacta)
+  const formatChartValue = (value: number): string => {
+    if (Math.abs(value) >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)}M`;
+    } else if (Math.abs(value) >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)}k`;
+    } else {
+      return `R$ ${value.toFixed(0)}`;
+    }
+  };
+
+  // Função para formatar datas
+  const formatDate = (dateString: string): string => {
+    try {
+      if (!dateString) return '';
+
+      const date = new Date(dateString);
+
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        return '';
+      }
+
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'short'
+      });
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+      return '';
+    }
+  };
 
   const handleViewTransaction = (transaction: any) => {
     setSelectedTransaction(transaction);
@@ -117,26 +149,109 @@ export default function Dashboard() {
     console.log("Compartilhar conta:", selectedAccount);
   };
 
+  // Se estiver carregando, mostrar loading
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className={styles.container}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            fontSize: '18px',
+            color: '#6b7280'
+          }}>
+            Carregando dados do dashboard...
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Se houver erro, mostrar erro
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className={styles.container}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+            fontSize: '18px',
+            color: '#ef4444'
+          }}>
+            {error}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Se não há dados, não renderizar
+  if (!dashboardData) {
+    return null;
+  }
+
+  // Validar dados críticos
+  const safeDashboardData = {
+    ...dashboardData,
+    summary: {
+      totalBalance: isNaN(dashboardData.summary.totalBalance) ? 0 : dashboardData.summary.totalBalance,
+      monthlyIncome: isNaN(dashboardData.summary.monthlyIncome) ? 0 : dashboardData.summary.monthlyIncome,
+      monthlyExpenses: isNaN(dashboardData.summary.monthlyExpenses) ? 0 : dashboardData.summary.monthlyExpenses,
+      monthlyResult: isNaN(dashboardData.summary.monthlyResult) ? 0 : dashboardData.summary.monthlyResult,
+      accountsCount: dashboardData.summary.accountsCount || 0
+    },
+    accounts: Array.isArray(dashboardData.accounts) ? dashboardData.accounts : [],
+    cashFlowData: Array.isArray(dashboardData.cashFlowData) ? dashboardData.cashFlowData : [],
+    topExpenses: Array.isArray(dashboardData.topExpenses) ? dashboardData.topExpenses : [],
+    billsSummary: {
+      billsToPay: {
+        count: dashboardData.billsSummary?.billsToPay?.count || 0,
+        amount: isNaN(dashboardData.billsSummary?.billsToPay?.amount) ? 0 : dashboardData.billsSummary.billsToPay.amount
+      },
+      billsToReceive: {
+        count: dashboardData.billsSummary?.billsToReceive?.count || 0,
+        amount: isNaN(dashboardData.billsSummary?.billsToReceive?.amount) ? 0 : dashboardData.billsSummary.billsToReceive.amount
+      }
+    },
+    creditCards: Array.isArray(dashboardData.creditCards) ? dashboardData.creditCards : []
+  };
+
   return (
     <DashboardLayout>
       <div className={styles.container}>
         {/* Header com navegação de período */}
         <div className={styles.header}>
           <div className={styles.periodNavigation}>
-            <button className={`${styles.periodButton} ${styles.active}`}>Mês</button>
-            <button className={styles.periodButton}>Semana</button>
+            <button
+              className={`${styles.periodButton} ${currentPeriod === 'month' ? styles.active : ''}`}
+              onClick={() => setCurrentPeriod('month')}
+            >
+              Mês
+            </button>
+            <button
+              className={`${styles.periodButton} ${currentPeriod === 'week' ? styles.active : ''}`}
+              onClick={() => setCurrentPeriod('week')}
+            >
+              Semana
+            </button>
             <button className={styles.filterButton}>
-              <Filter size={16} />
+              <ChevronDown size={16} />
               Filtros
             </button>
           </div>
           <div className={styles.dateNavigation}>
             <button className={styles.dateButton}>
-              <ArrowLeft size={16} />
+              <ChevronLeft size={16} />
             </button>
-            <span className={styles.currentDate}>Julho de 2024</span>
+            <span className={styles.currentDate}>
+              {currentPeriod === 'month' ? 'Julho de 2024' : 'Semana atual'}
+            </span>
             <button className={styles.dateButton}>
-              <ArrowRight size={16} />
+              <ChevronRight size={16} />
             </button>
             <button className={styles.dateButton}>
               <ChevronDown size={16} />
@@ -155,25 +270,29 @@ export default function Dashboard() {
                   <div className={styles.sidebarCardHeader}>
                     <h3 className={styles.sidebarTitle}>Saldo geral</h3>
                     <button className={styles.sidebarMenuButton}>
-                      <MoreVertical size={16} />
+                      <MoreHorizontal size={16} />
                     </button>
                   </div>
-                  <div className={styles.sidebarBalance}>R$24.542,00</div>
+                  <div className={styles.sidebarBalance}>
+                    {formatCurrency(safeDashboardData.summary.totalBalance)}
+                  </div>
                 </div>
 
                 {/* Card 2: Lista de Contas */}
                 <div className={styles.sidebarCard}>
                   <div className={styles.accountsList}>
-                    {accounts.map((account, index) => (
-                      <div key={index} className={styles.accountItem}>
+                    {safeDashboardData.accounts.slice(0, 6).map((account, index) => (
+                      <div key={account.id || index} className={styles.accountItem}>
                         <div className={styles.accountIcon}>
-                          {account.initials}
+                          {account.name.charAt(0).toUpperCase()}
                         </div>
                         <div className={styles.accountDetails}>
                           <div className={styles.accountName}>{account.name}</div>
-                          <div className={styles.accountType}>{account.type}</div>
+                          <div className={styles.accountType}>{account.type?.name || 'Conta'}</div>
                         </div>
-                        <div className={styles.accountBalance}>{account.balance}</div>
+                        <div className={styles.accountBalance}>
+                          {formatCurrency(account.balance)}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -184,26 +303,42 @@ export default function Dashboard() {
                   <div className={styles.sidebarCardHeader}>
                     <h3 className={styles.sidebarTitle}>Balanço do mês</h3>
                     <button className={styles.sidebarMenuButton}>
-                      <MoreVertical size={16} />
+                      <MoreHorizontal size={16} />
                     </button>
                   </div>
                   <div className={styles.balanceItem}>
                     <div className={styles.balanceLabel}>Entradas</div>
-                    <div className={styles.balanceValue}>{monthlyBalance.income}</div>
+                    <div className={styles.balanceValue}>
+                      {formatCurrency(safeDashboardData.summary.monthlyIncome)}
+                    </div>
                     <div className={styles.progressBar}>
-                      <div className={styles.progressFillGreen} style={{ width: '100%' }}></div>
+                      <div
+                        className={styles.progressFillGreen}
+                        style={{
+                          width: `${Math.min(100, (safeDashboardData.summary.monthlyIncome / Math.max(safeDashboardData.summary.monthlyIncome + safeDashboardData.summary.monthlyExpenses, 1)) * 100)}%`
+                        }}
+                      ></div>
                     </div>
                   </div>
                   <div className={styles.balanceItem}>
-                    <div className={styles.balanceLabel}>Entradas</div>
-                    <div className={styles.balanceValue}>{monthlyBalance.expense}</div>
+                    <div className={styles.balanceLabel}>Saídas</div>
+                    <div className={styles.balanceValue}>
+                      {formatCurrency(safeDashboardData.summary.monthlyExpenses)}
+                    </div>
                     <div className={styles.progressBar}>
-                      <div className={styles.progressFillRed} style={{ width: '100%' }}></div>
+                      <div
+                        className={styles.progressFillRed}
+                        style={{
+                          width: `${Math.min(100, (safeDashboardData.summary.monthlyExpenses / Math.max(safeDashboardData.summary.monthlyIncome + safeDashboardData.summary.monthlyExpenses, 1)) * 100)}%`
+                        }}
+                      ></div>
                     </div>
                   </div>
                   <div className={styles.balanceResult}>
                     <div className={styles.balanceLabel}>Resultados do mês</div>
-                    <div className={styles.balanceValueGreen}>{monthlyBalance.result}</div>
+                    <div className={`${styles.balanceValue} ${safeDashboardData.summary.monthlyResult >= 0 ? styles.balanceValueGreen : styles.balanceValueRed}`}>
+                      {formatCurrency(safeDashboardData.summary.monthlyResult)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -217,48 +352,84 @@ export default function Dashboard() {
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>Fluxo de Caixa Diário</h3>
                       <button className={styles.menuButton}>
-                        <MoreVertical size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
                     </div>
                     <div className={styles.chartContainer}>
-                      <div className={styles.barChart}>
-                        {cashFlowData.map((data, index) => (
-                          <div key={index} className={styles.barContainer}>
-                            <div className={styles.bar}>
-                              <div
-                                className={styles.barIncome}
-                                style={{ height: `${(data.income / 1000) * 100}%` }}
-                              ></div>
-                              <div
-                                className={styles.barExpense}
-                                style={{ height: `${(data.expense / 1000) * 100}%` }}
-                              ></div>
-                            </div>
-                            <div className={styles.barLabel}>{data.date}</div>
-                          </div>
-                        ))}
+                      {/* Gráfico de linha (área superior) */}
+                      <div className={styles.lineChartSection}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={safeDashboardData.cashFlowData} margin={{ top: 10, right: 10, left: 40, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.8} />
+                                <stop offset="50%" stopColor="#93c5fd" stopOpacity={0.4} />
+                                <stop offset="100%" stopColor="#dbeafe" stopOpacity={0.1} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="0" stroke="#f3f4f6" vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fill: "#9ca3af", fontSize: 11 }}
+                              dy={10}
+                              tickFormatter={formatDate}
+                            />
+                            <YAxis
+                              domain={['auto', 'auto']}
+                              tickCount={5}
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fill: "#9ca3af", fontSize: 11 }}
+                              width={35}
+                              tickFormatter={formatChartValue}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="flow"
+                              stroke="#60a5fa"
+                              strokeWidth={2}
+                              fill="url(#colorFlow)"
+                              dot={(props: any) => {
+                                const { cx, cy, index } = props
+                                // Mostrar pontos apenas no início e fim
+                                if (index === 0 || index === safeDashboardData.cashFlowData.length - 1) {
+                                  return <circle key={`dot-${index}`} cx={cx} cy={cy} r={4} fill="#60a5fa" stroke="#fff" strokeWidth={2} />
+                                }
+                                return null
+                              }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
                       </div>
-                      {/* Linha azul sobreposta */}
-                      <div className={styles.lineChart}>
-                        <svg className={styles.lineSvg} viewBox="0 0 100 100" preserveAspectRatio="none">
-                          <path
-                            d="M 0,80 Q 12.5,70 25,75 T 50,60 T 75,65 T 100,55"
-                            fill="none"
-                            stroke="#60a5fa"
-                            strokeWidth="2"
-                            className={styles.linePath}
-                          />
-                          {/* Pontos da linha */}
-                          <circle cx="0" cy="80" r="2" fill="#60a5fa" />
-                          <circle cx="12.5" cy="70" r="2" fill="#60a5fa" />
-                          <circle cx="25" cy="75" r="2" fill="#60a5fa" />
-                          <circle cx="37.5" cy="67" r="2" fill="#60a5fa" />
-                          <circle cx="50" cy="60" r="2" fill="#60a5fa" />
-                          <circle cx="62.5" cy="62" r="2" fill="#60a5fa" />
-                          <circle cx="75" cy="65" r="2" fill="#60a5fa" />
-                          <circle cx="87.5" cy="60" r="2" fill="#60a5fa" />
-                          <circle cx="100" cy="55" r="2" fill="#60a5fa" />
-                        </svg>
+
+                      {/* Gráfico de barras (área inferior) */}
+                      <div className={styles.barChartSection}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={safeDashboardData.cashFlowData} margin={{ top: 10, right: 10, left: 40, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="0" stroke="#f3f4f6" vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fill: "#9ca3af", fontSize: 11 }}
+                              dy={10}
+                              tickFormatter={formatDate}
+                            />
+                            <YAxis
+                              domain={['auto', 'auto']}
+                              tickCount={5}
+                              axisLine={false}
+                              tickLine={false}
+                              tick={{ fill: "#9ca3af", fontSize: 11 }}
+                              width={35}
+                              tickFormatter={formatChartValue}
+                            />
+                            <Bar dataKey="positive" fill="#5FD68A" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="negative" fill="#F87171" radius={[0, 0, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
                   </div>
@@ -271,15 +442,17 @@ export default function Dashboard() {
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>Contas para pagar na semana</h3>
                       <button className={styles.menuButton}>
-                        <MoreVertical size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
                     </div>
                     <div className={styles.billsContent}>
                       <div className={styles.billsSummary}>
                         <div className={styles.billsCircle}>
-                          <span className={styles.billsNumber}>9</span>
+                          <span className={styles.billsNumber}>{safeDashboardData.billsSummary.billsToPay.count}</span>
                         </div>
-                        <div className={styles.billsAmount}>R$25,23</div>
+                        <div className={styles.billsAmount}>
+                          {formatCurrency(safeDashboardData.billsSummary.billsToPay.amount)}
+                        </div>
                       </div>
                       <button className={styles.resolveButton}>Resolver</button>
                     </div>
@@ -290,15 +463,17 @@ export default function Dashboard() {
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>Contas a receber na semana</h3>
                       <button className={styles.menuButton}>
-                        <MoreVertical size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
                     </div>
                     <div className={styles.billsContent}>
                       <div className={styles.billsSummary}>
                         <div className={styles.billsCircleGreen}>
-                          <span className={styles.billsNumber}>123</span>
+                          <span className={styles.billsNumber}>{safeDashboardData.billsSummary.billsToReceive.count}</span>
                         </div>
-                        <div className={styles.billsAmount}>R$1.825.238,23</div>
+                        <div className={styles.billsAmount}>
+                          {formatCurrency(safeDashboardData.billsSummary.billsToReceive.amount)}
+                        </div>
                       </div>
                       <button className={styles.resolveButton}>Resolver</button>
                     </div>
@@ -312,33 +487,26 @@ export default function Dashboard() {
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>Top despesas</h3>
                       <button className={styles.menuButton}>
-                        <MoreVertical size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
                     </div>
                     <div className={styles.expensesList}>
-                      {topExpenses.map((expense, index) => (
+                      {safeDashboardData.topExpenses.map((expense, index) => (
                         <div key={index} className={styles.expenseItem}>
-                          <div className={styles.expenseNumber}>{index + 1}</div>
+                          <div className={styles.expenseNumber}>{expense.position}</div>
                           <div className={styles.expenseInfo}>
                             <div className={styles.expenseName}>{expense.name}</div>
                             <div className={styles.expenseAmount}>
-                              {expense.amount}
+                              {formatCurrency(expense.amount)}
                               <span className={styles.expensePercentage}>{expense.percentage}</span>
                             </div>
                           </div>
-                          <button
-                            className={styles.viewButton}
-                            onClick={() => handleViewTransaction(expense)}
-                            title="Visualizar transação"
-                          >
-                            <Eye size={14} />
-                          </button>
                         </div>
                       ))}
                     </div>
                     <div className={styles.pagination}>
                       <button className={styles.paginationButton}>
-                        <ArrowLeft size={16} />
+                        <ChevronLeft size={16} />
                       </button>
                       <div className={styles.paginationDots}>
                         <div className={`${styles.paginationDot} ${styles.active}`}></div>
@@ -346,7 +514,7 @@ export default function Dashboard() {
                         <div className={styles.paginationDot}></div>
                       </div>
                       <button className={styles.paginationButton}>
-                        <ArrowRight size={16} />
+                        <ChevronRight size={16} />
                       </button>
                     </div>
                   </div>
@@ -356,26 +524,24 @@ export default function Dashboard() {
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>Cartões de crédito</h3>
                       <button className={styles.menuButton}>
-                        <MoreVertical size={16} />
+                        <MoreHorizontal size={16} />
                       </button>
                     </div>
                     <div className={styles.creditCardsList}>
-                      {creditCards.map((card, index) => (
+                      {safeDashboardData.creditCards.map((card, index) => (
                         <div key={index} className={styles.creditCardItem}>
                           <div className={styles.creditCardIcon}>
-                            {card.initials}
+                            {card.name.charAt(0).toUpperCase()}
                           </div>
                           <div className={styles.creditCardDetails}>
                             <div className={styles.creditCardName}>{card.name}</div>
-                            <div className={styles.creditCardBalance}>{card.balance}</div>
+                            <div className={styles.creditCardBalance}>
+                              {formatCurrency(card.used)} / {formatCurrency(card.limit)}
+                            </div>
+                            <div className={styles.creditCardBalance}>
+                              Disponível: {formatCurrency(card.available)}
+                            </div>
                           </div>
-                          <button
-                            className={styles.viewButton}
-                            onClick={() => handleViewAccount(card)}
-                            title="Visualizar conta"
-                          >
-                            <Eye size={14} />
-                          </button>
                         </div>
                       ))}
                     </div>

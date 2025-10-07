@@ -272,6 +272,12 @@
   color: #10b981;
 }
 
+.balanceValueRed {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ef4444;
+}
+
 .balanceResult {
   display: flex;
   justify-content: space-between;
@@ -315,10 +321,9 @@
 /* Segunda linha: Contas embaixo do Fluxo de Caixa */
 .secondRow {
   display: grid;
-  grid-template-columns: 394px 394px;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: start;
-  justify-content: start;
 }
 
 /* Terceira linha: Top despesas + Cartões de crédito */
@@ -348,7 +353,7 @@
   border: 1px solid #e2e8f0;
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 260px;
   display: flex;
   flex-direction: column;
 }
@@ -361,8 +366,8 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
   position: relative;
-  width: 394px;
-  height: 248px;
+  width: 100%;
+  height: 200px;
   display: flex;
   flex-direction: column;
 }
@@ -376,7 +381,7 @@
   border: 1px solid #e2e8f0;
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 240px;
   display: flex;
   flex-direction: column;
 }
@@ -420,13 +425,21 @@
 
 /* Chart Styles */
 .chartContainer {
-  height: 300px;
+  height: 200px;
   position: relative;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 0 8px;
-  flex: 1;
+  flex-direction: column;
+  gap: 0;
+}
+
+.lineChartSection {
+  height: 60%;
+  position: relative;
+}
+
+.barChartSection {
+  height: 40%;
+  position: relative;
 }
 
 .barChart {
@@ -511,11 +524,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   text-align: center;
   flex: 1;
   justify-content: center;
-  padding: 12px 0;
+  padding: 20px 0;
 }
 
 .billsSummary {
@@ -525,8 +538,8 @@
 }
 
 .billsCircle {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
   background: #f59e0b;
   display: flex;
@@ -536,8 +549,8 @@
 }
 
 .billsCircleGreen {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
   background: #10b981;
   display: flex;
@@ -547,13 +560,13 @@
 }
 
 .billsNumber {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: white;
 }
 
 .billsAmount {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #374151;
 }
