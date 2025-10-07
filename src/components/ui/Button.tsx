@@ -1,237 +1,83 @@
-"use client";
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "@/lib/utils"
 
-import React from "react";
-import { useTheme } from "../../context/ThemeContext";
+const buttonVariants = cva(
+    "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+    {
+        variants: {
+            variant: {
+                default: "bg-primary text-primary-foreground hover:bg-primary/90",
+                primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+                destructive:
+                    "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+                outline:
+                    "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                secondary:
+                    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+                subtle: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                ghost: "hover:bg-accent hover:text-accent-foreground",
+                link: "text-primary underline-offset-4 hover:underline",
+            },
+            size: {
+                default: "h-10 px-4 py-2",
+                sm: "h-9 rounded-md px-3",
+                md: "h-10 px-4 py-2",
+                lg: "h-11 rounded-md px-8",
+                icon: "h-10 w-10",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+            size: "default",
+        },
+    }
+)
 
-export interface ButtonProps {
-  children: React.ReactNode;
-  variant?:
-    | "primary"
-    | "secondary"
-    | "subtle"
-    | "destructive"
-    | "ghost"
-    | "link";
-  size?: "sm" | "md" | "lg";
-  disabled?: boolean;
-  loading?: boolean;
-  icon?: React.ReactNode;
-  iconPosition?: "left" | "right";
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  className?: string;
-  fullWidth?: boolean;
-  style?: React.CSSProperties;
+export interface ButtonProps
+    extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+    asChild?: boolean
+    icon?: React.ReactNode
+    iconPosition?: 'left' | 'right'
+    loading?: boolean
+    fullWidth?: boolean
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  variant = "primary",
-  size = "md",
-  disabled = false,
-  loading = false,
-  icon,
-  iconPosition = "left",
-  onClick,
-  type = "button",
-  className = "",
-  fullWidth = false,
-  style,
-}) => {
-  const theme = useTheme();
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ className, variant, size, asChild = false, icon, iconPosition = 'left', loading, fullWidth, children, ...props }, ref) => {
+        const Comp = asChild ? Slot : "button"
 
-  // Base styles using design system
-  const getBaseStyles = (): React.CSSProperties => ({
-    fontFamily: theme.getFontFamily("primary"),
-    fontWeight: theme.getFontWeight("medium"),
-    lineHeight: theme.getLineHeight("normal"),
-    letterSpacing: theme.getLetterSpacing("normal"),
-    cursor: disabled ? "not-allowed" : "pointer",
-    transition: "all 0.2s ease-in-out",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: theme.getSpacing("xs"),
-    textDecoration: "none",
-    border: "none",
-    outline: "none",
-    borderRadius: theme.getRadius("m"),
-    width: fullWidth ? "100%" : "auto",
-    position: "relative",
-    overflow: "hidden",
-  });
+        const buttonContent = (
+            <>
+                {loading && (
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                )}
+                {!loading && icon && iconPosition === 'left' && icon}
+                {!loading && children}
+                {!loading && icon && iconPosition === 'right' && icon}
+            </>
+        )
 
-  // Size-specific styles
-  const getSizeStyles = (): React.CSSProperties => {
-    switch (size) {
-      case "sm":
-        return {
-          fontSize: theme.getFontSize("sm"),
-          padding: `${theme.getSpacing("xs")} ${theme.getSpacing("s")}`,
-          minHeight: "32px",
-        };
-      case "lg":
-        return {
-          fontSize: theme.getFontSize("lg"),
-          padding: `${theme.getSpacing("m")} ${theme.getSpacing("l")}`,
-          minHeight: "48px",
-        };
-      default: // md
-        return {
-          fontSize: theme.getFontSize("base"),
-          padding: `${theme.getSpacing("s")} ${theme.getSpacing("m")}`,
-          minHeight: "40px",
-        };
+        return (
+            <Comp
+                className={cn(
+                    buttonVariants({ variant, size, className }),
+                    fullWidth && "w-full"
+                )}
+                ref={ref}
+                disabled={loading || props.disabled}
+                {...props}
+            >
+                {buttonContent}
+            </Comp>
+        )
     }
-  };
+)
+Button.displayName = "Button"
 
-  // Variant-specific styles
-  const getVariantStyles = (): React.CSSProperties => {
-    const baseStyles = getBaseStyles();
-    const sizeStyles = getSizeStyles();
-
-    switch (variant) {
-      case "primary":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: disabled
-            ? theme.colors.neutrals[300]
-            : theme.colors.primary[600],
-          color: theme.colors.baseWhite,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        };
-
-      case "secondary":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: theme.colors.baseWhite,
-          color: theme.colors.baseBlack,
-          border: `1px solid ${theme.colors.neutrals[200]}`,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        };
-
-      case "subtle":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: disabled
-            ? theme.colors.neutrals[300]
-            : theme.colors.secondary[600],
-          color: theme.colors.baseBlack,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        };
-
-      case "destructive":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: disabled
-            ? theme.colors.neutrals[300]
-            : theme.colors.error[200],
-          color: theme.colors.baseWhite,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        };
-
-      case "ghost":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: "transparent",
-          color: theme.colors.baseBlack,
-        };
-
-      case "link":
-        return {
-          ...baseStyles,
-          ...sizeStyles,
-          backgroundColor: "transparent",
-          color: theme.colors.primary[600],
-          textDecoration: "underline",
-          padding: 0,
-          minHeight: "auto",
-        };
-
-      default:
-        return baseStyles;
-    }
-  };
-
-  // Loading spinner component
-  const LoadingSpinner = () => (
-    <svg
-      style={{
-        width: "16px",
-        height: "16px",
-        animation: "spin 1s linear infinite",
-      }}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12a9 9 0 11-6.219-8.56" />
-    </svg>
-  );
-
-  // Add icon component (for circular add button)
-  const AddIcon = () => (
-    <svg
-      style={{ width: "16px", height: "16px" }}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-
-  const styles = getVariantStyles();
-
-  // Handle circular add button variant
-  if (variant === "ghost" && children === "Add") {
-    return (
-      <button
-        type={type}
-        onClick={onClick}
-        disabled={disabled}
-        style={{
-          ...styles,
-          borderRadius: theme.getRadius("round"),
-          width: size === "lg" ? "48px" : size === "sm" ? "32px" : "40px",
-          height: size === "lg" ? "48px" : size === "sm" ? "32px" : "40px",
-          padding: 0,
-          minHeight: "auto",
-          ...style,
-        }}
-        className={`button button--${variant} button--${size} ${className}`}
-      >
-        <AddIcon />
-      </button>
-    );
-  }
-
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      style={{ ...styles, ...style }}
-      className={`button button--${variant} button--${size} ${className}`}
-    >
-      {loading && <LoadingSpinner />}
-      {!loading && icon && iconPosition === "left" && icon}
-      {!loading && <span>{children}</span>}
-      {!loading && icon && iconPosition === "right" && icon}
-    </button>
-  );
-};
-
-export default Button;
+export { Button, buttonVariants }

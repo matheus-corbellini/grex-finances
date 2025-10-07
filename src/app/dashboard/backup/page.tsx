@@ -248,17 +248,16 @@ export default function BackupPage() {
                     <Button
                         variant="secondary"
                         onClick={() => setShowSettings(!showSettings)}
-                        icon={<Settings size={20} />}
                     >
+                        <Settings size={20} className="mr-2" />
                         Configurações
                     </Button>
                     <Button
-                        variant="primary"
+                        variant="default"
                         onClick={handleCreateBackup}
                         disabled={isCreatingBackup}
-                        loading={isCreatingBackup}
-                        icon={<Download size={20} />}
                     >
+                        <Download size={20} className="mr-2" />
                         Criar Backup
                     </Button>
                 </div>
@@ -411,7 +410,7 @@ export default function BackupPage() {
                             Cancelar
                         </Button>
                         <Button
-                            variant="primary"
+                            variant="default"
                             onClick={handleSaveSettings}
                             loading={isSavingSettings}
                         >
@@ -488,7 +487,7 @@ export default function BackupPage() {
                                 <div className={styles.backupActions}>
                                     {backup.status === "completed" && (
                                         <Button
-                                            variant="primary"
+                                            variant="default"
                                             size="sm"
                                             onClick={() => handleDownloadBackup(backup)}
                                             icon={<Download size={16} />}

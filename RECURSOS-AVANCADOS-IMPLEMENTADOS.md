@@ -260,3 +260,4 @@ GET /reports/cash-flow-projection?months=12
 ```javascript
 GET /reports/credit-card-analysis?startDate=2024-01-01&endDate=2024-12-31
 ```
+

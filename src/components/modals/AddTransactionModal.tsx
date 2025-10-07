@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Calendar, DollarSign, Tag, CreditCard } from 'lucide-react';
-import Button from '../ui/Button';
+import { Button } from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import CurrencyInput from '../ui/CurrencyInput';
