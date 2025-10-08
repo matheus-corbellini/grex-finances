@@ -1,5 +1,5 @@
- # Build stage
- 
+# Build stage
+
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -42,4 +42,4 @@ USER nestjs
 EXPOSE 3001
 
 # Start the application
-CMD ["node", "dist/main"] 
+CMD ["npm", "run", "start:prod"] 

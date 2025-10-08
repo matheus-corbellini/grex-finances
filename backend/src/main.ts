@@ -17,8 +17,29 @@ async function bootstrap() {
   });
 
   // Enable CORS for frontend communication
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://grexfinances.netlify.app',
+    'https://grex-finances.onrender.com',
+    process.env.FRONTEND_URL || 'https://grexfinances.netlify.app'
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // In development, allow localhost with any port
+      if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],

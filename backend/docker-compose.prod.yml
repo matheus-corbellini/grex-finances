@@ -45,7 +45,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-secure_production_password_change_this}
       DB_NAME: grex_finances_production
       JWT_SECRET: ${JWT_SECRET:-your_super_secure_jwt_secret_change_this}
-      FRONTEND_URL: ${FRONTEND_URL:-https://grex-finances.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://grexfinances.netlify.app}
       LOG_LEVEL: warn
       SENTRY_DSN: ${SENTRY_DSN}
       SENTRY_ENVIRONMENT: production
@@ -84,7 +84,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.grex-finances.com}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://grex-finances.onrender.com}
       NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
     depends_on:
       - backend
