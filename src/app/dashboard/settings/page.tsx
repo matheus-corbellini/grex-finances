@@ -31,7 +31,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx'; // Temporariamente removido devido a vulnerabilidade
 import {
     Building,
     Users,
@@ -1328,6 +1328,10 @@ export default function Settings() {
     };
 
     const handleExportCategoriesExcel = () => {
+        // Temporariamente desabilitado devido à remoção da dependência xlsx
+        alert('Exportação Excel temporariamente desabilitada');
+
+        /* Código comentado temporariamente
         try {
             // Preparar dados para Excel
             const excelData: any[] = [];
@@ -1380,6 +1384,7 @@ export default function Settings() {
             console.error('Erro ao exportar Excel:', error);
             alert('Erro ao exportar Excel. Tente novamente.');
         }
+        */
     };
 
     const handleImportCategories = () => {
