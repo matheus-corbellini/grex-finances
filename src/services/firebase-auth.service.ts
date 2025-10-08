@@ -14,7 +14,7 @@ import {
     FacebookAuthProvider,
 } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
-import { User, CreateUserDto, LoginDto } from "../../../shared/types";
+import { User, CreateUserDto, LoginDto } from "../../shared/types";
 
 class FirebaseAuthService {
     private googleProvider = new GoogleAuthProvider();

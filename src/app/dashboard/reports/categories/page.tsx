@@ -62,8 +62,8 @@ export default function Categories() {
             const filters = {
                 startDate,
                 endDate,
-                period: 'monthly',
-                regime: regime1.toLowerCase() === 'caixa' ? 'cash' : 'accrual',
+                period: 'monthly' as 'monthly' | 'weekly' | 'daily',
+                regime: (regime1.toLowerCase() === 'caixa' ? 'cash' : 'accrual') as 'cash' | 'accrual',
                 considerUnpaid,
                 categoryId: category !== 'Todas' ? category : undefined,
                 accountId: regime2 !== 'Todas' ? regime2 : undefined

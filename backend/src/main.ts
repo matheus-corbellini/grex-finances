@@ -16,21 +16,17 @@ async function bootstrap() {
     logger: new AppLogger(),
   });
 
+  // Enable CORS for frontend communication
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+  });
+
   // Configurar logger global
   const appLogger = app.get(AppLogger);
   app.useLogger(appLogger);
-
-  // Enable CORS for frontend communication
-  const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? ['https://grexfinances.netlify.app', 'https://grexfinances.netlify.app/'] // Domínio do Netlify
-    : true; // Aceita qualquer origem durante desenvolvimento
-
-  app.enableCors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  });
 
   // Global Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter());

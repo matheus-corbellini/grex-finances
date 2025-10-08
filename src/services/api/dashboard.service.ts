@@ -73,10 +73,8 @@ class DashboardService extends BaseApiService {
             const [accounts, transactions] = await Promise.all([
                 accountsService.getAccounts(),
                 transactionsService.getTransactions({
-                    startDate: startDate.toISOString(),
-                    endDate: endDate.toISOString(),
-                    page: 1,
-                    limit: 1000 // Buscar mais transações para análise
+                    startDate,
+                    endDate
                 })
             ]);
 
@@ -134,14 +132,14 @@ class DashboardService extends BaseApiService {
         const validTransactions = Array.isArray(transactions) ? transactions : [];
 
         const monthlyIncome = validTransactions
-            .filter(t => t && (t.type === 'income' || t.type === 'INCOME') && t.amount)
+            .filter(t => t && t.type === 'income' && t.amount)
             .reduce((sum, t) => {
                 const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
                 return sum + (isNaN(amount) ? 0 : Math.abs(amount));
             }, 0);
 
         const monthlyExpenses = validTransactions
-            .filter(t => t && (t.type === 'expense' || t.type === 'EXPENSE') && t.amount)
+            .filter(t => t && t.type === 'expense' && t.amount)
             .reduce((sum, t) => {
                 const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
                 return sum + (isNaN(amount) ? 0 : Math.abs(amount));
@@ -190,14 +188,14 @@ class DashboardService extends BaseApiService {
             });
 
             const positive = dayTransactions
-                .filter(t => t && (t.type === 'income' || t.type === 'INCOME') && t.amount)
+                .filter(t => t && t.type === 'income' && t.amount)
                 .reduce((sum, t) => {
                     const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
                     return sum + (isNaN(amount) ? 0 : Math.abs(amount));
                 }, 0);
 
             const negative = dayTransactions
-                .filter(t => t && (t.type === 'expense' || t.type === 'EXPENSE') && t.amount)
+                .filter(t => t && t.type === 'expense' && t.amount)
                 .reduce((sum, t) => {
                     const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
                     return sum + (isNaN(amount) ? 0 : Math.abs(amount));
@@ -235,9 +233,9 @@ class DashboardService extends BaseApiService {
         const validTransactions = Array.isArray(transactions) ? transactions : [];
 
         validTransactions
-            .filter(t => t && (t.type === 'expense' || t.type === 'EXPENSE') && t.amount)
+            .filter(t => t && t.type === 'expense' && t.amount)
             .forEach(t => {
-                const category = t.category?.name || 'Outros';
+                const category = t.categoryId || 'Outros';
                 const current = expenseMap.get(category) || { amount: 0, count: 0 };
                 const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
 
@@ -275,7 +273,7 @@ class DashboardService extends BaseApiService {
         const validTransactions = Array.isArray(transactions) ? transactions : [];
 
         const billsToPay = validTransactions.filter(t => {
-            if (!t || !t.date || (t.type !== 'expense' && t.type !== 'EXPENSE')) return false;
+            if (!t || !t.date || t.type !== 'expense') return false;
 
             try {
                 const tDate = new Date(t.date);
@@ -288,7 +286,7 @@ class DashboardService extends BaseApiService {
         });
 
         const billsToReceive = validTransactions.filter(t => {
-            if (!t || !t.date || (t.type !== 'income' && t.type !== 'INCOME')) return false;
+            if (!t || !t.date || t.type !== 'income') return false;
 
             try {
                 const tDate = new Date(t.date);
@@ -371,7 +369,6 @@ class DashboardService extends BaseApiService {
         const data: CashFlowData[] = [];
         let cumulativeBalance = 5000; // Saldo inicial
 
-        // Criar dados de exemplo mais realistas
         const baseIncome = 2000;
         const baseExpense = 1500;
         const variation = 0.4; // 40% de variação

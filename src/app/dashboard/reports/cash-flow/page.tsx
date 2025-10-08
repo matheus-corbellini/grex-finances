@@ -50,8 +50,8 @@ export default function CashFlow() {
       const filters = {
         startDate,
         endDate,
-        period: view.toLowerCase() === 'mensal' ? 'monthly' : view.toLowerCase() === 'semanal' ? 'weekly' : 'daily',
-        regime: type.toLowerCase() === 'realizado' ? 'cash' : 'accrual',
+        period: (view.toLowerCase() === 'mensal' ? 'monthly' : view.toLowerCase() === 'semanal' ? 'weekly' : 'daily') as 'monthly' | 'weekly' | 'daily',
+        regime: (type.toLowerCase() === 'realizado' ? 'cash' : 'accrual') as 'cash' | 'accrual',
         considerUnpaid: type.toLowerCase() === 'comparativo'
       };
 

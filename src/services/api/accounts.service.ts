@@ -131,7 +131,7 @@ class AccountsService extends BaseApiService {
     }>;
   }> {
     try {
-      const response = await this.get(`/accounts/${id}/balance-history`, { params });
+      const response = await this.get<{ history: Array<{ date: string; balance: number; }> }>(`/accounts/${id}/balance-history`, { params });
       return response;
     } catch (error: any) {
       console.error('=== ERRO AO BUSCAR HISTÓRICO DE SALDOS ===');

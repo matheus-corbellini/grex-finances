@@ -83,8 +83,8 @@ export default function AnalysisEntriesExits() {
           const filters: ReportFilters = {
             startDate,
             endDate,
-            period: view === "Mensal" ? "monthly" : view === "Semanal" ? "weekly" : "daily",
-            regime: regime === "Caixa" ? "cash" : "accrual",
+            period: (view === "Mensal" ? "monthly" : view === "Semanal" ? "weekly" : "daily") as 'monthly' | 'weekly' | 'daily',
+            regime: (regime === "Caixa" ? "cash" : "accrual") as 'cash' | 'accrual',
             considerUnpaid
           };
 

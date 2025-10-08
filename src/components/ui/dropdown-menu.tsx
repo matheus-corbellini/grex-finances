@@ -15,7 +15,7 @@ DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
 const DropdownMenuContent = React.forwardRef<
     HTMLDivElement,
-    React.HTMLAttributes<HTMLDivElement>
+    React.HTMLAttributes<HTMLDivElement> & { align?: "start" | "end" }
 >(({ className, align = "end", ...props }, ref) => (
     <div
         ref={ref}
