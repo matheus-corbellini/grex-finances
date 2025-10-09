@@ -166,11 +166,19 @@ export default function Accounts() {
         console.error("Erro ao carregar contas:", err);
         if (isMounted) {
           // Handle specific error types with better user messages
+          let errorMessage: string;
+
           if (err.code === 'BACKEND_NOT_RUNNING' || err.code === 'NETWORK_ERROR') {
-            setError(`🚫 ${err.message}\n\n💡 ${err.details?.suggestion || 'Verifique se o servidor backend está rodando.'}`);
+            errorMessage = `🚫 ${err.message}\n\n💡 ${err.details?.suggestion || 'Verifique se o servidor backend está rodando.'}`;
+          } else if (typeof err === 'string') {
+            errorMessage = err;
+          } else if (err.message) {
+            errorMessage = err.message;
           } else {
-            setError(err.message || "Erro ao carregar contas");
+            errorMessage = "Erro ao carregar contas. Verifique sua conexão e tente novamente.";
           }
+
+          setError(errorMessage);
         }
       } finally {
         if (isMounted) {
@@ -795,11 +803,11 @@ export default function Accounts() {
         {error && (
           <div className={styles.errorContainer}>
             <div className={styles.errorMessage}>
-              {error.split('\n').map((line, index) => (
+              {typeof error === 'string' ? error.split('\n').map((line, index) => (
                 <p key={index} style={{ margin: index > 0 ? '8px 0' : '0 0 8px 0' }}>
                   {line}
                 </p>
-              ))}
+              )) : <p>{JSON.stringify(error)}</p>}
             </div>
             <div className={styles.errorActions}>
               <button
@@ -808,7 +816,7 @@ export default function Accounts() {
               >
                 Tentar novamente
               </button>
-              {error.includes('backend') && (
+              {typeof error === 'string' && error.includes('backend') && (
                 <button
                   className={styles.helpButton}
                   onClick={() => {

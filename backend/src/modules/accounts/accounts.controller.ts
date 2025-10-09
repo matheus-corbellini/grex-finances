@@ -11,7 +11,8 @@ import {
   UseGuards,
   Request,
   HttpCode,
-  HttpStatus
+  HttpStatus,
+  Headers
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -33,49 +34,25 @@ import {
   AccountSummaryDto
 } from "./dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+import { CurrentUser } from "@/common/decorators/current-user.decorator";
 
 @ApiTags('accounts')
 @Controller("accounts")
-// @UseGuards(JwtAuthGuard) // Temporariamente desabilitado para teste
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) { }
 
-  @Get('test')
-  @ApiOperation({ summary: 'Teste de endpoint de contas' })
-  async test(): Promise<{ message: string }> {
-    return { message: 'Endpoint de contas funcionando!' };
-  }
-
-  @Get('test-balance-history/:id')
-  @ApiOperation({ summary: 'Teste de histórico de saldos' })
-  async testBalanceHistory(@Param('id') id: string) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
-    const result = await this.accountsService.getBalanceHistory(id, userId, {
-      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      endDate: new Date().toISOString(),
-      period: HistoryPeriodEnum.DAILY
-    });
-
-    return {
-      accountId: id,
-      dataPoints: result.history.length,
-      sampleData: result.history.slice(0, 5),
-      fullData: result.history
-    };
-  }
+  // Endpoints de teste removidos - autenticação agora é obrigatória
 
   @Get()
   @ApiOperation({ summary: 'Listar todas as contas do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de contas retornada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async findAll(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: AccountFiltersDto
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.findAll(userId, filters);
   }
 
@@ -83,9 +60,7 @@ export class AccountsController {
   @ApiOperation({ summary: 'Obter resumo das contas do usuário' })
   @ApiResponse({ status: 200, description: 'Resumo das contas retornado com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async getSummary(@Request() req: any): Promise<AccountSummaryDto> {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async getSummary(@CurrentUser('id') userId: string): Promise<AccountSummaryDto> {
     return this.accountsService.getSummary(userId);
   }
 
@@ -93,9 +68,7 @@ export class AccountsController {
   @ApiOperation({ summary: 'Listar contas arquivadas do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de contas arquivadas retornada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async getArchived(@Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async getArchived(@CurrentUser('id') userId: string) {
     return this.accountsService.getArchived(userId);
   }
 
@@ -105,9 +78,7 @@ export class AccountsController {
   @ApiResponse({ status: 200, description: 'Conta encontrada com sucesso' })
   @ApiResponse({ status: 404, description: 'Conta não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async findOne(@Param('id') id: string, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async findOne(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.accountsService.findOne(id, userId);
   }
 
@@ -116,11 +87,9 @@ export class AccountsController {
   @ApiResponse({ status: 201, description: 'Conta criada com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async create(@Body() createAccountDto: CreateAccountDto, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async create(@Body() createAccountDto: CreateAccountDto, @CurrentUser('id') userId: string) {
     console.log('Dados recebidos no controller:', createAccountDto);
-    console.log('UserId usado:', userId);
+    console.log('UserId do token Firebase:', userId);
     console.log('Tipo de conta recebido:', createAccountDto.type);
     return this.accountsService.create(createAccountDto, userId);
   }
@@ -135,10 +104,8 @@ export class AccountsController {
   async update(
     @Param('id') id: string,
     @Body() updateAccountDto: UpdateAccountDto,
-    @Request() req: any
+    @CurrentUser('id') userId: string
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.update(id, updateAccountDto, userId);
   }
 
@@ -149,9 +116,7 @@ export class AccountsController {
   @ApiResponse({ status: 404, description: 'Conta não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.accountsService.remove(id, userId);
   }
 
@@ -165,10 +130,8 @@ export class AccountsController {
   async updateBalance(
     @Param('id') id: string,
     @Body() balanceData: AccountBalanceUpdateDto,
-    @Request() req: any
+    @CurrentUser('id') userId: string
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.updateBalance(id, balanceData, userId);
   }
 
@@ -184,11 +147,9 @@ export class AccountsController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async getTransactions(
     @Param('id') id: string,
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.getTransactions(id, userId, filters);
   }
 
@@ -198,41 +159,11 @@ export class AccountsController {
   @ApiResponse({ status: 200, description: 'Conta sincronizada com sucesso' })
   @ApiResponse({ status: 404, description: 'Conta não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async syncAccount(@Param('id') id: string, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async syncAccount(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.accountsService.syncAccount(id, userId);
   }
 
-  @Get(':id/balance-history-test')
-  @ApiOperation({ summary: 'Teste do histórico de saldo da conta' })
-  async getBalanceHistoryTest(@Param('id') id: string) {
-    try {
-      // Testar busca da conta
-      const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
-      const account = await this.accountsService.findOne(id, userId);
-
-      return {
-        message: 'Teste funcionando',
-        accountId: id,
-        account: {
-          id: account.id,
-          name: account.name,
-          balance: account.balance
-        },
-        history: [{
-          date: new Date().toISOString(),
-          balance: parseFloat(account.balance.toString())
-        }]
-      };
-    } catch (error) {
-      return {
-        message: 'Erro no teste',
-        error: error.message,
-        stack: error.stack
-      };
-    }
-  }
+  // Endpoint de teste removido - usar getBalanceHistory com autenticação
 
   @Get(':id/balance-history')
   @ApiOperation({ summary: 'Obter histórico de saldo da conta' })
@@ -245,11 +176,9 @@ export class AccountsController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async getBalanceHistory(
     @Param('id') id: string,
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: HistoryFiltersDto
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.accountsService.getBalanceHistory(id, userId, filters);
   }
 
@@ -259,9 +188,7 @@ export class AccountsController {
   @ApiResponse({ status: 200, description: 'Conta arquivada com sucesso' })
   @ApiResponse({ status: 404, description: 'Conta não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async archive(@Param('id') id: string, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async archive(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.accountsService.archive(id, userId);
   }
 
@@ -271,9 +198,7 @@ export class AccountsController {
   @ApiResponse({ status: 200, description: 'Conta restaurada com sucesso' })
   @ApiResponse({ status: 404, description: 'Conta arquivada não encontrada' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  async restore(@Param('id') id: string, @Request() req: any) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
+  async restore(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.accountsService.restore(id, userId);
   }
 } 

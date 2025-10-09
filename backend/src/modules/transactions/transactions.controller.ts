@@ -16,6 +16,7 @@ import {
   UseInterceptors,
   Res,
   Header,
+  Headers,
   UsePipes,
   ValidationPipe
 } from "@nestjs/common";
@@ -48,46 +49,28 @@ import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { AppLogger } from "@/common/logger/app.logger";
 import { LogMethod } from "@/common/decorators/log-method.decorator";
 import { NotFoundException, BusinessException, ValidationException } from "@/common/exceptions/custom.exceptions";
+import { CurrentUser } from "@/common/decorators/current-user.decorator";
 
 @ApiTags('transactions')
 @Controller("transactions")
-// @UseGuards(JwtAuthGuard) // Temporariamente desabilitado para teste
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TransactionsController {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly logger: AppLogger,
   ) { }
 
-  @Get('test')
-  @ApiOperation({ summary: 'Teste de endpoint de transações' })
-  async test(): Promise<{ message: string }> {
-    return { message: 'Endpoint de transações funcionando!' };
-  }
-
-  @Get('simple')
-  @ApiOperation({ summary: 'Listar transações simples' })
-  async findAllSimple(): Promise<any> {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
-    try {
-      // Chamar diretamente o service sem filtros complexos
-      return await this.transactionsService.findAll(userId, {}, { page: 1, limit: 10 });
-    } catch (error) {
-      return { error: error.message, stack: error.stack };
-    }
-  }
+  // Endpoints de teste removidos - autenticação agora é obrigatória
 
   @Get()
   @ApiOperation({ summary: 'Listar transações do usuário' })
   @ApiResponse({ status: 200, description: 'Lista de transações retornada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async findAll(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto
   ) {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     // Extrair paginação do DTO
     const { page = 1, limit = 10, ...filterParams } = filters;
     const pagination = { page, limit };
@@ -98,11 +81,9 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Obter resumo das transações' })
   @ApiResponse({ status: 200, description: 'Resumo das transações retornado com sucesso' })
   async getSummary(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto
   ): Promise<TransactionSummaryDto> {
-    // Mock user para teste
-    const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
     return this.transactionsService.getSummary(userId, filters);
   }
 
@@ -110,10 +91,9 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Obter transações recentes' })
   @ApiQuery({ name: 'limit', required: false, description: 'Número de transações (padrão: 10)' })
   async getRecent(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query('limit') limit: number = 10
   ) {
-    const userId = req.user.id;
     return this.transactionsService.getRecent(userId, limit);
   }
 
@@ -121,17 +101,15 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Obter transações futuras' })
   @ApiQuery({ name: 'days', required: false, description: 'Número de dias (padrão: 7)' })
   async getUpcoming(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query('days') days: number = 7
   ) {
-    const userId = req.user.id;
     return this.transactionsService.getUpcoming(userId, days);
   }
 
   @Get('recurring')
   @ApiOperation({ summary: 'Listar transações recorrentes' })
-  async getRecurring(@Request() req: any) {
-    const userId = req.user.id;
+  async getRecurring(@CurrentUser('id') userId: string) {
     return this.transactionsService.getRecurring(userId);
   }
 
@@ -140,31 +118,11 @@ export class TransactionsController {
   @ApiParam({ name: 'id', description: 'ID da transação' })
   @ApiResponse({ status: 200, description: 'Transação encontrada com sucesso' })
   @ApiResponse({ status: 404, description: 'Transação não encontrada' })
-  async findOne(@Param('id') id: string, @Request() req: any) {
-    const userId = req.user.id;
+  async findOne(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.transactionsService.findOne(id, userId);
   }
 
-  @Post('test')
-  async testCreate(@Body() body: any) {
-    console.log('Test endpoint called with body:', body);
-    return { message: 'Test endpoint working', body };
-  }
-
-  @Post('simple')
-  async simpleCreate(@Body() body: any) {
-    try {
-      console.log('Simple POST called with:', body);
-      return {
-        success: true,
-        message: 'Simple endpoint working',
-        receivedData: body
-      };
-    } catch (error) {
-      console.error('Error in simple endpoint:', error);
-      return { success: false, error: error.message };
-    }
-  }
+  // Endpoints de teste removidos - usar endpoints principais com autenticação
 
   @Post('add')
   @LogMethod({ level: 'log', message: 'Creating transaction via add endpoint', includeArgs: true })
@@ -338,9 +296,8 @@ export class TransactionsController {
   async update(
     @Param('id') id: string,
     @Body() updateTransactionDto: UpdateTransactionDto,
-    @Request() req: any
+    @CurrentUser('id') userId: string
   ) {
-    const userId = req.user.id;
     return this.transactionsService.update(id, updateTransactionDto, userId);
   }
 
@@ -350,8 +307,7 @@ export class TransactionsController {
   @ApiResponse({ status: 200, description: 'Transação excluída com sucesso' })
   @ApiResponse({ status: 404, description: 'Transação não encontrada' })
   @HttpCode(HttpStatus.OK)
-  async remove(@Param('id') id: string, @Request() req: any) {
-    const userId = req.user.id;
+  async remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.transactionsService.remove(id, userId);
   }
 
@@ -359,24 +315,21 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Duplicar transação' })
   @ApiParam({ name: 'id', description: 'ID da transação' })
   @ApiResponse({ status: 201, description: 'Transação duplicada com sucesso' })
-  async duplicate(@Param('id') id: string, @Request() req: any) {
-    const userId = req.user.id;
+  async duplicate(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.transactionsService.duplicate(id, userId);
   }
 
   @Post('bulk/update')
   @ApiOperation({ summary: 'Atualizar múltiplas transações' })
   @ApiResponse({ status: 200, description: 'Transações atualizadas com sucesso' })
-  async bulkUpdate(@Body() bulkUpdateDto: BulkUpdateDto, @Request() req: any) {
-    const userId = req.user.id;
+  async bulkUpdate(@Body() bulkUpdateDto: BulkUpdateDto, @CurrentUser('id') userId: string) {
     return this.transactionsService.bulkUpdate(bulkUpdateDto, userId);
   }
 
   @Post('bulk/delete')
   @ApiOperation({ summary: 'Excluir múltiplas transações' })
   @ApiResponse({ status: 200, description: 'Transações excluídas com sucesso' })
-  async bulkDelete(@Body() bulkDeleteDto: BulkDeleteDto, @Request() req: any) {
-    const userId = req.user.id;
+  async bulkDelete(@Body() bulkDeleteDto: BulkDeleteDto, @CurrentUser('id') userId: string) {
     return this.transactionsService.bulkDelete(bulkDeleteDto, userId);
   }
 
@@ -389,9 +342,8 @@ export class TransactionsController {
     @UploadedFile() file: any,
     @Body('accountId') accountId: string,
     @Body('options') options: any,
-    @Request() req: any
+    @CurrentUser('id') userId: string
   ): Promise<ImportResultDto> {
-    const userId = req.user.id;
     return this.transactionsService.import(file, accountId, userId, options);
   }
 
@@ -399,12 +351,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Exportar transações para CSV' })
   @Header('Content-Type', 'text/csv')
   async exportCsv(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
     @Res() res: any
   ) {
-    const userId = req.user.id;
     const result = await this.transactionsService.exportCsv(userId, filters, options);
 
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
@@ -418,12 +369,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Exportar transações para PDF' })
   @Header('Content-Type', 'application/pdf')
   async exportPdf(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
     @Res() res: any
   ) {
-    const userId = req.user.id;
     const result = await this.transactionsService.exportPdf(userId, filters, options);
 
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
@@ -437,12 +387,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Exportar transações para Excel' })
   @Header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   async exportExcel(
-    @Request() req: any,
+    @CurrentUser('id') userId: string,
     @Query() filters: TransactionFiltersDto,
     @Query() options: ExportTransactionsDto,
     @Res() res: any
   ) {
-    const userId = req.user.id;
     const result = await this.transactionsService.exportExcel(userId, filters, options);
 
     res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);

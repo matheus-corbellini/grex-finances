@@ -18,6 +18,7 @@ import { CategoriesService, CategoryType } from "./categories.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission.guard";
 import { Permission } from "../users/entities/role.entity";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import {
   CreateCategoryDto,
   UpdateCategoryDto,
@@ -29,8 +30,8 @@ import {
 
 @ApiTags("Categories")
 @Controller("categories")
-// @UseGuards(JwtAuthGuard) // Temporariamente desabilitado para teste
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) { }
 
@@ -44,8 +45,7 @@ export class CategoriesController {
   @ApiResponse({ status: 409, description: "Categoria já existe" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 403, description: "Sem permissão" })
-  async create(@Request() req: any, @Body() createCategoryDto: CreateCategoryDto): Promise<CategoryResponseDto> {
-    const userId = req.user.id;
+  async create(@CurrentUser('id') userId: string, @Body() createCategoryDto: CreateCategoryDto): Promise<CategoryResponseDto> {
     return this.categoriesService.create(userId, createCategoryDto);
   }
 

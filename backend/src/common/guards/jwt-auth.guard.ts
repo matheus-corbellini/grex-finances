@@ -8,7 +8,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { IS_PUBLIC_KEY } from "@/common/decorators/auth.decorator";
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard("jwt") {
+export class JwtAuthGuard extends AuthGuard(["firebase", "jwt"]) {
   constructor(private reflector: Reflector) {
     super();
   }
@@ -26,10 +26,18 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+    // Se houver erro ou não houver usuário, lançar exceção
     if (err || !user) {
-      throw err || new UnauthorizedException("Token inválido");
+      console.error('❌ Erro na autenticação:', err?.message || 'Usuário não encontrado', info);
+      throw err || new UnauthorizedException("Token inválido ou expirado");
     }
+
+    console.log('✅ Usuário autenticado:', {
+      id: user.id,
+      email: user.email,
+    });
+
     return user;
   }
 }

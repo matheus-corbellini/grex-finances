@@ -110,7 +110,17 @@ class BaseApiService {
 
   private getAuthToken(): string | null {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("accessToken");
+      // Tentar pegar token do localStorage primeiro (fallback para compatibilidade)
+      const localToken = localStorage.getItem("accessToken");
+      if (localToken) {
+        return localToken;
+      }
+
+      // Se não tiver no localStorage, tentar pegar do sessionStorage (Firebase)
+      const firebaseToken = sessionStorage.getItem("firebaseToken");
+      if (firebaseToken) {
+        return firebaseToken;
+      }
     }
     return null;
   }

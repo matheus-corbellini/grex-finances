@@ -4,7 +4,7 @@ import { Subscription } from "../../billing/entities/subscription.entity";
 
 @Entity("users")
 export class User {
-  @PrimaryGeneratedColumn("uuid")
+  @Column({ type: "varchar", length: 255, primary: true })
   id: string;
 
   @Column({ unique: true })

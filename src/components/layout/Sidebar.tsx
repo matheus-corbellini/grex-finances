@@ -33,7 +33,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Memoize pathname comparisons to prevent unnecessary re-renders
@@ -123,17 +123,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           <div className={styles.userProfileContainer}>
             {/* Profile Avatar */}
             <div className={styles.profileAvatar}>
-              ML
+              {user?.email ? user.email.substring(0, 2).toUpperCase() : 'U'}
             </div>
 
             {/* User Info */}
             {isOpen && (
               <div className={styles.userInfo}>
                 <div className={styles.userName}>
-                  Maria Lúcia
+                  {user?.email || 'Carregando...'}
                 </div>
                 <div className={styles.userRole}>
-                  Lider
+                  {user?.firstName && user?.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : 'Usuário'}
                 </div>
               </div>
             )}

@@ -63,12 +63,25 @@ Sistema financeiro completo desenvolvido com Next.js e NestJS.
 - [x] **Manipulação de datas** financeiras
 - [x] **Validações** de CPF, email, valores monetários
 
-### 🔐 Segurança
+### 🔐 Segurança e Autenticação
 
+- [x] **Firebase Authentication + Firestore** - Sistema de autenticação completo
+  - Login com email/senha (dados do Firestore)
+  - Registro com sincronização automática
+  - Login social (Google, Facebook)
+  - Recuperação e mudança de senha
+  - Verificação de email
+  - Gerenciamento de sessão
+  - Usuário padrão: grex@gmail.com / 123456
 - [x] **JWT Authentication** com refresh tokens
 - [x] **Guards personalizados** para rotas protegidas
 - [x] **Controle de acesso** baseado em roles
 - [x] **Interceptors** para tratamento de erros
+
+> 📚 **Documentação Firebase**: 
+> - [FIREBASE-SUMMARY.md](FIREBASE-SUMMARY.md) - Resumo e guia rápido
+> - [FIREBASE-CONSOLE-SETUP.md](FIREBASE-CONSOLE-SETUP.md) - Setup do console
+> - [FIREBASE-SETUP-USER.md](FIREBASE-SETUP-USER.md) - Criar usuário padrão
 
 ## 📁 Estrutura de Diretórios
 
@@ -109,13 +122,63 @@ grex-finances/
         └── report.types.ts
 ```
 
+## 🚀 Como Começar
+
+### Configuração Inicial
+
+```bash
+# 1. Configurar variáveis de ambiente (Firebase e outros)
+./setup-env.sh
+
+# 2. Instalar dependências
+npm install
+
+# 3. Iniciar servidor de desenvolvimento
+npm run dev
+```
+
+### Configuração do Firebase
+
+O projeto usa Firebase **exclusivamente para autenticação**. Para configurar:
+
+```bash
+# Opção 1: Script automático
+./setup-env.sh
+
+# Opção 2: Manual
+cp env.local.example .env.local
+```
+
+📚 **Guias disponíveis:**
+- [FIREBASE-SETUP.md](FIREBASE-SETUP.md) - Guia completo de configuração
+- [FIREBASE-QUICK-REFERENCE.md](FIREBASE-QUICK-REFERENCE.md) - Referência rápida de uso
+- [FIREBASE-SUMMARY.md](FIREBASE-SUMMARY.md) - Resumo da configuração
+
+### Scripts Disponíveis
+
+```bash
+npm run dev                    # Inicia servidor de desenvolvimento
+npm run build                  # Build para produção
+npm run start                  # Inicia servidor de produção
+npm run lint                   # Executa linter
+
+# Docker
+npm run docker:dev             # Inicia ambiente com Docker
+npm run docker:staging         # Deploy staging
+npm run docker:production      # Deploy produção
+
+# Deploy
+npm run deploy:staging         # Deploy para staging
+npm run deploy:production      # Deploy para produção
+```
+
 ## 🛠️ Próximos Passos
 
 Para continuar o desenvolvimento:
 
-1. **Implementar as entidades** do backend (User, Account, Transaction, etc.)
-2. **Criar os controllers** e services para cada módulo
-3. **Implementar middleware de autenticação** JWT
+1. ✅ ~~**Configurar Firebase Authentication**~~ (Concluído)
+2. **Implementar as entidades** do backend (User, Account, Transaction, etc.)
+3. **Criar os controllers** e services para cada módulo
 4. **Desenvolver os hooks** customizados do frontend
 5. **Criar context providers** para estado global
 6. **Integrar com design system** do Figma

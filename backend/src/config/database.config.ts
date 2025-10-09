@@ -8,7 +8,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   password: process.env.DB_PASSWORD || 'npg_FyzXVP8QZv4K',
   database: process.env.DB_NAME || 'neondb',
   autoLoadEntities: true,
-  synchronize: false, // Desabilitado para evitar problemas de schema
+  synchronize: false, // Desabilitado após recriar FKs (UUID -> VARCHAR concluído)
   logging: process.env.NODE_ENV === 'development',
   ssl: true,
   extra: {

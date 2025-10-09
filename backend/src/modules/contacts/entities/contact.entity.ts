@@ -6,7 +6,7 @@ export class Contact {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column({ type: "varchar", length: 255 })
     userId: string;
 
     @ManyToOne(() => User)
