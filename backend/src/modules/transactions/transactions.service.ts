@@ -87,6 +87,19 @@ export class TransactionsService {
 
     const [transactions, total] = await query.getManyAndCount();
 
+    // Debug: log das transações retornadas
+    console.log('🔍 BACKEND SERVICE - Transações encontradas:', transactions.length);
+    if (transactions.length > 0) {
+      console.log('🔍 BACKEND SERVICE - Primeira transação:', {
+        id: transactions[0].id,
+        date: transactions[0].date,
+        dateType: typeof transactions[0].date,
+        dateString: transactions[0].date?.toString(),
+        amount: transactions[0].amount,
+        type: transactions[0].type
+      });
+    }
+
     return {
       transactions,
       total,

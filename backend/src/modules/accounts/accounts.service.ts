@@ -188,8 +188,12 @@ export class AccountsService {
     }>;
   }> {
     try {
+      console.log(`🔍 BACKEND - getBalanceHistory chamado para conta ${id}, usuário ${userId}`);
+      console.log(`🔍 BACKEND - Filtros recebidos:`, filters);
+
       // Verificar se a conta pertence ao usuário
       const account = await this.findOne(id, userId);
+      console.log(`🔍 BACKEND - Conta encontrada:`, account?.name);
 
       // Definir período padrão (últimos 30 dias se não especificado) com validação
       let endDate: Date;
@@ -235,31 +239,61 @@ export class AccountsService {
           const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
           const baseBalance = currentBalance;
 
+          // Verificar se a conta foi criada recentemente (últimos 7 dias)
+          const accountCreatedAt = new Date(account.createdAt);
+          const now = new Date();
+          const daysSinceCreation = Math.ceil((now.getTime() - accountCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
+
+          const isRecentlyCreated = daysSinceCreation <= 7;
+
+          // Debug logs
+          console.log(`🔍 DEBUG - Conta ${account.name}:`);
+          console.log(`  - Data de criação: ${accountCreatedAt.toISOString()}`);
+          console.log(`  - Data atual: ${now.toISOString()}`);
+          console.log(`  - Dias desde criação: ${daysSinceCreation}`);
+          console.log(`  - É recém-criada: ${isRecentlyCreated}`);
+          console.log(`  - Saldo base: ${baseBalance}`);
+          console.log(`  - Período solicitado: ${startDate.toISOString()} até ${endDate.toISOString()}`);
+
           // Gerar pelo menos 7 pontos de dados para ter uma linha visível
           const pointsToGenerate = Math.max(7, Math.min(daysDiff + 1, 30));
           const stepSize = pointsToGenerate > 1 ? daysDiff / (pointsToGenerate - 1) : 1;
 
-          // Gerar variação sintética baseada no saldo atual
-          for (let i = 0; i < pointsToGenerate; i++) {
-            const date = new Date(startDate.getTime() + (i * stepSize) * 24 * 60 * 60 * 1000);
+          // Para contas recém-criadas, gerar linha reta
+          if (isRecentlyCreated) {
+            console.log(`✅ Gerando LINHA RETA para conta recém-criada`);
+            for (let i = 0; i < pointsToGenerate; i++) {
+              const date = new Date(startDate.getTime() + (i * stepSize) * 24 * 60 * 60 * 1000);
 
-            // O último ponto deve ser exatamente o saldo atual
-            if (i === pointsToGenerate - 1) {
               history.push({
                 date: date.toISOString(),
                 balance: Math.round(baseBalance * 100) / 100
               });
-            } else {
-              // Criar variação sintética mais suave (±2% do saldo base, limitada)
-              const maxVariation = Math.min(baseBalance * 0.02, 1000); // Máximo 2% ou R$ 1000
-              const variation = Math.sin(i * 0.4) * maxVariation; // Variação senoidal suave
-              const randomNoise = (Math.random() - 0.5) * maxVariation * 0.1; // Pequeno ruído
-              const syntheticBalance = Math.max(0, baseBalance + variation + randomNoise);
+            }
+          } else {
+            console.log(`📈 Gerando VARIAÇÕES SINTÉTICAS para conta antiga`);
+            // Para contas antigas, gerar variação sintética baseada no saldo atual
+            for (let i = 0; i < pointsToGenerate; i++) {
+              const date = new Date(startDate.getTime() + (i * stepSize) * 24 * 60 * 60 * 1000);
 
-              history.push({
-                date: date.toISOString(),
-                balance: Math.round(syntheticBalance * 100) / 100 // Arredondar para 2 casas decimais
-              });
+              // O último ponto deve ser exatamente o saldo atual
+              if (i === pointsToGenerate - 1) {
+                history.push({
+                  date: date.toISOString(),
+                  balance: Math.round(baseBalance * 100) / 100
+                });
+              } else {
+                // Criar variação sintética mais suave (±2% do saldo base, limitada)
+                const maxVariation = Math.min(baseBalance * 0.02, 1000); // Máximo 2% ou R$ 1000
+                const variation = Math.sin(i * 0.4) * maxVariation; // Variação senoidal suave
+                const randomNoise = (Math.random() - 0.5) * maxVariation * 0.1; // Pequeno ruído
+                const syntheticBalance = Math.max(0, baseBalance + variation + randomNoise);
+
+                history.push({
+                  date: date.toISOString(),
+                  balance: Math.round(syntheticBalance * 100) / 100 // Arredondar para 2 casas decimais
+                });
+              }
             }
           }
         } else {
@@ -297,14 +331,10 @@ export class AccountsService {
     } catch (error) {
       console.error('=== ERRO AO BUSCAR HISTÓRICO DE SALDOS ===');
       console.error('Account ID:', id);
-      console.error('URL: /accounts/' + id + '/balance-history');
-      console.error('Params:', filters);
+      console.error('User ID:', userId);
       console.error('Error message:', error?.message);
-      console.error('Error code:', error?.code);
-      console.error('HTTP status:', error?.response?.status);
-      console.error('Response data:', error?.response?.data);
+      console.error('Error stack:', error?.stack);
       console.error('Full error object:', JSON.stringify(error, null, 2));
-      console.error('Error keys:', Object.keys(error || {}));
 
       // Retornar dados sintéticos básicos sem fazer mais queries
       const currentBalance = 1000; // Valor padrão seguro

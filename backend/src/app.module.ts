@@ -3,6 +3,7 @@ import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { TestController } from "./test.controller";
 import { databaseConfig } from "./config/database.config";
 
 // Import essential modules only
@@ -53,7 +54,7 @@ import { ReportsModule } from "./modules/reports/reports.module";
     ReportsModule,
     // GoalsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TestController],
   providers: [
     AppService,
     AppLogger,

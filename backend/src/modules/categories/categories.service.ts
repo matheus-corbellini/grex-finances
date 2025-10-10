@@ -76,7 +76,19 @@ export class CategoriesService {
 
       const categories = await queryBuilder.getMany();
 
-      return categories.map(category => this.mapCategoryToResponse(category));
+      console.log('🔍 BACKEND SERVICE - Categorias encontradas:', categories.length);
+      if (categories.length > 0) {
+        console.log('🔍 BACKEND SERVICE - Primeira categoria:', categories[0]);
+        console.log('🔍 BACKEND SERVICE - IDs das categorias:', categories.map(cat => cat.id));
+      }
+
+      const mappedCategories = categories.map(category => this.mapCategoryToResponse(category));
+      console.log('🔍 BACKEND SERVICE - Categorias mapeadas:', mappedCategories.length);
+      if (mappedCategories.length > 0) {
+        console.log('🔍 BACKEND SERVICE - Primeira categoria mapeada:', mappedCategories[0]);
+      }
+
+      return mappedCategories;
     } catch (error) {
       this.logger.error(`Erro ao buscar categorias:`, error);
       throw error;

@@ -16,9 +16,11 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { CategoriesService, CategoryType } from "./categories.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
+import { DevAuthGuard } from "../../common/guards/dev-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission.guard";
 import { Permission } from "../users/entities/role.entity";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import { Public } from "../../common/decorators/auth.decorator";
 import {
   CreateCategoryDto,
   UpdateCategoryDto,
@@ -30,7 +32,7 @@ import {
 
 @ApiTags("Categories")
 @Controller("categories")
-@UseGuards(JwtAuthGuard)
+@UseGuards(DevAuthGuard)
 @ApiBearerAuth()
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) { }
@@ -64,7 +66,18 @@ export class CategoriesController {
   ): Promise<CategoryResponseDto[]> {
     // Mock user para teste
     const userId = '18ceba90-1200-40e5-ac06-de32d18a15a5';
-    return this.categoriesService.findAll(userId, type, search);
+
+    // Verificar se existem categorias para o usuário
+    const categories = await this.categoriesService.findAll(userId, type, search);
+
+    // Se não houver categorias, criar as padrão
+    if (categories.length === 0) {
+      console.log('🔍 BACKEND - Nenhuma categoria encontrada, criando categorias padrão...');
+      await this.categoriesService.createDefaultCategories(userId);
+      return this.categoriesService.findAll(userId, type, search);
+    }
+
+    return categories;
   }
 
   @Get(":id")
