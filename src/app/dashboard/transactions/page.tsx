@@ -29,9 +29,11 @@ import { Account } from "../../../../shared/types/account.types";
 import { Category } from "../../../../shared/types/category.types";
 import { safeErrorLog } from "../../../utils/error-logger";
 import { useAuthRedirect } from "../../../hooks/useAuthRedirect";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Transactions() {
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 8, 1)); // Setembro 2025
+  const { user, loading: authLoading } = useAuth();
+  const [currentDate, setCurrentDate] = useState(new Date()); // Data atual
   const [activeView, setActiveView] = useState("Mês");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRow, setSelectedRow] = useState<string>("3"); // Terceira linha selecionada como no modelo
@@ -80,6 +82,56 @@ export default function Transactions() {
   const [categories, setCategories] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
+  // Função para obter o nome da categoria pelo ID
+  const getCategoryName = (categoryId: string) => {
+    if (!categoryId) return 'Sem categoria';
+
+    // Se o categoryId for um nome de categoria (não um ID), retornar diretamente
+    if (categoryId && !categoryId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) && !categoryId.match(/^\d+$/)) {
+      console.log('🔍 DEBUG - CategoryId parece ser um nome:', categoryId);
+      return categoryId;
+    }
+
+    // Mapeamento dos IDs do mock server para os nomes das categorias
+    const mockCategoryMapping: { [key: string]: string } = {
+      '1': 'Alimentação',
+      '2': 'Transporte',
+      '3': 'Salário',
+      '4': 'Freelance',
+      '5': 'Lazer',
+      '6': 'Saúde',
+      '7': 'Educação',
+      '8': 'Outros'
+    };
+
+    // Se for um ID numérico do mock server, usar o mapeamento
+    if (categoryId.match(/^\d+$/) && mockCategoryMapping[categoryId]) {
+      console.log('🔍 DEBUG - Usando mapeamento do mock server:', categoryId, '->', mockCategoryMapping[categoryId]);
+      return mockCategoryMapping[categoryId];
+    }
+
+    console.log('🔍 DEBUG - Buscando categoria:', categoryId);
+    console.log('🔍 DEBUG - Tipo do categoryId:', typeof categoryId);
+    console.log('🔍 DEBUG - Categorias disponíveis:', categories);
+    console.log('🔍 DEBUG - Quantidade de categorias:', categories.length);
+
+    // Log detalhado de cada categoria
+    categories.forEach((cat, index) => {
+      console.log(`🔍 DEBUG - Categoria ${index}:`, {
+        id: cat.id,
+        idType: typeof cat.id,
+        name: cat.name,
+        isMatch: cat.id === categoryId
+      });
+    });
+
+    const category = categories.find(cat => cat.id === categoryId);
+    console.log('🔍 DEBUG - Categoria encontrada:', category);
+    console.log('🔍 DEBUG - Nome da categoria:', category?.name);
+    console.log('🔍 DEBUG - Retornando:', category ? category.name : 'Categoria não encontrada');
+    return category ? category.name : 'Categoria não encontrada';
+  };
+
   // Estados para filtros
   const [filters, setFilters] = useState({
     search: '',
@@ -93,10 +145,22 @@ export default function Transactions() {
 
   // Carregar transações da API
   useEffect(() => {
+    // Aguardar autenticação estar completa
+    if (authLoading) {
+      console.log("🔍 TRANSACTIONS - Aguardando autenticação...");
+      return;
+    }
+
+    if (!user) {
+      console.log("🔍 TRANSACTIONS - Usuário não autenticado, não carregando transações");
+      return;
+    }
+
+    console.log("🔍 TRANSACTIONS - Usuário autenticado:", user.email);
     loadTransactions();
     loadCategories();
     loadAccounts();
-  }, [currentPage, searchTerm, activeView, currentDate]);
+  }, [authLoading, user?.id, currentPage, searchTerm, activeView, currentDate]);
 
 
   // Aplicar filtros quando mudarem
@@ -109,6 +173,16 @@ export default function Transactions() {
     calculateBalanceSummary();
   }, [filteredTransactions]);
 
+  // Debug: monitorar mudanças nas categorias
+  useEffect(() => {
+    console.log('🔍 DEBUG - Categorias atualizadas:', categories);
+    console.log('🔍 DEBUG - Quantidade de categorias:', categories.length);
+    if (categories.length > 0) {
+      console.log('🔍 DEBUG - Primeira categoria:', categories[0]);
+      console.log('🔍 DEBUG - IDs das categorias:', categories.map(cat => cat.id));
+    }
+  }, [categories]);
+
   const loadTransactions = async () => {
     try {
       setIsLoading(true);
@@ -118,12 +192,12 @@ export default function Transactions() {
         search: searchTerm || undefined,
         // Adicionar filtros de data baseados na view ativa
         ...(activeView === "Mês" && {
-          startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1), // Últimos 3 meses
-          endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+          startDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1), // Últimos 2 meses
+          endDate: new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0) // Próximo mês
         }),
         ...(activeView === "Semana" && {
-          startDate: new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000),
-          endDate: currentDate
+          startDate: new Date(currentDate.getTime() - 14 * 24 * 60 * 60 * 1000), // Últimas 2 semanas
+          endDate: new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000) // Próxima semana
         })
       };
 
@@ -131,6 +205,16 @@ export default function Transactions() {
         page: currentPage,
         limit: 10
       });
+
+      console.log('🔍 DEBUG - Resposta completa do backend:', response);
+      console.log('🔍 DEBUG - Dados das transações:', response.data);
+      console.log('🔍 DEBUG - Quantidade de transações:', response.data?.length);
+
+      if (response.data && response.data.length > 0) {
+        console.log('🔍 DEBUG - Primeira transação:', response.data[0]);
+        console.log('🔍 DEBUG - Data da primeira transação:', response.data[0].date);
+        console.log('🔍 DEBUG - Tipo da data:', typeof response.data[0].date);
+      }
 
       setTransactions(response.data || []);
       setTotalTransactions(response.pagination?.total || 0);
@@ -153,7 +237,13 @@ export default function Transactions() {
 
   const loadCategories = async () => {
     try {
+      console.log("🔍 TRANSACTIONS - Carregando categorias...");
       const categoriesData = await transactionsService.getCategories();
+      console.log("🔍 TRANSACTIONS - Categorias carregadas:", categoriesData);
+      console.log("🔍 TRANSACTIONS - Quantidade de categorias:", categoriesData?.length);
+      if (categoriesData && categoriesData.length > 0) {
+        console.log("🔍 TRANSACTIONS - Primeira categoria:", categoriesData[0]);
+      }
       setCategories(categoriesData || []);
     } catch (err) {
       console.error("❌ Erro ao carregar categorias:", err);
@@ -185,7 +275,7 @@ export default function Transactions() {
     // Filtro por categoria
     if (filters.category) {
       filtered = filtered.filter(transaction =>
-        transaction.categoryId === filters.category
+        getCategoryName(transaction.categoryId) === filters.category
       );
     }
 
@@ -246,9 +336,17 @@ export default function Transactions() {
 
     (filteredTransactions || []).forEach(transaction => {
       // Validate date before processing
+      console.log('🔍 DEBUG - Processando transação:', {
+        id: transaction.id,
+        date: transaction.date,
+        dateType: typeof transaction.date,
+        amount: transaction.amount,
+        type: transaction.type
+      });
+
       const date = new Date(transaction.date);
       if (isNaN(date.getTime())) {
-        console.warn('Invalid date for transaction:', transaction.id, transaction.date);
+        console.warn('❌ Invalid date for transaction:', transaction.id, transaction.date);
         return; // Skip this transaction
       }
 
@@ -329,9 +427,17 @@ export default function Transactions() {
 
   const handleAddTransaction = async (transactionData: any) => {
     try {
-      console.log('Dados recebidos do modal:', transactionData);
-      console.log('Data recebida:', transactionData.date);
-      console.log('Tipo da data:', typeof transactionData.date);
+      console.log('📝 Dados recebidos do modal:', transactionData);
+      console.log('📝 Data recebida:', transactionData.date);
+      console.log('📝 Tipo da data:', typeof transactionData.date);
+      console.log('📝 Valor recebido:', transactionData.amount);
+      console.log('📝 Tipo do valor:', typeof transactionData.amount);
+      console.log('📝 Valor é NaN?', isNaN(transactionData.amount));
+
+      // Validar se o valor é válido antes de enviar
+      if (isNaN(transactionData.amount) || transactionData.amount <= 0) {
+        throw new Error('Valor deve ser um número válido maior que zero');
+      }
 
       // Converter os dados para o formato esperado pela API
       const apiData = {
@@ -340,31 +446,36 @@ export default function Transactions() {
         // Os tipos TransactionType e TransactionStatus já estão corretos
       };
 
-      console.log('Dados sendo enviados para a API:', apiData);
-      console.log('Data convertida:', apiData.date);
-      console.log('Data é válida?', !isNaN(apiData.date.getTime()));
-      console.log('CategoryId:', apiData.categoryId);
-      console.log('AccountId:', apiData.accountId);
+      console.log('📤 Dados sendo enviados para a API:', apiData);
+      console.log('📤 Data convertida:', apiData.date);
+      console.log('📤 Data é válida?', !isNaN(apiData.date.getTime()));
+      console.log('📤 CategoryId:', apiData.categoryId);
+      console.log('📤 AccountId:', apiData.accountId);
 
       const response = await transactionsService.createTransaction(apiData);
 
-      console.log('Resposta da API:', response);
-      console.log('Tipo da resposta:', typeof response);
-      console.log('Propriedades da resposta:', Object.keys(response || {}));
+      console.log('✅ Resposta da API:', response);
+      console.log('✅ Tipo da resposta:', typeof response);
+      console.log('✅ Propriedades da resposta:', Object.keys(response || {}));
 
       // Extrair apenas o objeto transaction da resposta
       const newTransaction = response;
-      console.log('Transação extraída:', newTransaction);
+      console.log('✅ Transação extraída:', newTransaction);
 
       // Atualizar a lista de transações
       setTransactions(prev => [newTransaction, ...prev]);
       setTotalTransactions(prev => prev + 1);
+
+      // Recarregar transações do backend para garantir consistência
+      console.log('🔄 Recarregando transações do backend...');
+      await loadTransactions();
 
       // Mostrar mensagem de sucesso
       setShowSuccessMessage(true);
       setTimeout(() => setShowSuccessMessage(false), 3000);
 
     } catch (error: any) {
+      console.error('❌ Erro ao adicionar transação:', error);
       safeErrorLog("Erro ao adicionar transação:", error);
       throw new Error(error.message || "Erro ao adicionar transação");
     }
@@ -771,7 +882,7 @@ export default function Transactions() {
         const rowData = [
           '', // Tipo (vazio)
           transaction.description,
-          transaction.categoryId,
+          getCategoryName(transaction.categoryId),
           transaction.amount,
           transaction.status
         ];
@@ -909,7 +1020,7 @@ export default function Transactions() {
         const rowData = [
           '', // Tipo (vazio)
           transaction.description,
-          transaction.categoryId,
+          getCategoryName(transaction.categoryId),
           transaction.amount,
           transaction.status
         ];
@@ -1531,7 +1642,7 @@ export default function Transactions() {
                     <td className={styles.tableCell}>
                       <div className={styles.categoryCell}>
                         <span className={styles.categoryText}>
-                          {transaction.categoryId || 'Sem categoria'}
+                          {getCategoryName(getCategoryName(transaction.categoryId))}
                         </span>
                       </div>
                     </td>

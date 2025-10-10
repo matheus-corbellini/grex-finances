@@ -47,7 +47,15 @@ class AccountsService extends BaseApiService {
 
   // Get all accounts
   async getAccounts(): Promise<Account[]> {
-    return this.get<Account[]>("/accounts");
+    try {
+      console.log("🔍 ACCOUNTS SERVICE - Chamando GET /accounts");
+      const result = await this.get<Account[]>("/accounts");
+      console.log("🔍 ACCOUNTS SERVICE - Resultado recebido:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ ACCOUNTS SERVICE - Erro ao buscar contas:", error);
+      throw error;
+    }
   }
 
   // Get account by ID

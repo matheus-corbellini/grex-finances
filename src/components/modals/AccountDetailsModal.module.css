@@ -75,6 +75,24 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+.customIcon {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  font-size: 10px;
+  padding: 4px 6px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #ffffff;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4);
+  white-space: nowrap;
+  z-index: 10;
+}
+
 .accountDetails {
   flex: 1;
   min-width: 0;
@@ -717,6 +735,88 @@
 .footerActions {
   display: flex;
   gap: 12px;
+}
+
+/* Estilos para botões que podem estar sem estilo */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background-color: #e8e8e8;
+  border-color: #c0c0c0;
+  color: #111;
+}
+
+.actionButton:active {
+  background-color: #d8d8d8;
+  border-color: #b0b0b0;
+}
+
+/* Estilo para botão de texto simples */
+.textButton {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.2s ease-in-out;
+}
+
+.textButton:hover {
+  color: #000;
+}
+
+/* Estilo para tags que podem estar sem estilo */
+.tagElement {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 16px;
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Garantir que todos os spans dentro de accountMeta tenham estilo */
+.accountMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* Estilo específico para elementos que podem estar sem classe */
+.accountMetaSecondary span {
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-size: 11px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Responsive */

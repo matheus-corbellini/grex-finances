@@ -5,6 +5,7 @@ import {
   PaginatedResponse,
   RequestOptions,
 } from "../../../shared/types";
+import { auth } from "../../../firebaseConfig";
 
 class BaseApiService {
   protected api: AxiosInstance;
@@ -26,13 +27,13 @@ class BaseApiService {
   private setupInterceptors() {
     // Request interceptor for auth token
     this.api.interceptors.request.use(
-      (config) => {
-        const token = this.getAuthToken();
+      async (config) => {
+        const token = await this.getAuthToken();
         console.log("📤 Fazendo requisição:", {
           url: config.url,
           method: config.method,
           hasToken: !!token,
-          tokenPreview: token ? `${token.substring(0, 20)}...` : 'N/A'
+          tokenPreview: token && typeof token === 'string' ? `${token.substring(0, 20)}...` : 'N/A'
         });
 
         if (token) {
@@ -57,7 +58,10 @@ class BaseApiService {
           url: error.config?.url,
           method: error.config?.method,
           data: error.response?.data,
-          message: error.message
+          message: error.message,
+          errorType: typeof error,
+          errorKeys: Object.keys(error || {}),
+          fullError: JSON.stringify(error, null, 2)
         });
 
         if (error.response?.status === 401) {
@@ -108,19 +112,16 @@ class BaseApiService {
     );
   }
 
-  private getAuthToken(): string | null {
-    if (typeof window !== "undefined") {
-      // Tentar pegar token do localStorage primeiro (fallback para compatibilidade)
-      const localToken = localStorage.getItem("accessToken");
-      if (localToken) {
-        return localToken;
+  private async getAuthToken(): Promise<string | null> {
+    try {
+      if (typeof window !== "undefined" && auth.currentUser) {
+        // Usar Firebase diretamente para obter token atualizado
+        const token = await auth.currentUser.getIdToken();
+        console.log('🔐 Token Firebase obtido:', typeof token, token ? token.substring(0, 20) + '...' : 'null');
+        return token;
       }
-
-      // Se não tiver no localStorage, tentar pegar do sessionStorage (Firebase)
-      const firebaseToken = sessionStorage.getItem("firebaseToken");
-      if (firebaseToken) {
-        return firebaseToken;
-      }
+    } catch (error) {
+      console.error('❌ Erro ao obter token Firebase:', error);
     }
     return null;
   }

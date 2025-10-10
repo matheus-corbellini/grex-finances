@@ -177,6 +177,9 @@ export const AccountDetailsModal: React.FC<AccountDetailsModalProps> = ({
                                     />
                                 )}
                                 {accountType && getAccountCategoryIcon(accountType.category)}
+                                {accountType?.icon && (
+                                    <span className={styles.customIcon}>{accountType.icon}</span>
+                                )}
                             </div>
                             <div className={styles.accountDetails}>
                                 <h2 className={styles.accountTitle}>{account.name}</h2>

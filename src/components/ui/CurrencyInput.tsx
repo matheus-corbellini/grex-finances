@@ -49,6 +49,9 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         // Converte vírgula para ponto para parseFloat
         const numericValue = parseFloat(cleanValue.replace(',', '.')) || 0;
 
+        // Debug: log do valor convertido
+        console.log(`💰 CurrencyInput - Valor original: "${inputValue}", Limpo: "${cleanValue}", Numérico: ${numericValue}`);
+
         // Atualiza o valor de exibição
         setDisplayValue(cleanValue);
 

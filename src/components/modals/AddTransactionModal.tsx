@@ -118,7 +118,16 @@ export default function AddTransactionModal({
             return;
         }
 
-        console.log('Dados do formulário antes de enviar:', formData);
+        console.log('📝 Dados do formulário antes de enviar:', formData);
+        console.log('📝 Tipo do valor:', typeof formData.amount);
+        console.log('📝 Valor é NaN?', isNaN(formData.amount));
+        console.log('📝 Valor é válido?', formData.amount > 0);
+
+        // Validar se o valor é válido antes de enviar
+        if (isNaN(formData.amount) || formData.amount <= 0) {
+            setErrors({ amount: 'Valor deve ser um número válido maior que zero' });
+            return;
+        }
 
         setIsLoading(true);
         try {
@@ -136,6 +145,7 @@ export default function AddTransactionModal({
             });
             onClose();
         } catch (error: any) {
+            console.error('❌ Erro ao adicionar transação:', error);
             setErrors({ general: error.message || 'Erro ao adicionar transação' });
         } finally {
             setIsLoading(false);

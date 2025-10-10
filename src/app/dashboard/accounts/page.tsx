@@ -13,9 +13,11 @@ import { Account } from "../../../../shared/types/account.types";
 import styles from "./Accounts.module.css";
 import { safeErrorLog } from "../../../utils/error-logger";
 import { useToast } from "../../../context/ToastContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Accounts() {
   const { warning } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [currentDate, setCurrentDate] = useState(new Date(2024, 6, 1)); // Julho 2024
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
@@ -43,9 +45,13 @@ export default function Accounts() {
   // Carregar histórico de saldos para uma conta
   const loadBalanceHistory = async (accountId: string, isMounted: boolean = true) => {
     try {
+      console.log(`🔍 FRONTEND - Iniciando loadBalanceHistory para conta ${accountId}`);
+
       // Buscar dados dos últimos 30 dias para ter mais pontos no gráfico
       const endDate = new Date();
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+      console.log(`🔍 FRONTEND - Período solicitado: ${startDate.toISOString()} até ${endDate.toISOString()}`);
 
       const history = await accountsService.getBalanceHistory(accountId, {
         startDate: startDate.toISOString(),
@@ -53,22 +59,29 @@ export default function Accounts() {
         period: 'daily'
       });
 
+      console.log(`🔍 FRONTEND - Resposta recebida:`, history);
+
       if (isMounted) {
         setBalanceHistory(prev => ({
           ...prev,
           [accountId]: history.history || []
         }));
 
-        // Debug: log dos dados recebidos (removido para produção)
-        // console.log(`Histórico para conta ${accountId}:`, history.history);
+        // Debug: log dos dados recebidos
+        console.log(`🔍 FRONTEND - Histórico para conta ${accountId}:`, history.history);
+        const account = accounts.find(acc => acc.id === accountId);
+        console.log(`🔍 FRONTEND - Conta encontrada:`, account?.name || 'Não encontrada');
       }
     } catch (err: any) {
-      console.error("Erro ao carregar histórico de saldos:", {
+      console.error("❌ FRONTEND - Erro ao carregar histórico de saldos:", {
         accountId,
         message: err?.message || 'Erro desconhecido',
         code: err?.code || 'UNKNOWN_ERROR',
         details: err?.details || null,
-        fullError: err
+        fullError: err,
+        errorType: typeof err,
+        errorKeys: Object.keys(err || {}),
+        errorString: JSON.stringify(err, null, 2)
       });
 
       // Em caso de erro, gerar dados sintéticos para manter a funcionalidade
@@ -76,19 +89,42 @@ export default function Accounts() {
         const account = accounts.find(acc => acc.id === accountId);
         const baseBalance = account?.balance || 1000;
 
+        // Verificar se a conta foi criada recentemente (últimos 7 dias)
+        const accountCreatedAt = account?.createdAt ? new Date(account.createdAt) : new Date();
+        const now = new Date();
+        const daysSinceCreation = Math.ceil((now.getTime() - accountCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
+        const isRecentlyCreated = daysSinceCreation <= 7;
+
+        console.log(`🔍 FRONTEND DEBUG - Conta ${account?.name || 'Não encontrada'}:`);
+        console.log(`  - Data de criação: ${accountCreatedAt.toISOString()}`);
+        console.log(`  - Dias desde criação: ${daysSinceCreation}`);
+        console.log(`  - É recém-criada: ${isRecentlyCreated}`);
+        console.log(`  - Saldo base: ${baseBalance}`);
+
         // Gerar histórico sintético dos últimos 30 dias
         const syntheticHistory = [];
         for (let i = 29; i >= 0; i--) {
           const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-          // Criar variação suave baseada no saldo atual
-          const variation = Math.sin(i * 0.2) * baseBalance * 0.02; // ±2% de variação
-          const randomNoise = (Math.random() - 0.5) * baseBalance * 0.005; // Pequeno ruído
-          const balance = Math.max(0, baseBalance + variation + randomNoise);
 
-          syntheticHistory.push({
-            date: date.toISOString(),
-            balance: Math.round(balance * 100) / 100
-          });
+          if (isRecentlyCreated) {
+            // Para contas recém-criadas, linha reta
+            if (i === 0) console.log(`✅ FRONTEND - Gerando LINHA RETA para conta recém-criada`);
+            syntheticHistory.push({
+              date: date.toISOString(),
+              balance: baseBalance
+            });
+          } else {
+            // Para contas antigas, criar variação suave baseada no saldo atual
+            if (i === 0) console.log(`📈 FRONTEND - Gerando VARIAÇÕES SINTÉTICAS para conta antiga`);
+            const variation = Math.sin(i * 0.2) * baseBalance * 0.02; // ±2% de variação
+            const randomNoise = (Math.random() - 0.5) * baseBalance * 0.005; // Pequeno ruído
+            const balance = Math.max(0, baseBalance + variation + randomNoise);
+
+            syntheticHistory.push({
+              date: date.toISOString(),
+              balance: Math.round(balance * 100) / 100
+            });
+          }
         }
 
         setBalanceHistory(prev => ({
@@ -143,19 +179,36 @@ export default function Accounts() {
     let isMounted = true;
 
     const loadAccounts = async () => {
+      // Aguardar autenticação estar completa
+      if (authLoading) {
+        console.log("🔍 FRONTEND - Aguardando autenticação...");
+        return;
+      }
+
+      if (!user) {
+        console.log("🔍 FRONTEND - Usuário não autenticado, não carregando contas");
+        return;
+      }
+
+      console.log("🔍 FRONTEND - Usuário autenticado:", user.email);
       try {
+        console.log("🔍 FRONTEND - Iniciando carregamento de contas...");
+
         if (isMounted) {
           setIsLoading(true);
           setError(null);
         }
 
+        console.log("🔍 FRONTEND - Chamando accountsService.getAccounts()...");
         const accountsData = await accountsService.getAccounts();
+        console.log("🔍 FRONTEND - Contas recebidas:", accountsData);
 
         if (isMounted) {
           setAccounts(accountsData);
 
           // Carregar histórico de saldos e transações para cada conta
           for (const account of accountsData) {
+            console.log(`🔍 FRONTEND - Carregando dados para conta ${account.name} (${account.id})`);
             await Promise.all([
               loadBalanceHistory(account.id, isMounted),
               loadRecentTransactions(account.id, isMounted)
@@ -163,7 +216,15 @@ export default function Accounts() {
           }
         }
       } catch (err: any) {
-        console.error("Erro ao carregar contas:", err);
+        console.error("❌ FRONTEND - Erro ao carregar contas:", {
+          error: err,
+          errorType: typeof err,
+          errorKeys: Object.keys(err || {}),
+          errorString: JSON.stringify(err, null, 2),
+          errorMessage: err?.message,
+          errorCode: err?.code,
+          errorStatus: err?.response?.status
+        });
         if (isMounted) {
           // Handle specific error types with better user messages
           let errorMessage: string;
@@ -192,7 +253,7 @@ export default function Accounts() {
     return () => {
       isMounted = false;
     };
-  }, [currentDate, viewMode]);
+  }, [authLoading, user, currentDate, viewMode]);
 
   const formatDate = (date: Date) => {
     if (viewMode === 'week') {

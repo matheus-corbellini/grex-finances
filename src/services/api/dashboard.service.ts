@@ -3,6 +3,7 @@ import { Account } from "../../../shared/types/account.types";
 import { Transaction } from "../../../shared/types/transaction.types";
 import accountsService from "./accounts.service";
 import transactionsService from "./transactions.service";
+import categoriesService from "./categories.service";
 
 export interface DashboardSummary {
     totalBalance: number;
@@ -70,19 +71,20 @@ class DashboardService extends BaseApiService {
                 : new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
             // Buscar dados em paralelo usando serviços existentes
-            const [accounts, transactions] = await Promise.all([
+            const [accounts, transactions, categories] = await Promise.all([
                 accountsService.getAccounts(),
                 transactionsService.getTransactions({
                     startDate,
                     endDate
-                })
+                }),
+                categoriesService.getCategories()
             ]);
 
 
             // Calcular dados agregados
             const summary = this.calculateSummary(accounts, transactions.data);
             const cashFlowData = this.generateCashFlowData(transactions.data, period);
-            const topExpenses = this.calculateTopExpenses(transactions.data);
+            const topExpenses = this.calculateTopExpenses(transactions.data, categories);
             const billsSummary = this.calculateBillsSummary(transactions.data);
             const creditCards = this.filterCreditCards(accounts);
 
@@ -226,21 +228,28 @@ class DashboardService extends BaseApiService {
         return data;
     }
 
-    private calculateTopExpenses(transactions: Transaction[]): TopExpense[] {
+    private calculateTopExpenses(transactions: Transaction[], categories: any[]): TopExpense[] {
         const expenseMap = new Map<string, { amount: number; count: number }>();
 
         // Garantir que transactions seja um array válido
         const validTransactions = Array.isArray(transactions) ? transactions : [];
 
+        // Criar um mapa de categorias para busca rápida
+        const categoryMap = new Map<string, string>();
+        categories.forEach(cat => {
+            categoryMap.set(cat.id, cat.name);
+        });
+
         validTransactions
             .filter(t => t && t.type === 'expense' && t.amount)
             .forEach(t => {
-                const category = t.categoryId || 'Outros';
-                const current = expenseMap.get(category) || { amount: 0, count: 0 };
+                // Buscar o nome da categoria pelo ID
+                const categoryName = categoryMap.get(t.categoryId) || t.categoryId || 'Outros';
+                const current = expenseMap.get(categoryName) || { amount: 0, count: 0 };
                 const amount = typeof t.amount === 'number' ? t.amount : parseFloat(t.amount);
 
                 if (!isNaN(amount)) {
-                    expenseMap.set(category, {
+                    expenseMap.set(categoryName, {
                         amount: current.amount + Math.abs(amount),
                         count: current.count + 1
                     });
