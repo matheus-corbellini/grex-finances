@@ -2,7 +2,7 @@ import axios from "axios";
 import { auth } from "../../firebaseConfig";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://grex-finances.onrender.com",
+  baseURL: "https://grex-finances.onrender.com",
 });
 
 // Interceptor para adicionar token do Firebase em todas as requisições
