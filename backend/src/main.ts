@@ -16,44 +16,21 @@ async function bootstrap() {
     logger: new AppLogger(),
   });
 
+  // Configurar logger global
+  const appLogger = app.get(AppLogger);
+  app.useLogger(appLogger);
+
   // Enable CORS for frontend communication
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'https://grexfinances.netlify.app',
-    'https://grex-finances.onrender.com',
-    process.env.FRONTEND_URL || 'https://grexfinances.netlify.app'
-  ].filter(Boolean);
-
   app.enableCors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      console.log('🔍 CORS Origin recebido:', origin);
-      console.log('🔍 Origins permitidas:', allowedOrigins);
-
-      if (allowedOrigins.includes(origin)) {
-        console.log('✅ Origin permitida');
-        return callback(null, true);
-      }
-
-      // In development, allow localhost with any port
-      if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
-        console.log('✅ Origin localhost permitida em development');
-        return callback(null, true);
-      }
-
-      console.log('❌ Origin bloqueada:', origin);
-      return callback(new Error('Not allowed by CORS'), false);
-    },
+    origin: true, // Allow all origins in production for testing
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-User-Id'],
   });
 
-  // Configurar logger global
-  const appLogger = app.get(AppLogger);
-  app.useLogger(appLogger);
+  appLogger.log('✅ CORS configurado para aceitar todas as origins', {
+    type: 'startup',
+  });
 
   // Global Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter());
