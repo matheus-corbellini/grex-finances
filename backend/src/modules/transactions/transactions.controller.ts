@@ -51,11 +51,10 @@ import { LogMethod } from "@/common/decorators/log-method.decorator";
 import { NotFoundException, BusinessException, ValidationException } from "@/common/exceptions/custom.exceptions";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Public } from "@/common/decorators/auth.decorator";
-import { DevAuthGuard } from "@/common/guards/dev-auth.guard";
 
 @ApiTags('transactions')
 @Controller("transactions")
-@UseGuards(DevAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class TransactionsController {
   constructor(

@@ -34,13 +34,12 @@ import {
   AccountSummaryDto
 } from "./dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
-import { DevAuthGuard } from "@/common/guards/dev-auth.guard";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Public } from "@/common/decorators/auth.decorator";
 
 @ApiTags('accounts')
 @Controller("accounts")
-// @UseGuards(DevAuthGuard) // Temporariamente removido para teste
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) { }
@@ -52,10 +51,9 @@ export class AccountsController {
   @ApiResponse({ status: 200, description: 'Lista de contas retornada com sucesso' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   async findAll(
+    @CurrentUser('id') userId: string,
     @Query() filters: AccountFiltersDto
   ) {
-    // Temporariamente usar um userId fixo para teste
-    const userId = 'test-user-id';
     return this.accountsService.findAll(userId, filters);
   }
 

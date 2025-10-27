@@ -16,7 +16,6 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { CategoriesService, CategoryType } from "./categories.service";
 import { JwtAuthGuard } from "../../common/guards/jwt-auth.guard";
-import { DevAuthGuard } from "../../common/guards/dev-auth.guard";
 import { PermissionGuard } from "../../common/guards/permission.guard";
 import { Permission } from "../users/entities/role.entity";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -32,7 +31,7 @@ import {
 
 @ApiTags("Categories")
 @Controller("categories")
-@UseGuards(DevAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) { }
