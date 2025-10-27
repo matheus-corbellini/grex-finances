@@ -29,20 +29,26 @@ async function bootstrap() {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
+      console.log('🔍 CORS Origin recebido:', origin);
+      console.log('🔍 Origins permitidas:', allowedOrigins);
+
       if (allowedOrigins.includes(origin)) {
+        console.log('✅ Origin permitida');
         return callback(null, true);
       }
 
       // In development, allow localhost with any port
       if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) {
+        console.log('✅ Origin localhost permitida em development');
         return callback(null, true);
       }
 
+      console.log('❌ Origin bloqueada:', origin);
       return callback(new Error('Not allowed by CORS'), false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-User-Id'],
   });
 
   // Configurar logger global
