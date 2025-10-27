@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
+import { useAuth } from "../../context/AuthContext";
 import styles from "./Dashboard.module.css";
 import {
   ChevronDown,
@@ -26,6 +27,7 @@ import { TransactionType } from "../../../shared/types/transaction.types";
 import dashboardService, { DashboardData, CashFlowData, TopExpense, BillsSummary, CreditCardSummary } from "../../services/api/dashboard.service";
 
 export default function Dashboard() {
+  const { user, loading: authLoading } = useAuth();
   const [showTransactionViewModal, setShowTransactionViewModal] = useState(false);
   const [showAccountDetailsModal, setShowAccountDetailsModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
@@ -38,7 +40,21 @@ export default function Dashboard() {
   const [currentPeriod, setCurrentPeriod] = useState<'week' | 'month'>('month');
 
   const loadDashboardData = useCallback(async () => {
+    // Aguardar autenticação estar completa
+    if (authLoading) {
+      console.log("🔍 Dashboard - Aguardando autenticação...");
+      return;
+    }
+
+    if (!user) {
+      console.log("🔍 Dashboard - Usuário não autenticado, não carregando dados");
+      setError('Você precisa estar autenticado para ver o dashboard');
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log("🔍 Dashboard - Usuário autenticado:", user.email);
       setLoading(true);
       setError(null);
       const data = await dashboardService.getDashboardData(currentPeriod);
@@ -49,7 +65,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [currentPeriod]);
+  }, [currentPeriod, authLoading, user]);
 
   // Carregar dados do dashboard
   useEffect(() => {

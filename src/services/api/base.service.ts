@@ -18,7 +18,7 @@ class BaseApiService {
         "Content-Type": "application/json",
         "Accept": "application/json",
       },
-      withCredentials: false, // Desabilitar credentials para evitar problemas CORS
+      withCredentials: true, // Habilitar credentials para permitir cookies e CORS
     });
 
     this.setupInterceptors();
@@ -114,10 +114,21 @@ class BaseApiService {
 
   private async getAuthToken(): Promise<string | null> {
     try {
-      if (typeof window !== "undefined" && auth.currentUser) {
-        // Usar Firebase diretamente para obter token atualizado
+      if (typeof window === "undefined") {
+        return null;
+      }
+
+      // Primeiro, tentar obter o token do localStorage (mais rápido)
+      const cachedToken = localStorage.getItem('accessToken') || sessionStorage.getItem('firebaseToken');
+      if (cachedToken) {
+        console.log('🔐 Token obtido do cache:', cachedToken.substring(0, 20) + '...');
+        return cachedToken;
+      }
+
+      // Se não houver token em cache, tentar obter do Firebase
+      if (auth.currentUser) {
         const token = await auth.currentUser.getIdToken();
-        console.log('🔐 Token Firebase obtido:', typeof token, token ? token.substring(0, 20) + '...' : 'null');
+        console.log('🔐 Token Firebase obtido:', token.substring(0, 20) + '...');
         return token;
       }
     } catch (error) {
