@@ -12,7 +12,7 @@ class BaseApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "https://grex-finances.onrender.com",
       timeout: 15000, // Increased timeout for better reliability
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ class BaseApiService {
             code: "BACKEND_NOT_RUNNING",
             details: {
               suggestion: "Execute 'npm run dev' na pasta backend ou 'docker-compose up' para iniciar o servidor",
-              url: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+              url: process.env.NEXT_PUBLIC_API_URL || "https://grex-finances.onrender.com"
             },
             timestamp: new Date(),
           };
@@ -89,8 +89,8 @@ class BaseApiService {
             message: "Erro de conexão com o servidor. Verifique se o backend está rodando.",
             code: "NETWORK_ERROR",
             details: {
-              suggestion: "Verifique se o servidor backend está rodando na porta 3001",
-              url: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+              suggestion: "Verifique se o servidor backend está rodando",
+              url: process.env.NEXT_PUBLIC_API_URL || "https://grex-finances.onrender.com"
             },
             timestamp: new Date(),
           };
